@@ -2,6 +2,10 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 
+import { findEdificio } from "@/lib/ed.mongodb";
+
+let x = findEdificio(1).catch(e => console.log(e+"error"))
+/* console.log("hhhhhhhhhhhhhhhhhh",x.json()) */
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
