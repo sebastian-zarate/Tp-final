@@ -1,11 +1,9 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import Torretas from "@/models/edificios";
 
-import { findEdificio } from "@/lib/ed.mongodb";
-
-let x = findEdificio(1).catch(e => console.log(e+"error"))
-/* console.log("hhhhhhhhhhhhhhhhhh",x.json()) */
+/* console.log(Torretas.getCollection ({name})) */
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -19,7 +17,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className=" bg-slate-400">
       <body className={inter.className}>{children}</body>
     </html>
   );
