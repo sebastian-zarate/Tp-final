@@ -8,7 +8,7 @@ if(!MONGODB_URI) {
 export const connectDb = async () => {
 
   try{
-    const {connection} = await mongoose.conncet(MONGODB_URI)
+    const {connection} = await mongoose.connect(MONGODB_URI)
     if(connection.readyState === 1){
       console.log("mongodb conected")
       return Promise.resolve(true)

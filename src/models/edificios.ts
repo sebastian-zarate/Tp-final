@@ -1,26 +1,28 @@
 import { Schema, model, models } from "mongoose"
 
 const TorretasSchema = new Schema({
-    id: {
+    id: String,
+    name: String
+/*     id: {
         type: Number,
-        unique: true,
-        required:[true, "id is required"]
-/*         match: [      //sirve para validar, ejemplo si va a tener una arroba
+         unique: true,
+         required:[true, "id is required"] ,
+         match: [      //sirve para validar, ejemplo si va a tener una arroba
            
-        ] */
+        ] 
 
     },
     nivelEdif: {
         type: Number,
-        required: [true, "level is required"], //si no viene q envia un mensaje q la contra es requerida.,
-      /*   select:false   */      //no es necesario que se devuelva el password
+         required: [true, "level is required"],  //si no viene q envia un mensaje q la contra es requerida.,
+        select:false        //no es necesario que se devuelva el password
     },
     name: {
         type: String,
         required: [true, "name is required"],
         minLength: [3, "Fullname must be at least 3 characters"],
         maxLength: [50, "Fullname must be at least 3 characters"]
-    }
+    } */
 })
 
 //me permite interactuar con la base de datos, buscar, eliminar
