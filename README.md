@@ -2,7 +2,7 @@
 
 * Se instaló mongodb.
 * Se creo carpeta lib (/src/app/lib) con el contenido para la conexión con la base de datos.
-* En el Atlas creo el cluster y establesco el método de conexión hacia el visual.
+* En el Atlas creo el cluster y establesco el método de conexión con la aplicación.
 
 
 * * NO SE COMO CONECTARME A LA BASE DE DATOSSSSSSSSSS

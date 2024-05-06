@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import Torretas from "@/models/edificios";
+import main from "@/lib/prisma"
 
-/* console.log(Torretas.getCollection ({name})) */
+console.log(main)
+
+
+
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
