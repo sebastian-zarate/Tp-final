@@ -1,11 +1,11 @@
-import { PrismaClient } from '@prisma/client'
+/*import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
 async function main() {
 
     //aca se crean las colecciones para la base de datos
-/*     const torretas = await prisma.torretas.create({
+     const torretas = await prisma.torretas.create({
         data:{
             name: 'Cañon',
             nivel: 0         
@@ -54,7 +54,40 @@ async function main() {
         }
     })
     const arr = [torretas, ayunta,muros, herreria, cantera, maderera, bosque] 
-    return arr */
+    return arr 
 
 }
-export default main()
+export default main()*/
+/*
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
+
+async function main() {
+  const datos = await prisma.$transaction([
+    prisma.torretas.createMany({
+      data: [
+        { name: 'Cañon', nivel: 0 },
+        // Agrega más datos aquí si es necesario
+      ],
+    }),
+    prisma.ayuntamiento.createMany({
+      data: [
+        { name: 'Ayuntamiento', nivel: 0 },
+        // Agrega más datos aquí si es necesario
+      ],
+    }),
+    // Repite para otros modelos si es necesario
+  ]);
+
+  return datos;
+}
+
+main()
+  .catch((error) => {
+    console.error('Error al crear datos:', error);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });
+*/
