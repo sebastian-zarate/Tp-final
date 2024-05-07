@@ -5,5 +5,6 @@
 * En el Atlas creo el cluster y establesco el método de conexión con la aplicación.
 
 
-* * NO SE COMO CONECTARME A LA BASE DE DATOSSSSSSSSSS
-
+* * Copien su link del atlas (donde dice conectarse con drivers-app) a la variable de entorno en el archivo .env
+* en el archivo .gitignore pongan en cualquier línea: .env (para que sea ignorado por git y no se suba a github o algo por el estilo).
+* En el archivo schema.prisma se crean las colecciones para la base de datos. Los cambios que quieran actualizar de ese archivo: ejecuten el comando npx prisma generate

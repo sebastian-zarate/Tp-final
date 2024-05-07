@@ -3,7 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import main from "@/lib/prisma"
 
-console.log(main)
+/* console.log(main) */
 
 
 

@@ -1,12 +1,12 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
-
+//npx prisma generate       PARA GENERAR EL SCHEMA
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
   provider = "prisma-client-js"
-  previewFeatures = ["mongodb"]
+  //previewFeatures = ["mongodb"]
 }
 
 datasource db {
@@ -14,8 +14,57 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Madera {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  name String
+  cantidad Int
+}
+
+model Piedra {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  name String
+  cantidad Int
+}
+
 model Torretas {
   id String @id @default(auto()) @map("_id") @db.ObjectId
   name String
+  nivel Int
+}
+model Ayuntamiento {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  name String
+  nivel Int
+}
+model Muros {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  name String
+  nivel Int
+}
+model Herreria {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  name String
+  nivel Int
+  maderaNecesaria Int
+  piedraNecesaria Int
+}
+
+model Cantera {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  name String
+  nivelHerriaNecesario Int
+  nivel Int     
+}
+model Maderera {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  name String
+  nivel Int
+  maderaNecesaria Int
+  piedraNecesaria Int
+}
+model Bosque {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  name String
+  nivelMadereraNecesario Int
   nivel Int
 }
