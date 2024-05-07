@@ -4,7 +4,8 @@ const prisma = new PrismaClient()
 
 async function main() {
 
-    const torretas = await prisma.torretas.create({
+    //aca se crean las colecciones para la base de datos
+/*     const torretas = await prisma.torretas.create({
         data:{
             name: 'Cañon',
             nivel: 0         
@@ -52,8 +53,8 @@ async function main() {
             nivelMadereraNecesario: 0
         }
     })
-    const arr = [torretas, ayunta,muros, herreria, cantera, maderera, bosque]
-    return arr
+    const arr = [torretas, ayunta,muros, herreria, cantera, maderera, bosque] 
+    return arr */
 
 }
 export default main()
