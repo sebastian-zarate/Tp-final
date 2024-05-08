@@ -1,4 +1,4 @@
-// This is your Prisma schema file,
+  // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 //npx prisma generate       PARA GENERAR EL SCHEMA
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
@@ -14,57 +14,20 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Madera {
+model Edificios {
   id String @id @default(auto()) @map("_id") @db.ObjectId
   name String
-  cantidad Int
+  //recursos Recursos[]
+ // recurso Recursos
+  //recursoId String @db.ObjectId
+  nivel Int
 }
 
-model Piedra {
+model Recursos{
   id String @id @default(auto()) @map("_id") @db.ObjectId
   name String
-  cantidad Int
+  //recursoNecesario String
+ // recurso Recursos @relation(fields: [recursoId], references: [id])
+
 }
 
-model Torretas {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-  name String
-  nivel Int
-}
-model Ayuntamiento {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-  name String
-  nivel Int
-}
-model Muros {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-  name String
-  nivel Int
-}
-model Herreria {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-  name String
-  nivel Int
-  maderaNecesaria Int
-  piedraNecesaria Int
-}
-
-model Cantera {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-  name String
-  nivelHerriaNecesario Int
-  nivel Int     
-}
-model Maderera {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-  name String
-  nivel Int
-  maderaNecesaria Int
-  piedraNecesaria Int
-}
-model Bosque {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-  name String
-  nivelMadereraNecesario Int
-  nivel Int
-}
