@@ -1,20 +1,34 @@
+import React, { useState, useEffect } from 'react';
+import { getEdificios } from '../../services/edificios';
 
-import React, { useState } from 'react';
+interface Building {
+  x: number;
+  y: number;
+  type: string;
+}
 
-
-const DynamicBuildings = () => {
-  const [buildings, setBuildings] = useState([]);
+const DynamicBuildings: React.FC = () => {
+  const [buildings, setBuildings] = useState<Building[]>([]);
   const [selectedBuilding, setSelectedBuilding] = useState('');
-  const [draggedBuildingIndex, setDraggedBuildingIndex] = useState(null);
+  const [draggedBuildingIndex, setDraggedBuildingIndex] = useState<number | null>(null);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
-  const buildingSize = 100; // Tamaño del edificio en píxeles
+  const [buildingNames, setBuildingNames] = useState<string[]>([]); // Aquí guardaremos los nombres de los edificios
 
-  const buildingNames = [
-    'Muros', 'Herrería', 'Cantera', 'Maderera', 'Ayuntamiento',
-    'Granja', 'Cuartel', 'Taller', 'Mercado'
-  ];
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await getEdificios();
+        const names = res.map(edificio => edificio.name);
+        setBuildingNames(names);
+        console.log("buildingNames actualizado:", names);
+      } catch (error) {
+        console.error("Error al obtener nombres de edificios:", error);
+      }
+    };
+    fetchData();
+  }, []); // Esta función se ejecuta solo una vez al montar el componente
 
-  const handleBuildClick = (event) => {
+  const handleBuildClick = (event: React.MouseEvent<HTMLDivElement>) => {
     if (!selectedBuilding) return;
 
     const x = event.clientX;
@@ -29,7 +43,7 @@ const DynamicBuildings = () => {
     setSelectedBuilding(''); // Limpiar la selección de edificio después de construir
   };
 
-  const handleMouseDown = (event, index) => {
+  const handleMouseDown = (event: React.MouseEvent<HTMLDivElement>, index: number) => {
     setDraggedBuildingIndex(index);
     const x = event.clientX;
     const y = event.clientY;
@@ -42,7 +56,7 @@ const DynamicBuildings = () => {
     setDraggedBuildingIndex(null);
   };
 
-  const handleMouseMove = (event) => {
+  const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
     if (draggedBuildingIndex !== null) {
       const x = event.clientX;
       const y = event.clientY;
@@ -53,18 +67,18 @@ const DynamicBuildings = () => {
     }
   };
 
-  const handleBuildingSelection = (event) => {
+  const handleBuildingSelection = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedBuilding(event.target.value);
   };
 
-  const handleDeleteBuilding = (index) => {
+  const handleDeleteBuilding = (index: number) => {
     const filteredBuildings = buildings.filter((_, i) => i !== index);
     setBuildings(filteredBuildings);
   };
 
-  const handleCreateBuilding = (buildingName) => {
+  const handleCreateBuilding = (buildingName: string) => {
     setSelectedBuilding(buildingName);
-    handleBuildClick({ clientX: window.innerWidth / 2, clientY: window.innerHeight / 2 }); // Simplemente establece la posición en el centro de la ventana
+    handleBuildClick({ clientX: window.innerWidth / 2, clientY: window.innerHeight / 2 } as React.MouseEvent<HTMLDivElement>);
   };
 
   return (
@@ -89,7 +103,7 @@ const DynamicBuildings = () => {
           <div>{building.type} - X: {building.x}, Y: {building.y}</div>
           <button onClick={() => handleDeleteBuilding(index)}>Eliminar</button>
         </div>
-      ))};
+      ))}
       
       <div className="absolute top-0 right-0 p-4 bg-red-500 hover:bg-blue-700 text-blue font-bold py-2 px-4 rounded">
         <h3>Crear edificios</h3>
