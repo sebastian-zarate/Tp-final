@@ -45,7 +45,7 @@ export default async function EdificiosPage() {
 				
 			</li>
 			{list.map((e, index) => (
-				<li className="flex items-center justify-between border-b border-gray-300 p-2">
+				<li key={index} className="flex items-center justify-between border-b border-gray-300 p-2">
 					<span key={index} className=" text-sm text-black-600 font-bold w-1/3">{index + 1}</span>
 					<span className="text-lg text-black-600 font-bold w-1/3 text-center">{e.name}</span>
 					<div className="w-1/3 text-right">
