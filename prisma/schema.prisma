@@ -17,10 +17,13 @@ datasource db {
 model Edificios {
   id String @id @default(auto()) @map("_id") @db.ObjectId
   name String
+  nivel Int
+  recursoPorMinuto Int?
+  ultimaInteraccion DateTime?
   //recursos Recursos[]
  // recurso Recursos
   //recursoId String @db.ObjectId
-  nivel Int
+ 
 }
 
 model Recursos{
@@ -29,5 +32,14 @@ model Recursos{
   //recursoNecesario String
  // recurso Recursos @relation(fields: [recursoId], references: [id])
 
+}
+
+model User{
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  username String
+  email String
+  password String
+  nivel Int
+  madera Int
 }
 

@@ -15,6 +15,18 @@ export const getEdificios = async () => {
     console.log(muchos)        
     return muchos
 }
+
+export const updateEdificioUltimaInteraccion = async (Id:any, UltimaInteraccion: any) => {
+await prisma.edificios.update({
+    where:{
+        id:Id
+    },
+    data:{
+        ultimaInteraccion: UltimaInteraccion
+    }
+})
+}
+
 export const deleteEdificios = async (Id:string) => {
     await prisma.edificios.delete({
         where:{
@@ -23,7 +35,14 @@ export const deleteEdificios = async (Id:string) => {
     })    
     return true
 }
-
+export const getOneEdificio = async (Id:string) => {
+    const e = await prisma.edificios.findUnique({
+        where:{
+            id:Id
+        }
+    })  
+    return e
+}
 export const getRecursos = async () => {
     const muchos = await prisma.recursos.findMany()  
     console.log(muchos)        

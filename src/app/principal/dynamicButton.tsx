@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getEdificios } from '../../services/edificios';
+import { calcularRecursosGenerados } from '@/services/recursos';
 
 interface Building {
   x: number;
@@ -13,6 +14,8 @@ const DynamicBuildings: React.FC = () => {
   const [draggedBuildingIndex, setDraggedBuildingIndex] = useState<number | null>(null);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [buildingNames, setBuildingNames] = useState<string[]>([]); // Aquí guardaremos los nombres de los edificios
+  //recursos
+  const [madera, setMadera] = useState(0);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -81,6 +84,11 @@ const DynamicBuildings: React.FC = () => {
     handleBuildClick({ clientX: window.innerWidth / 2, clientY: window.innerHeight / 2 } as React.MouseEvent<HTMLDivElement>);
   };
 
+  const recolectarRecursos = async () => {
+    const recursos = await calcularRecursosGenerados();
+    console.log("Recursos generados:", recursos);
+    setMadera(madera + recursos);
+  }
   return (
     <div
       className="relative flex justify-center items-center h-screen bg-green-500"
@@ -104,7 +112,10 @@ const DynamicBuildings: React.FC = () => {
           <button onClick={() => handleDeleteBuilding(index)}>Eliminar</button>
         </div>
       ))}
-
+      <div className="absolute top-0 left-0 p-4 bg-red-500 hover:bg-blue-700 text-blue font-bold py-2 px-4 rounded">
+        <h3>Madera: {madera}</h3>
+        <button onClick={recolectarRecursos}> Recolectar Recursos</button>
+      </div>
       <div className="absolute top-0 right-0 p-4 bg-red-500 hover:bg-blue-700 text-blue font-bold py-2 px-4 rounded">
         <h3>Crear edificios</h3>
         {buildingNames.map((buildingName, index) => (
