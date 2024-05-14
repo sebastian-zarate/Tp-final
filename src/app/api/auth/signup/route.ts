@@ -12,8 +12,15 @@ const prisma = new PrismaClient()
 } */
 
 export const GET = async () => {
-    const muchos = await prisma.edificios.findMany()  
-    console.log(muchos)
-/*     console.log(crearE) */
-    return NextResponse.json(muchos)
+/*     const muchos = await prisma.users.findFirst()  
+
+    return NextResponse.json(muchos) */
+    try{
+        const muchos = await prisma.users.findFirst()  
+        console.log(muchos)
+        return NextResponse.json(muchos)
+    } catch(e){
+        return "EL error: " + e
+    }
+
 }

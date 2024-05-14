@@ -43,7 +43,7 @@ export const getOneEdificio = async (Id:string) => {
     })  
     return e
 }
-export const getRecursos = async () => {
+/* export const getRecursos = async () => {
     const muchos = await prisma.recursos.findMany()  
     console.log(muchos)        
     return muchos
@@ -62,7 +62,7 @@ export const deleteRecur = async (Id:string) => {
     })    
     return true
 }
-
+ */
 
 
   /* async function crearE() {

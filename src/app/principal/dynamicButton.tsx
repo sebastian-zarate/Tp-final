@@ -1,3 +1,4 @@
+'use client'
 import React, { useState, useEffect } from 'react';
 import { getEdificios } from '../../services/edificios';
 import { calcularRecursosGenerados } from '@/services/recursos';
