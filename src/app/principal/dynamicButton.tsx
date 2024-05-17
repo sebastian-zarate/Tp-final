@@ -1,7 +1,8 @@
 'use client'
 import React, { useState, useEffect } from 'react';
+import { getUser} from '@/services/users';
 import { getEdificios } from '../../services/edificios';
-import { calcularRecursosGenerados } from '@/services/recursos';
+import {recolectarRecursos } from '@/services/recursos';
 
 interface Building {
   x: number;
@@ -17,8 +18,12 @@ const DynamicBuildings: React.FC = () => {
   const [buildingNames, setBuildingNames] = useState<string[]>([]); // Aquí guardaremos los nombres de los edificios
   //recursos
   const [madera, setMadera] = useState(0);
-
+  const [piedra, setPiedra] = useState(0);
+  const [pan, setPan] = useState(0);
+  const [usuario, setUser] = useState('');
+  
   useEffect(() => {
+    cargarUser();
     const fetchData = async () => {
       try {
         const res = await getEdificios();
@@ -84,11 +89,31 @@ const DynamicBuildings: React.FC = () => {
     setSelectedBuilding(buildingName);
     handleBuildClick({ clientX: window.innerWidth / 2, clientY: window.innerHeight / 2 } as React.MouseEvent<HTMLDivElement>);
   };
-
-  const recolectarRecursos = async () => {
+/*
+  const recolectarRecursosOld = async () => {
     const recursos = await calcularRecursosGenerados();
     console.log("Recursos generados:", recursos);
     setMadera(madera + recursos);
+  }*/
+
+  const cargarUser = async () => {
+    const user = await getUser("66468410bdff2445e9bb57d6")
+    if(user != null){
+      setMadera(user.madera);
+      setPiedra(user.piedra);
+      setPan(user.pan);
+      setUser(user.username);
+    }
+  }
+  // Recolectar recursos (Por ahora el usuario esta hardcodeado, luego se debe obtener)
+  const recolectarRecursosUser = async () => {
+    const user = await getUser("66468410bdff2445e9bb57d6")
+    if(user != null){
+      await recolectarRecursos(user.id);
+      setMadera(user.madera);
+      setPiedra(user.piedra);
+      setPan(user.pan);
+    }
   }
   return (
     <div
@@ -114,8 +139,11 @@ const DynamicBuildings: React.FC = () => {
         </div>
       ))}
       <div className="absolute top-0 left-0 p-4 bg-red-500 hover:bg-blue-700 text-blue font-bold py-2 px-4 rounded">
+        <h3>Usuario: {usuario}</h3>
         <h3>Madera: {madera}</h3>
-        <button onClick={recolectarRecursos}> Recolectar Recursos</button>
+        <h3>Piedra: {piedra}</h3>
+        <h3>Pan: {pan}</h3>
+        <button onClick={() => recolectarRecursosUser()}> Recolectar Recursos</button>
       </div>
       <div className="absolute top-0 right-0 p-4 bg-red-500 hover:bg-blue-700 text-blue font-bold py-2 px-4 rounded">
         <h3>Crear edificios</h3>

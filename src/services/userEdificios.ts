@@ -1,9 +1,7 @@
 'use server'
 import { PrismaClient } from "@prisma/client"
 
-const prisma = new PrismaClient({
-    log: ['query']
-})
+const prisma = new PrismaClient()
 
 // GET todos los edificios que construyó un usuario (sin importar el EdificioId)
 export const getUEbyUserId = async (Id: string) => {
@@ -13,6 +11,7 @@ export const getUEbyUserId = async (Id: string) => {
         }
     })
     console.log(`User ${Id} Edificios: `, e)
+    return e
 }
 
 // GET todos los edificios  del mismo EdificioId que construyó un usuario
