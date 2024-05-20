@@ -2,6 +2,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import MenuDesplegable from './menuDesplegable';
 import { GuardarEdificio, getBuildingsByUserId } from '../../services/userEdificios';
+import { getUser} from '@/services/users';
+import { getEdificios } from '../../services/edificios';
+import {recolectarRecursos } from '@/services/recursos';
 
 type Building = {
   x: number;
@@ -18,12 +21,18 @@ const DynamicBuildings: React.FC = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [draggedBuildingIndex, setDraggedBuildingIndex] = useState<number | null>(null);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [madera, setMadera] = useState(0);
+  const [piedra, setPiedra] = useState(0);
+  const [pan, setPan] = useState(0);
+  const [usuario, setUser] = useState('');
+  
 
   const mouseMoveRef = useRef<(e: MouseEvent) => void>(() => {});
   const mouseUpRef = useRef<() => void>(() => {});
 
   useEffect(() => {
     const userId = 'tu_id_de_usuario'; // Reemplazar con el ID de usuario actual
+    cargarUser();
     getBuildingsByUserId(userId)
       .then(fetchedBuildings => {
         setBuildings(fetchedBuildings);
@@ -141,12 +150,37 @@ const DynamicBuildings: React.FC = () => {
 
   const guardarAldea = () => {
     buildings.forEach((building, index) => {
-      guardarEdificioEnBD(`${building.id}`, building.x, building.y);
+      guardarEdificioEnBD(`${building.type}`, building.x, building.y);
     });
   };
+  const recolectarRecursosUser = async () => {
+    const user = await getUser("6645239328fab0b97120439e")
+    if(user != null){
+      await recolectarRecursos(user.id);
+      setMadera(user.madera);
+      setPiedra(user.piedra);
+      setPan(user.pan);
+    }
+  }
+  const cargarUser = async () => {
+    const user = await getUser("6645239328fab0b97120439e")
+    if(user != null){
+      setMadera(user.madera);
+      setPiedra(user.piedra);
+      setPan(user.pan);
+      setUser(String (user.username));
+    }
+  }
 
   return (
     <div className="flex flex-col items-center justify-center w-screen h-screen bg-gray-900">
+      <div className="absolute top-0 left-0 p-4 bg-red-500 hover:bg-blue-700 text-blue font-bold py-2 px-4 rounded">
+        <h3>Usuario: {usuario}</h3>
+        <h3>Madera: {madera}</h3>
+        <h3>Piedra: {piedra}</h3>
+        <h3>Pan: {pan}</h3>
+        <button onClick={() => recolectarRecursosUser()}> Recolectar Recursos</button>
+      </div>
       <div style={{ width: '1200px', height: '700px' }} className="bg-green-500 flex items-center justify-center relative">
         {buildings.map((building, index) => (
           <div
@@ -164,7 +198,7 @@ const DynamicBuildings: React.FC = () => {
             }}
             onMouseDown={(e) => handleMouseDown(index, e)}
           >
-            <div>{building.id} - X: {building.x}, Y: {building.y}</div>
+            <div>{building.type} - X: {building.x}, Y: {building.y}</div>
           </div>
         ))}
       </div>

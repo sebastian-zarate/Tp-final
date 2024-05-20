@@ -6,11 +6,9 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 
-export async function getUser(user?: string) {
-   const userId = user;
-    return userId;
+    
 
-}
+
 
 export async function GuardarEdificio(id: string, posX: number, posY: number): Promise<void> {
     //id = '663ac05f044ccf6167cf703d'
@@ -72,7 +70,7 @@ export async function getBuildingsByUserId(userId: string): Promise<any[]> {
         // Buscar todos los edificios creados por el usuario con el ID proporcionado
         const buildings = await prisma.userEdificios.findMany({
             where: {
-                userId: '66468410bdff2445e9bb57d6', // Utilizar el `userId` proporcionado en la llamada
+                userId: '6645239328fab0b97120439e', // Utilizar el `userId` proporcionado en la llamada
             },
             include: {
                 edificio: {
@@ -99,4 +97,67 @@ export async function getBuildingsByUserId(userId: string): Promise<any[]> {
         console.error("Error fetching buildings by user ID:", error);
         throw error;
     }
+}
+
+export const getUEbyUserId = async (Id: string) => {
+    const e = await prisma.userEdificios.findMany({
+        where: {
+            userId: Id
+        }
+    })
+    console.log(`User ${Id} Edificios: `, e)
+    return e
+}
+
+// GET todos los edificios  del mismo EdificioId que construyó un usuario
+export const getUEbyUserIdEdId = async (userId: string, edificioId: string) => {
+    const e = await prisma.userEdificios.findMany({
+        where: {
+            userId: {
+                equals: userId,
+            },
+            edificioId: {
+                equals: edificioId,
+            }
+        }
+    })
+    console.log(`UserID ${userId} EdificiosID ${edificioId}: `, e)
+    return e
+}
+
+// GET un solo edificio que construyó un usuario (No tiene un uso claro)
+/*
+export const getUe = async (name: string) => {
+    const e = await prisma.userEdificios.findFirst({
+        where: {
+            nivel: Number(name)
+        }
+    })
+    console.log(`------>User Edificio ${name}: `, e)
+    return e
+}
+*/
+
+// UPDATE un edificio que construyó un usuario
+export const updateUE= async (Id: string, data: any) => {
+    const e = await prisma.userEdificios.update({
+        where: {
+            id: Id
+        },
+        data: data
+    })
+    console.log(`User Edificio ${Id} updated: `, e)
+    return e
+}
+
+//GET por el id principal de la tabla UserEdificios
+export const getUEById = async (Id: string) => {
+    const e = await prisma.userEdificios.findUnique({
+        where: {
+            id: Id
+
+        }
+    })
+    await console.log(`----->>>>>>>>>>>>> User Edificio ${Id}: `, e)
+    return e
 }

@@ -20,8 +20,10 @@ model UserEdificios {
   posicion_x Int?
   posicion_y Int?
   userId String @db.ObjectId
+  user Users @relation(fields: [userId], references: [id])
   ultimaInteraccion DateTime?
   nivel Int?
+  trabajadores Int?
 
   edificio Edificios @relation(fields: [edificioId], references: [id])
 }
@@ -36,6 +38,8 @@ model Users{
   madera Int
   piedra Int
   pan Int
+  unidadesDeTrabajo Int
+  userEdificios UserEdificios[]
 }
 model Edificios {
   id String @id @default(auto()) @map("_id") @db.ObjectId
