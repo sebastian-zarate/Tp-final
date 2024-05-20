@@ -29,8 +29,8 @@ model Edificios {
 
 model Users{
   id String @id @default(auto()) @map("_id") @db.ObjectId
-  username String?
-  email String
+  username String? @unique
+  email String? @unique
   hash String?
   salt String?
   nivel Int

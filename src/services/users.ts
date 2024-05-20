@@ -11,19 +11,32 @@ let cantMadera = 500
 let cantPan = 800
 let cantPiedra= 600
 
-export async function createUser(user: { email: string, password: string }) {
+export async function createUser(user: { email: string, password: string, username: string}) {
   if (!user.email || user.email.length < 5 || !user.email.includes('@')) {
     throw new Error('Invalid email');
     
   }
-  const existing = await prisma.users.findFirst({
+  if (!user.username || user.username.length < 3){
+    throw new Error('Invalid username');
+  }
+
+  const existingEmail = await prisma.users.findFirst({
     where:{
       email:user.email
     }
   })
-  if (existing) {
+  if (existingEmail) {
     throw new Error('User already exists');
   }
+  const existingUsername = await prisma.users.findFirst({
+    where: {
+      username: user.username
+      }
+  })
+  if (existingUsername) {
+    throw new Error('Username already exists');
+  }
+
   if (!user.password || user.password.length < 8) {
     throw new Error('Password too short');
   }
@@ -31,7 +44,7 @@ export async function createUser(user: { email: string, password: string }) {
   const salt = getSalt();
 
   const  userWithHash = {
-    username: null,
+    username: user.username,
     email: user.email,
     hash: hashPassword(salt +user.password ),        
     piedra: cantPiedra,
@@ -44,16 +57,27 @@ export async function createUser(user: { email: string, password: string }) {
     await prisma.users.create({data: userWithHash});    
 }
 
-export async function authenticateUser(user: { email: string, password: string }) {
-
-  const existing = await prisma.users.findFirst({
+export async function authenticateUser(user: { email: string, username?: string, password: string }) {
+  let existing;
+//Buscar por email o por username 
+  if(user.email){
+  existing = await prisma.users.findFirst({
     where:{
       email:user.email
     }
   })
-  if (!existing) {
-    throw new Error('User not found');
-  }
+}else if (user.username){
+  existing = await prisma.users.findFirst({
+    where: {
+      username: user.username
+}
+  })
+}else {
+  throw new Error('Email or username required')
+}
+if (!existing) {
+  throw new Error('User not found');
+}
   const hash = hashPassword(existing.salt + user.password);
   console.log("el hash nuevo: ",hash)
   console.log("el hash existente: ",existing.hash)
@@ -61,5 +85,5 @@ export async function authenticateUser(user: { email: string, password: string }
     throw new Error('Invalid password');
   }
   cookies().set('user', signJWT(hash) , { httpOnly: true, sameSite: 'strict' })
-  return { email: existing.email };
+  return { email: existing.email, username: existing.username};
 }
