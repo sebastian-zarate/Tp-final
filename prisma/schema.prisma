@@ -14,17 +14,16 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Edificios {
+model UserEdificios {
   id String @id @default(auto()) @map("_id") @db.ObjectId
-  name String
-  nivel Int?
-  recursoPorMinuto Int?
+  edificioId String @db.ObjectId
+  posicion_x Int?
+  posicion_y Int?
+  userId String @db.ObjectId
   ultimaInteraccion DateTime?
-  tipoRecurso String?
-  //recursos Recursos[]
- // recurso Recursos
-  //recursoId String @db.ObjectId
- 
+  nivel Int?
+
+  edificio Edificios @relation(fields: [edificioId], references: [id])
 }
 
 model Users{
@@ -38,13 +37,17 @@ model Users{
   piedra Int
   pan Int
 }
-model UserEdificios{
-    id String @id @default(auto()) @map("_id") @db.ObjectId
-    edificioId String @db.ObjectId
-    posicion_x Int
-    posicion_y Int
-    userId String @db.ObjectId
-    ultimaInteraccion DateTime
-    nivel Int
-}
+model Edificios {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  name String
+  ancho Int?
+  largo Int?
+  nivel Int?
+  costo Int?
+  descripcion String?
+  recursoPorMinuto Int?
+  ultimaInteraccion DateTime?
+  tipoRecurso String?
 
+  userEdificios UserEdificios[]
+}

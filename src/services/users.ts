@@ -5,12 +5,13 @@ import { getSalt, hashPassword } from "../helpers/hashPassword";
 import { ok } from "assert";
 import { cookies } from "next/headers";
 import { signJWT } from "@/helpers/jwt";
+import { getUser} from "./userEdificios"
 
 const prisma = new PrismaClient()
 let cantMadera = 500
 let cantPan = 800
 let cantPiedra= 600
-
+let userId = ''
 export async function createUser(user: { email: string, password: string }) {
   if (!user.email || user.email.length < 5 || !user.email.includes('@')) {
     throw new Error('Invalid email');
@@ -57,9 +58,15 @@ export async function authenticateUser(user: { email: string, password: string }
   const hash = hashPassword(existing.salt + user.password);
   console.log("el hash nuevo: ",hash)
   console.log("el hash existente: ",existing.hash)
+  console.log("el ID: ",existing.id)
+  getUser(existing.id)
+  console.log("el ID: ",existing.id)
+
   if (hash !== existing.hash) {
     throw new Error('Invalid password');
   }
   cookies().set('user', signJWT(hash) , { httpOnly: true, sameSite: 'strict' })
   return { email: existing.email };
 }
+
+

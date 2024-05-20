@@ -1,61 +1,143 @@
+'use client'
+import React, { useState, useEffect } from 'react';
+import { getEdificios, updateEdificioUltimaInteraccion } from '@/services/edificios';
 
-import { addEdificio, getEdificios } from "@/services/edificios"
+const EdificiosPage = () => {
+  const [edificios, setEdificios] = useState([]);
+  const [editingEdificio, setEditingEdificio] = useState(null);
+  const [formData, setFormData] = useState({
+    name: '',
+    nivel: '',
+    ancho: '',
+    largo: '',
+    descripcion: '',
+    costo: ''
+  });
 
-export default async function EdificiosPage() {
+  useEffect(() => {
+    fetchEdificios();
+  }, []);
 
-
-  const list = await getEdificios()
-/*   const [count, setCount] = useState(0) */
-/*   const [page, setPage] = useState(1)
-  const [count, setCount] = useState(0) */
-/*   const pageCount = Math.ceil(count / 5) */
-
-
-
-  async function addEdificiO(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-
-    const form = event.currentTarget
-    const data = new FormData(form)
-    const edificio = {
-      nivel: parseInt(data.get('nivel') as string),
-      name: data.get('name') as string
+  const fetchEdificios = async () => {
+    try {
+      const edificiosData = await getEdificios();
+      setEdificios(edificiosData);
+    } catch (error) {
+      console.error('Error fetching edificios:', error);
     }
+  };
 
-    await addEdificio(edificio)
+  const handleEditClick = (edificio) => {
+    setEditingEdificio(edificio);
+    setFormData({
+      name: edificio.name,
+      nivel: edificio.nivel,
+      ancho: edificio.ancho,
+      largo: edificio.largo,
+      descripcion: edificio.descripcion,
+      costo: edificio.costo
+    });
+  };
 
-    form.reset()
-  /*   setList(current => [...current, edificio]) */
-/*     if (page === pageCount && list.length < 5) {
-      setList(current => [...current, pokemon])
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value
+    });
+  };
+
+  async function handleFormSubmit(e) {
+    e.preventDefault();
+    try {
+      const anchoInt = parseInt(formData.ancho);
+      const largoInt = parseInt(formData.largo);
+      const costoInt = parseInt(formData.costo);
+  
+      await updateEdificioUltimaInteraccion(
+        editingEdificio.id,
+        new Date(),
+        anchoInt,
+        largoInt,
+        costoInt,
+        formData.descripcion
+      );
+      fetchEdificios();
+      setEditingEdificio(null);
+      setFormData({
+        name: '',
+        nivel: '',
+        ancho: '',
+        largo: '',
+        descripcion: '',
+        costo: ''
+      });
+    } catch (error) {
+      console.error('Error updating edificio:', error);
     }
-    setCount(current => current + 1) */
   }
-
   
 
   return (
-    <main className="container mx-auto flex flex-col pt-10 bg-white">
-		<h1 className="text-5xl text-blue-600 font-extrabold text-center">Edificios</h1>
-		<ul className="mt-4 border-4 border-black-700">
-            <h1>Edificios</h1>
-			<li className="flex items-center justify-between border-b border-gray-300 p-2 bg-green-700">
-				<span className="text-lg text-white font-extrabold w-1/3">ID</span>
-				<span className="text-lg text-white font-extrabold w-1/3 text-center">Name</span>
-				
-			</li>
-			{list.map((e, index) => (
-				<li key={index} className="flex items-center justify-between border-b border-gray-300 p-2">
-					<span key={index} className=" text-sm text-black-600 font-bold w-1/3">{index + 1}</span>
-					<span className="text-lg text-black-600 font-bold w-1/3 text-center">{e.name}</span>
-					<div className="w-1/3 text-right">
-					</div>
-				</li>
-			))}
-            
-		</ul>
+    <div>
+      <h1>Edificios</h1>
+      {edificios.map((edificio) => (
+        <div key={edificio.id}>
+          {editingEdificio && editingEdificio.id === edificio.id ? (
+            <form onSubmit={handleFormSubmit}>
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleInputChange}
+              />
+              <input
+                type="text"
+                name="nivel"
+                value={formData.nivel}
+                onChange={handleInputChange}
+              />
+              <input
+                type="text"
+                name="ancho"
+                value={formData.ancho}
+                onChange={handleInputChange}
+              />
+              <input
+                type="text"
+                name="largo"
+                value={formData.largo}
+                onChange={handleInputChange}
+              />
+              <input
+                type="text"
+                name="descripcion"
+                value={formData.descripcion}
+                onChange={handleInputChange}
+              />
+              <input
+                type="text"
+                name="costo"
+                value={formData.costo}
+                onChange={handleInputChange}
+              />
+              <button type="submit">Guardar</button>
+            </form>
+          ) : (
+            <div>
+              <p>Name: {edificio.name}</p>
+              <p>Nivel: {edificio.nivel}</p>
+              <p>Ancho: {edificio.ancho}</p>
+              <p>Largo: {edificio.largo}</p>
+              <p>Descripción: {edificio.descripcion}</p>
+              <p>Costo: {edificio.costo}</p>
+              <button onClick={() => handleEditClick(edificio)}>Editar</button>
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+};
 
-	</main>
-  )
-}
-
+export default EdificiosPage;
