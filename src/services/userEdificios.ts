@@ -1,5 +1,6 @@
 'use server'
 import { PrismaClient } from "@prisma/client"
+import { getEdificioById } from "./edificios"
 
 const prisma = new PrismaClient({
     log: ['query']
@@ -65,5 +66,43 @@ export const getUEById = async (Id: string) => {
         }
     })
     await console.log(`----->>>>>>>>>>>>> User Edificio ${Id}: `, e)
+    return e
+}
+//misma funcionalidad que el de matu, pero aca retorna el documento
+export const getUEbyUserIdRet = async (Id: string) => {
+    const e = await prisma.userEdificios.findMany({
+        where: {
+            userId: Id
+        }
+    })
+    return e
+}
+
+// GET todos los edificios  del mismo EdificioId que construyó un usuario
+export const getUEbyUserIdEdIdNico = async (userId: string, edificioId: string) => {
+    const e = await prisma.userEdificios.findFirst({
+        where: {
+            userId: {
+                equals: userId,
+            },
+            edificioId: {
+                equals: edificioId,
+            }
+        }
+    })
+    console.log(`UserID ${userId} EdificiosID ${edificioId}: `, e)
+    return e
+}
+
+export const updateUEunidades= async (Id: string, data: any) => {
+    const e = await prisma.userEdificios.update({
+        where: {
+            id: Id
+        },
+        data: {
+           trabajadores: data
+        }
+    })
+    console.log(`User Edificio ${Id} updated: `, e)
     return e
 }

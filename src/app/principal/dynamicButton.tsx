@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { getEdificios } from '../../services/edificios';
 import { calcularRecursosGenerados } from '@/services/recursos';
+import { getUserByUserName } from '@/services/users';
+
 
 interface Building {
   x: number;
@@ -17,6 +19,7 @@ const DynamicBuildings: React.FC = () => {
   const [buildingNames, setBuildingNames] = useState<string[]>([]); // Aquí guardaremos los nombres de los edificios
   //recursos
   const [madera, setMadera] = useState(0);
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -90,6 +93,13 @@ const DynamicBuildings: React.FC = () => {
     console.log("Recursos generados:", recursos);
     setMadera(madera + recursos);
   }
+
+  const producirUnidades = async () => {
+    window.location.replace("/unidades")
+/*     const unidades = await getUserByUserName("korosensee"); */
+/*     console.log("Recursos generados:", unidades?.unidadesDeTrabajo); */
+  }
+
   return (
     <div
       className="relative flex justify-center items-center h-screen bg-green-500"
@@ -117,6 +127,13 @@ const DynamicBuildings: React.FC = () => {
         <h3>Madera: {madera}</h3>
         <button onClick={recolectarRecursos}> Recolectar Recursos</button>
       </div>
+
+      <div className="absolute top-30 left-0 p-4 bg-red-500 hover:bg-blue-700 text-blue font-bold py-2 px-4 rounded">
+        {/* <h3>Unidades de trabajo: {unidades}</h3> */}
+        <button onClick={producirUnidades}> Asignar Unidades</button>
+      </div>
+
+
       <div className="absolute top-0 right-0 p-4 bg-red-500 hover:bg-blue-700 text-blue font-bold py-2 px-4 rounded">
         <h3>Crear edificios</h3>
         {buildingNames.map((buildingName, index) => (

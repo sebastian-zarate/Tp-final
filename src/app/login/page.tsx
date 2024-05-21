@@ -7,6 +7,7 @@ async function Login(){
     async function logUser(data:FormData) {
         'use server'
         const user = {
+          username: data.get('username') as string,
           email: data.get('email') as string,
           password: data.get('password') as string
         }
@@ -28,6 +29,10 @@ async function Login(){
               <h1 className=" border-solid text-xl  text-white bg-gray-400">Login</h1>
               
               <form  action={logUser}>  
+              <label htmlFor="username">Username</label>
+                <p/>
+                <input className="border px-2" type="username" id="username" name="username" required></input>
+                <p/>
                 <label htmlFor="email">Email</label>
                 <p/>
                 <input className="border px-2" type="email" id="email" name="email" required></input>

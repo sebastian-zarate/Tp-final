@@ -15,7 +15,22 @@ export const getEdificios = async () => {
     console.log(muchos)        
     return muchos
 }
-
+export const getEdificioById = async (Id: string) => {
+    const edif = await prisma.edificios.findFirst({
+        where:{
+            id: Id
+        }
+    })
+    return edif
+}
+export const getEdificioByName = async (Name: string) => {
+    const edif = await prisma.edificios.findFirst({
+        where:{
+            name: Name
+        }
+    })
+    return edif
+}
 export const updateEdificioUltimaInteraccion = async (Id:any, UltimaInteraccion: any) => {
 await prisma.edificios.update({
     where:{
