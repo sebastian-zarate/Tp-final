@@ -138,3 +138,24 @@ export const updateUnidDefUser =async (id:string, data: any) => {
   })
   return users
 }
+
+export async function getUser(Id: string) {
+  const u = await prisma.users.findUnique({
+    where: {
+      id: Id
+    }
+  })
+  console.log(`User ${Id}: `, u)
+  return u
+}
+
+export async function updateUser(Id: string, data: any) {
+  const u = await prisma.users.update({
+    where: {
+      id: Id
+    },
+    data: data
+  })
+  console.log(`User ${Id} updated: `, u)
+  return u
+}

@@ -13,6 +13,7 @@ export const getUEbyUserId = async (Id: string) => {
         }
     })
     console.log(`User ${Id} Edificios: `, e)
+    return e
 }
 
 // GET todos los edificios  del mismo EdificioId que construyó un usuario
