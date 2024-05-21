@@ -8,23 +8,15 @@ import { signJWT } from "@/helpers/jwt";
 const prisma = new PrismaClient()
 let cantMadera = 500
 let cantPan = 800
-<<<<<<< HEAD
 let cantPiedra= 600
 let unidadesDeTrabajo = 100
-=======
-let cantPiedra = 600
->>>>>>> 2d119dee6fae267371d70084e02ff706d81f42ff
 
 export async function createUser(user: { email: string, password: string, username: string}) {
   if (!user.email || user.email.length < 5 || !user.email.includes('@') ) {
     throw new Error('Invalid email');
-<<<<<<< HEAD
   }
   if (!user.username || user.username.length < 3){
     throw new Error('Invalid username');
-=======
-
->>>>>>> 2d119dee6fae267371d70084e02ff706d81f42ff
   }
   const existing = await prisma.users.findFirst({
     where: {
@@ -49,28 +41,17 @@ export async function createUser(user: { email: string, password: string, userna
 
   const salt = getSalt();
 
-<<<<<<< HEAD
   const  userWithHash = {
     username: user.username,
-=======
-  const userWithHash = {
-    username: null,
->>>>>>> 2d119dee6fae267371d70084e02ff706d81f42ff
     email: user.email,
     hash: hashPassword(salt + user.password),
     piedra: cantPiedra,
     pan: cantPan,
     madera: cantMadera,
-<<<<<<< HEAD
     nivel:1, 
     salt,
     unidadesDeTrabajo
 }
-=======
-    nivel: 1,
-    salt: salt
-  }
->>>>>>> 2d119dee6fae267371d70084e02ff706d81f42ff
 
   await prisma.users.create({ data: userWithHash });
 }
@@ -91,7 +72,6 @@ export async function authenticateUser(user: {username:string, email: string, pa
   if (hash !== existing.hash) {
     throw new Error('Invalid password');
   }
-<<<<<<< HEAD
   
   cookies().set("user" , signJWT(hash) , { httpOnly: true, sameSite: 'strict' })
   cookies().set("userName" , user.username , { httpOnly: true, sameSite: 'strict' })
@@ -157,10 +137,6 @@ export const updateUnidDefUser =async (id:string, data: any) => {
     }
   })
   return users
-=======
-  cookies().set('user', signJWT(hash), { httpOnly: true, sameSite: 'strict' })
-  return { email: existing.email };
->>>>>>> 2d119dee6fae267371d70084e02ff706d81f42ff
 }
 
 export async function getUser(Id: string) {
@@ -182,8 +158,4 @@ export async function updateUser(Id: string, data: any) {
   })
   console.log(`User ${Id} updated: `, u)
   return u
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 2d119dee6fae267371d70084e02ff706d81f42ff
