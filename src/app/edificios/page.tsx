@@ -1,10 +1,13 @@
 
 import { addEdificio, getEdificios } from "@/services/edificios"
-
+import {getUEbyUserId, getUEbyUserIdEdId} from "@/services/userEdificios"
 export default async function EdificiosPage() {
 
 
   const list = await getEdificios()
+  //PROBAR METODOS
+  const UEbyUserId = await getUEbyUserId("66468410bdff2445e9bb57d6")
+  const UEbyUserIdEdId = await getUEbyUserIdEdId("66468410bdff2445e9bb57d6", "663ac05f044ccf6167cf7040")
 /*   const [count, setCount] = useState(0) */
 /*   const [page, setPage] = useState(1)
   const [count, setCount] = useState(0) */

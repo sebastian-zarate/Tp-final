@@ -1,86 +1,129 @@
 'use client'
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import MenuDesplegable from './menuDesplegable';
+import { GuardarEdificio, getUEbyUserId } from '../../services/userEdificios'; //faltan estos 2
+import { getUser} from '@/services/users';
 import { getEdificios } from '../../services/edificios';
 import { calcularRecursosGenerados } from '@/services/recursos';
-import { getUserByUserName } from '@/services/users';
 
-
-interface Building {
+type Building = {
   x: number;
   y: number;
   type: string;
-}
+  ancho: number;
+  largo: number;
+  id: string;
+};
+
 
 const DynamicBuildings: React.FC = () => {
   const [buildings, setBuildings] = useState<Building[]>([]);
-  const [selectedBuilding, setSelectedBuilding] = useState('');
+  const [menuOpen, setMenuOpen] = useState(false);
   const [draggedBuildingIndex, setDraggedBuildingIndex] = useState<number | null>(null);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
-  const [buildingNames, setBuildingNames] = useState<string[]>([]); // Aquí guardaremos los nombres de los edificios
-  //recursos
   const [madera, setMadera] = useState(0);
 
-
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await getEdificios();
-        const names = res.map(edificio => edificio.name);
-        setBuildingNames(names);
-        console.log("buildingNames actualizado:", names);
-      } catch (error) {
-        console.error("Error al obtener nombres de edificios:", error);
-      }
-    };
-    fetchData();
-  }, []); // Esta función se ejecuta solo una vez al montar el componente
+    const userId = 'tu_id_de_usuario'; // Reemplazar con el ID de usuario actual
+    cargarUser();
+    getUEbyUserId(userId)
+      .then(fetchedBuildings => {
+        setBuildings(fetchedBuildings);
+      })
+      .catch(error => {
+        console.error("Error fetching buildings:", error);
+      });
+  }, []);
 
-  const handleBuildClick = (event: React.MouseEvent<HTMLDivElement>) => {
-    if (!selectedBuilding) return;
-
-    const x = event.clientX;
-    const y = event.clientY;
-
-    // Verificar si ya se construyó el edificio
-    const isBuildingConstructed = buildings.some(building => building.type === selectedBuilding);
-    if (!isBuildingConstructed) {
-      setBuildings([...buildings, { x, y, type: selectedBuilding }]);
+  const handleBuildClick = (x: number, y: number, buildingType: string, ancho: number, largo: number) => {
+    const existingBuilding = buildings.find(building => building.x === x && building.y === y && building.type === buildingType);
+  
+    if (!existingBuilding) {
+      // Crear un nuevo edificio con un ID único
+      const newBuilding = { x, y, type: buildingType, ancho, largo };
+      
+      // Actualizar el estado utilizando una función de callback para asegurar el valor actualizado de buildings
+      setBuildings(prevBuildings => {
+        const updatedBuildings = [...prevBuildings, newBuilding];
+        // Llamar a la función para guardar el edificio en la base de datos con el ID correcto
+        guardarEdificioEnBD(`${buildingType}-${updatedBuildings.length}`, x, y);
+        return updatedBuildings;
+      });
+    } else {
+      console.log('Ya hay un edificio del mismo tipo en estas coordenadas');
     }
+  };
+  
 
-    setSelectedBuilding(''); // Limpiar la selección de edificio después de construir
+  const handleMenuClick = () => {
+    setMenuOpen(!menuOpen);
   };
 
-  const handleMouseDown = (event: React.MouseEvent<HTMLDivElement>, index: number) => {
+  const handleMouseDown = (index: number, event: React.MouseEvent<HTMLDivElement>) => {
     setDraggedBuildingIndex(index);
-    const x = event.clientX;
-    const y = event.clientY;
-    const buildingX = buildings[index].x;
-    const buildingY = buildings[index].y;
-    setDragOffset({ x: x - buildingX, y: y - buildingY });
-  };
+    const startX = event.clientX;
+    const startY = event.clientY;
+    setDragOffset({ x: startX - buildings[index].x, y: startY - buildings[index].y });
 
-  const handleMouseUp = () => {
-    setDraggedBuildingIndex(null);
-  };
+    mouseMoveRef.current = (e: MouseEvent) => {
+      const newX = e.clientX - dragOffset.x;
+      const newY = e.clientY - dragOffset.y;
+      handleBuildingMove(index, newX, newY);
+    };
 
-  const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
-    if (draggedBuildingIndex !== null) {
-      const x = event.clientX;
-      const y = event.clientY;
-      const newBuildings = [...buildings];
-      newBuildings[draggedBuildingIndex].x = x - dragOffset.x;
-      newBuildings[draggedBuildingIndex].y = y - dragOffset.y;
-      setBuildings(newBuildings);
-    }
-  };
+    mouseUpRef.current = () => {
+      setDraggedBuildingIndex(null);
+      window.removeEventListener('mousemove', mouseMoveRef.current);
+      window.removeEventListener('mouseup', mouseUpRef.current);
+    };
 
-  const handleBuildingSelection = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedBuilding(event.target.value);
+    window.addEventListener('mousemove', mouseMoveRef.current);
+    window.addEventListener('mouseup', mouseUpRef.current);
   };
-
-  const handleDeleteBuilding = (index: number) => {
-    const filteredBuildings = buildings.filter((_, i) => i !== index);
-    setBuildings(filteredBuildings);
+  const handleBuildingMove = (index: number, newX: number, newY: number) => {
+    setBuildings(prevBuildings => {
+      const updatedBuildings = [...prevBuildings];
+      const maxWidth = 1200; // Ancho del área de construcción
+      const maxHeight = 700; // Alto del área de construcción
+      const buildingWidth = updatedBuildings[index].ancho; // Ancho de cada edificio
+      const buildingHeight = updatedBuildings[index].largo; // Alto de cada edificio
+      const collisionMargin = 10; // Margen de colisión entre edificios
+  
+      // Limitar las coordenadas x e y dentro del área de construcción
+      const clampedX = Math.min(Math.max(newX, 0), maxWidth - buildingWidth);
+      const clampedY = Math.min(Math.max(newY, 0), maxHeight - buildingHeight);
+  
+      // Ajustar la posición si colisiona con otros edificios
+      const collidedBuildingIndex = getCollidedBuildingIndex(index, clampedX, clampedY, buildingWidth, buildingHeight);
+      if (collidedBuildingIndex !== -1) {
+        const collidedBuilding = updatedBuildings[collidedBuildingIndex];
+        const deltaX = clampedX - collidedBuilding.x;
+        const deltaY = clampedY - collidedBuilding.y;
+        
+        // Calcular la dirección de desplazamiento y ajustar la posición del edificio
+        let newX = clampedX;
+        let newY = clampedY;
+  
+        if (Math.abs(deltaX) < Math.abs(deltaY)) {
+          // Desplazamiento horizontal
+          newX = collidedBuilding.x + (deltaX > 0 ? collidedBuilding.ancho + collisionMargin : -buildingWidth - collisionMargin);
+        } else {
+          // Desplazamiento vertical
+          newY = collidedBuilding.y + (deltaY > 0 ? collidedBuilding.largo + collisionMargin : -buildingHeight - collisionMargin);
+        }
+  
+        // Limitar las coordenadas x e y dentro del área de construcción después del ajuste
+        newX = Math.min(Math.max(newX, 0), maxWidth - buildingWidth);
+        newY = Math.min(Math.max(newY, 0), maxHeight - buildingHeight);
+  
+        updatedBuildings[index].x = newX;
+        updatedBuildings[index].y = newY;
+      } else {
+        updatedBuildings[index].x = clampedX;
+        updatedBuildings[index].y = clampedY;
+      }
+      return updatedBuildings;
+    });
   };
 
   const handleCreateBuilding = (buildingName: string) => {
@@ -93,13 +136,6 @@ const DynamicBuildings: React.FC = () => {
     console.log("Recursos generados:", recursos);
     setMadera(madera + recursos);
   }
-
-  const producirUnidades = async () => {
-    window.location.replace("/unidades")
-/*     const unidades = await getUserByUserName("korosensee"); */
-/*     console.log("Recursos generados:", unidades?.unidadesDeTrabajo); */
-  }
-
   return (
     <div
       className="relative flex justify-center items-center h-screen bg-green-500"
@@ -127,13 +163,6 @@ const DynamicBuildings: React.FC = () => {
         <h3>Madera: {madera}</h3>
         <button onClick={recolectarRecursos}> Recolectar Recursos</button>
       </div>
-
-      <div className="absolute top-30 left-0 p-4 bg-red-500 hover:bg-blue-700 text-blue font-bold py-2 px-4 rounded">
-        {/* <h3>Unidades de trabajo: {unidades}</h3> */}
-        <button onClick={producirUnidades}> Asignar Unidades</button>
-      </div>
-
-
       <div className="absolute top-0 right-0 p-4 bg-red-500 hover:bg-blue-700 text-blue font-bold py-2 px-4 rounded">
         <h3>Crear edificios</h3>
         {buildingNames.map((buildingName, index) => (
@@ -144,6 +173,19 @@ const DynamicBuildings: React.FC = () => {
           </div>
         ))}
       </div>
+      <button
+        className="absolute bottom-4 right-4 bg-green-500 hover:bg-white text-white font-bold py-2 px-4 rounded"
+        onClick={handleMenuClick}
+      >
+        Menú
+      </button>
+      {menuOpen && <MenuDesplegable onBuildClick={handleBuildClick} />}
+      <button
+        className="absolute bottom-4 left-4 bg-blue-500 hover:bg-white text-white font-bold py-2 px-4 rounded"
+        onClick={guardarAldea}
+      >
+        Guardar Aldea
+      </button>
     </div>
   );
 };

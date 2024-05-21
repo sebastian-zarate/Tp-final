@@ -17,10 +17,14 @@ datasource db {
 model Edificios {
   id String @id @default(auto()) @map("_id") @db.ObjectId
   name String
+  ancho Int?
+  largo Int?
   nivel Int?
+  costo Int?
+  descripcion String?
   recursoPorMinuto Int?
-  ultimaInteraccion DateTime?
   tipoRecurso String?
+
   userEdificios UserEdificios[]
  
 }

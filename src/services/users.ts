@@ -19,8 +19,8 @@ export async function createUser(user: { email: string, password: string, userna
     throw new Error('Invalid username');
   }
   const existing = await prisma.users.findFirst({
-    where:{
-      email:user.email
+    where: {
+      email: user.email
     }
   })
   if (existing) {
@@ -44,7 +44,7 @@ export async function createUser(user: { email: string, password: string, userna
   const  userWithHash = {
     username: user.username,
     email: user.email,
-    hash: hashPassword(salt +user.password ),        
+    hash: hashPassword(salt + user.password),
     piedra: cantPiedra,
     pan: cantPan,
     madera: cantMadera,
@@ -53,22 +53,22 @@ export async function createUser(user: { email: string, password: string, userna
     unidadesDeTrabajo
 }
 
-    await prisma.users.create({data: userWithHash});    
+  await prisma.users.create({ data: userWithHash });
 }
 
 export async function authenticateUser(user: {username:string, email: string, password: string }) {
 
   const existing = await prisma.users.findFirst({
-    where:{
-      email:user.email
+    where: {
+      email: user.email
     }
   })
   if (!existing) {
     throw new Error('User not found');
   }
   const hash = hashPassword(existing.salt + user.password);
-  console.log("el hash nuevo: ",hash)
-  console.log("el hash existente: ",existing.hash)
+  console.log("el hash nuevo: ", hash)
+  console.log("el hash existente: ", existing.hash)
   if (hash !== existing.hash) {
     throw new Error('Invalid password');
   }
