@@ -73,8 +73,21 @@ export async function authenticateUser(user: {username:string, email: string, pa
     throw new Error('Invalid password');
   }
   
+<<<<<<< HEAD
   cookies().set("user" , signJWT(hash) , { httpOnly: true,/*  sameSite: 'strict'  */})
  /*  cookies().set("userName" , user.username , { httpOnly: true, sameSite: 'strict' }) */
+=======
+  cookies().set("user" , signJWT(hash) , { httpOnly: true, sameSite: 'strict' })
+  cookies().set("userName" , user.username , { httpOnly: true, sameSite: 'strict' })
+  /* cookies().set("userName" , user.email , { httpOnly: true, sameSite: 'strict' }) */
+/*   if(user.email){
+    cookies().set(user.email, signJWT(hash) , { httpOnly: true, sameSite: 'strict' })
+  } 
+  if(user.username){
+    cookies().set(user.username, signJWT(hash) , { httpOnly: true, sameSite: 'strict' })
+  }
+ */
+>>>>>>> 868adf736af5a9557ac2bc6759ed98f2dd202148
  
 
   return { email: existing.email, username: existing.username };
@@ -89,7 +102,11 @@ export const getUserByUserName = async (userName:string) => {
   })        
   return users
 }
+<<<<<<< HEAD
 export const getUserByemail = async (email?:string) => {
+=======
+export const getUserByemail = async (email:string) => {
+>>>>>>> 868adf736af5a9557ac2bc6759ed98f2dd202148
   const users = await prisma.users.findFirst({
     where: {
       email: email
@@ -97,6 +114,7 @@ export const getUserByemail = async (email?:string) => {
   })   
    return users
 }
+<<<<<<< HEAD
 export const getUserByHash = async (hash:string) => {
   const users = await prisma.users.findFirst({
     where: {
@@ -106,6 +124,8 @@ export const getUserByHash = async (hash:string) => {
   if(users)  return users
   /* else return false   */
 }
+=======
+>>>>>>> 868adf736af5a9557ac2bc6759ed98f2dd202148
 //método que me devuelve un booleano de si existe el usuario
 export const getBoolUserExist = async (email:string) => {
   const users = await prisma.users.findFirst({
@@ -116,6 +136,7 @@ export const getBoolUserExist = async (email:string) => {
   if(users)  return true
   else return false    
 }
+<<<<<<< HEAD
 export const getUserById= async (Id:string) => {
   const users = await prisma.users.findFirst({
     where: {
@@ -124,4 +145,49 @@ export const getUserById= async (Id:string) => {
   }) 
   return users
   /* else return false   */
+=======
+
+export const updateUnidAtaqUser =async (id:string, data: any) => {
+  const users = await prisma.users.update({
+    where: {
+      id: id
+    },
+    data: {
+      unidadesDeAtaque: data
+    }
+  })
+  return users
+}
+export const updateUnidDefUser =async (id:string, data: any) => {
+  const users = await prisma.users.update({
+    where: {
+      id: id
+    },
+    data: {
+      unidadesDeDefensa: data
+    }
+  })
+  return users
+}
+
+export async function getUser(Id: string) {
+  const u = await prisma.users.findUnique({
+    where: {
+      id: Id
+    }
+  })
+  console.log(`User ${Id}: `, u)
+  return u
+}
+
+export async function updateUser(Id: string, data: any) {
+  const u = await prisma.users.update({
+    where: {
+      id: Id
+    },
+    data: data
+  })
+  console.log(`User ${Id} updated: `, u)
+  return u
+>>>>>>> 868adf736af5a9557ac2bc6759ed98f2dd202148
 }
