@@ -1,19 +1,15 @@
-/* "use client" */
+
 import { verifyJWT } from "@/helpers/jwt";
 import { getEdificioById, getEdificioByName } from "@/services/edificios";
-import { getUEbyUserIdEdId, getUEbyUserIdEdIdNico, getUEbyUserIdRet, updateUE, updateUEunidades } from "@/services/userEdificios";
+import {  getUEbyUserIdEdIdNico, getUEbyUserIdRet, updateUE, updateUEunidades } from "@/services/userEdificios";
 import {  getUserByHash, getUserById } from "@/services/users"
 /* import Cookies from 'universal-cookie' */
 import { redirect } from "next/navigation" 
 import { cookies } from "next/headers";
-import { time } from "console";
-import { DocumentProps } from "postcss";
 /* import { useState } from "react"; */
 
 
 export default async function Unidades(){
-
-
 
     const cooki = cookies().get('user')?.value
     console.log("cokieessssssssssssssssss",cooki)
