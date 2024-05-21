@@ -2,11 +2,10 @@
 import { cookies } from "next/headers";
 import DynamicButton from "./dynamicButton";
 import { redirect } from "next/navigation";
-import { getBoolUserExist, getUserByHash } from "@/services/users";
+import { getUserByHash } from "@/services/users";
 import { verifyJWT } from "@/helpers/jwt";
 
 import { useEffect } from "react";
-import { getBoolUserExist } from "@/services/users";
 
 async function Principal() {
     // Marca este componente como un componente del lado del cliente

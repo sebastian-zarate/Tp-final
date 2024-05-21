@@ -31,18 +31,34 @@ export const getUEbyUserIdEdId = async (userId: string, edificioId: string) => {
     return e
 }
 
-// GET un solo edificio que construyó un usuario (No tiene un uso claro)
-/*
-export const getUe = async (name: string) => {
-    const e = await prisma.userEdificios.findFirst({
-        where: {
-            nivel: Number(name)
-        }
-    })
-    console.log(`------>User Edificio ${name}: `, e)
-    return e
-}
-*/
+export async function GuardarEdificio(id: string, posX: number, posY: number, edificioNivel: number): Promise<void> {
+    //id = '663ac05f044ccf6167cf703d'
+
+    console.log("id ", id)
+    console.log(" posx", posX)
+    console.log(posY)
+    try {
+      // Lógica para guardar/actualizar el edificio en la base de datos
+      await prisma.userEdificios.updateMany({
+        where: { id },
+        data: {
+        userId: '6645239328fab0b97120439e',
+          posicion_x: posX,
+          posicion_y: posY,
+          nivel : edificioNivel
+
+        },
+
+      });
+    } catch (error) {
+      console.error("Error saving building:", error);
+      throw error;
+    }
+    console.log("id ", id)
+    console.log(" posx", posX)
+    console.log(posY)
+
+  }
 
 // UPDATE un edificio que construyó un usuario
 export const updateUE= async (Id: string, data: any) => {

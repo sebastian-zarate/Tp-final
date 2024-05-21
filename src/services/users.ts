@@ -125,3 +125,13 @@ export const getUserById= async (Id:string) => {
   return users
   /* else return false   */
 }
+export async function updateUser(Id: string, data: any) {
+  const u = await prisma.users.update({
+    where: {
+      id: Id
+    },
+    data: data
+  })
+  console.log(`User ${Id} updated: `, u)
+  return u
+}

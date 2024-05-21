@@ -1,8 +1,8 @@
 'use client'
 import React, { useState, useEffect, useRef } from 'react';
 import MenuDesplegable from './menuDesplegable';
-import { GuardarEdificio, getUEbyUserId } from '../../services/userEdificios'; //faltan estos 2
-import { getUser} from '@/services/users';
+import {  getUEbyUserId } from '../../services/userEdificios'; //faltan estos 2
+import {  getUserById} from '@/services/users';
 import { getEdificios } from '../../services/edificios';
 import {recolectarRecursos } from '@/services/recursos';
 
@@ -137,14 +137,22 @@ const DynamicBuildings: React.FC = () => {
     setSelectedBuilding(buildingName);
     handleBuildClick({ clientX: window.innerWidth / 2, clientY: window.innerHeight / 2 } as React.MouseEvent<HTMLDivElement>);
   };
+  const guardarEdificioEnBD = (id: string, posX: number, posY: number) => {
+    GuardarEdificio(id, posX, posY);
+  };
 
+  const guardarAldea = () => {
+    buildings.forEach((building, index) => {
+      guardarEdificioEnBD(`${building.type}`, building.x, building.y);
+    });
+  };
   const recolectarRecursos = async () => {
     const recursos = await calcularRecursosGenerados();
     console.log("Recursos generados:", recursos);
     setMadera(madera + recursos);
   }
   const cargarUser = async () => {
-    const user = await getUser("6645239328fab0b97120439e")
+    const user = await getUserById("6645239328fab0b97120439e")
     if(user != null){
       setMadera(user.madera);
       setPiedra(user.piedra);
