@@ -10,7 +10,7 @@ const prisma = new PrismaClient();
 
 
 
-export async function GuardarEdificio(id: string, posX: number, posY: number): Promise<void> {
+export async function GuardarEdificio(id: string, posX: number, posY: number, edificioNivel: number): Promise<void> {
     //id = '663ac05f044ccf6167cf703d'
 
     console.log("id ", id)
@@ -18,12 +18,13 @@ export async function GuardarEdificio(id: string, posX: number, posY: number): P
     console.log(posY)
     try {
       // Lógica para guardar/actualizar el edificio en la base de datos
-      await prisma.userEdificios.update({
+      await prisma.userEdificios.updateMany({
         where: { id },
         data: {
         userId: '6645239328fab0b97120439e',
           posicion_x: posX,
           posicion_y: posY,
+          nivel : edificioNivel
          
         },
        
@@ -39,28 +40,30 @@ export async function GuardarEdificio(id: string, posX: number, posY: number): P
   }
 
 
-export async function builtEdificio(edificioId: string,posX: number, posY: number ): Promise<void> {
+export async function builtEdificio(edificioID: string, edificioX: number,edificioY: number, edificioNivel: number) {
     try {
-        // Lógica para crear un nuevo edificio en la base de datos
-        await prisma.userEdificios.create({
+        // Obtener el ID del usuario
+        const usuarioId = '6645239328fab0b97120439e';
+        console.log("usuarioId: ", edificioID)
+        // Crear el edificio en la base de datos utilizando Prisma
+        const nuevoEdificio = await prisma.userEdificios.create({
             data: {
-                userId: '6645239328fab0b97120439e',
-                posicion_x: posX,
-                posicion_y: posY,
-                edificio: {
-                    connect: { id: edificioId } // Conectar el edificio existente por su ID
-                }
-            },
+                edificioId: edificioID, // Asegúrate de que este es un string válido
+                posicion_x: edificioX,
+                posicion_y: edificioY,
+                userId: usuarioId,
+                ultimaInteraccion: new Date(),
+                nivel: edificioNivel // Establecer un valor por defecto para 'nivel'
+            }
         });
-        console.log("Edificio creado exitosamente.");
+
+        // Devolver el ID del usuario y el edificio creado
+        return { usuarioId: usuarioId, edificio: nuevoEdificio };
     } catch (error) {
-        console.error("Error al guardar el edificio:", error);
-        throw error;
+        console.error("Error al guardar el edificio en la base de datos:", error);
+        throw error; // Relanzar el error para que sea manejado por el código que llama a esta función
     }
 }
-
-
-
 
 
 
@@ -76,9 +79,10 @@ export async function getBuildingsByUserId(userId: string): Promise<any[]> {
                 edificio: {
                     select: {
                         id: true,
+                        name: true,
                         ancho: true,
                         largo: true,
-                        name: true, // Suponiendo que 'name' es el tipo del edificio
+                        costo: true
                     }
                 }
             }
@@ -86,18 +90,23 @@ export async function getBuildingsByUserId(userId: string): Promise<any[]> {
 
         // Mapeamos los resultados para que tengan el formato deseado
         return buildings.map(building => ({
-            id: building.edificio.id,
+             // Utilizar el id de la relación UserEdificios
+            id: building.id,
             x: building.posicion_x,
             y: building.posicion_y,
             type: building.edificio.name, // Usar el nombre del edificio como tipo
+            costo: building.edificio.costo,
             ancho: building.edificio.ancho,
-            largo: building.edificio.largo
+            largo: building.edificio.largo,
+            nivel: building.nivel
+
         }));
     } catch (error) {
         console.error("Error fetching buildings by user ID:", error);
         throw error;
     }
 }
+
 
 export const getUEbyUserId = async (Id: string) => {
     const e = await prisma.userEdificios.findMany({
