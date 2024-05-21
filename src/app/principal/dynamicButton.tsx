@@ -1,7 +1,11 @@
 'use client'
+<<<<<<< HEAD
 import React, { useState, useEffect, useRef } from 'react';
 import MenuDesplegable from './menuDesplegable';
 import { GuardarEdificio, getUEbyUserId } from '../../services/userEdificios'; //faltan estos 2
+=======
+import React, { useState, useEffect } from 'react';
+>>>>>>> 2d119dee6fae267371d70084e02ff706d81f42ff
 import { getUser} from '@/services/users';
 import { getEdificios } from '../../services/edificios';
 import {recolectarRecursos } from '@/services/recursos';
@@ -26,6 +30,7 @@ const DynamicBuildings: React.FC = () => {
   const [pan, setPan] = useState(0);
   const [usuario, setUser] = useState('');
   
+<<<<<<< HEAD
 
   const mouseMoveRef = useRef<(e: MouseEvent) => void>(() => {});
   const mouseUpRef = useRef<() => void>(() => {});
@@ -41,6 +46,22 @@ const DynamicBuildings: React.FC = () => {
         console.error("Error fetching buildings:", error);
       });
   }, []);
+=======
+  useEffect(() => {
+    cargarUser();
+    const fetchData = async () => {
+      try {
+        const res = await getEdificios();
+        const names = res.map(edificio => edificio.name);
+        setBuildingNames(names);
+        console.log("buildingNames actualizado:", names);
+      } catch (error) {
+        console.error("Error al obtener nombres de edificios:", error);
+      }
+    };
+    fetchData();
+  }, []); // Esta función se ejecuta solo una vez al montar el componente
+>>>>>>> 2d119dee6fae267371d70084e02ff706d81f42ff
 
   const handleBuildClick = (x: number, y: number, buildingType: string, ancho: number, largo: number) => {
     const existingBuilding = buildings.find(building => building.x === x && building.y === y && building.type === buildingType);
@@ -161,6 +182,49 @@ const DynamicBuildings: React.FC = () => {
       setPiedra(user.piedra);
       setPan(user.pan);
     }
+<<<<<<< HEAD
+=======
+  };
+
+  const handleBuildingSelection = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedBuilding(event.target.value);
+  };
+
+  const handleDeleteBuilding = (index: number) => {
+    const filteredBuildings = buildings.filter((_, i) => i !== index);
+    setBuildings(filteredBuildings);
+  };
+
+  const handleCreateBuilding = (buildingName: string) => {
+    setSelectedBuilding(buildingName);
+    handleBuildClick({ clientX: window.innerWidth / 2, clientY: window.innerHeight / 2 } as React.MouseEvent<HTMLDivElement>);
+  };
+/*
+  const recolectarRecursosOld = async () => {
+    const recursos = await calcularRecursosGenerados();
+    console.log("Recursos generados:", recursos);
+    setMadera(madera + recursos);
+  }*/
+
+  const cargarUser = async () => {
+    const user = await getUser("66468410bdff2445e9bb57d6")
+    if(user != null){
+      setMadera(user.madera);
+      setPiedra(user.piedra);
+      setPan(user.pan);
+      setUser(user.username);
+    }
+  }
+  // Recolectar recursos (Por ahora el usuario esta hardcodeado, luego se debe obtener)
+  const recolectarRecursosUser = async () => {
+    const user = await getUser("66468410bdff2445e9bb57d6")
+    if(user != null){
+      await recolectarRecursos(user.id);
+      setMadera(user.madera);
+      setPiedra(user.piedra);
+      setPan(user.pan);
+    }
+>>>>>>> 2d119dee6fae267371d70084e02ff706d81f42ff
   }
   const cargarUser = async () => {
     const user = await getUser("6645239328fab0b97120439e")
