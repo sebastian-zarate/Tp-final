@@ -27,14 +27,18 @@ model Edificios {
 
 model Users{
   id String @id @default(auto()) @map("_id") @db.ObjectId
-  username String?
-  email String
+  username String @unique
+  email String @unique
   hash String?
   salt String?
   nivel Int
   madera Int
   piedra Int
   pan Int
+  unidadesDisponibles Int?
+  unidadesDeRecoleccion Int?
+  unidadesDeDefensa Int?
+  unidadesDeAtaque Int?
   userEdificios UserEdificios[]
 }
 model UserEdificios{

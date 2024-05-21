@@ -8,9 +8,11 @@ async function Signup(){
         "use server"
         const email =data.get('email') as string
         const password =data.get('password') as string
+        const username =data.get('username') as string
         const user = {
           email: email,
-          password: password
+          password: password,
+          username: username
         }
         await createUser(user)
         redirect('/login')        
@@ -23,7 +25,11 @@ async function Signup(){
         <div className=" flex flex-col mt-16 p-8 items-center justify-center bg-gray-400">
           
           <h1 className=" border-solid text-xl  text-white bg-gray-400">Signup</h1>
-          <form  action={createUs}>  
+          <form  action={createUs}> 
+          <label id= 'userLabel' htmlFor="username">Username</label>
+            <p/>
+            <input className="border px-2" type="text" id="username" name="username" required></input>
+            <p/> 
             <label id='emailLabel' htmlFor="email">Email</label>
             <p/>
             <input className="border px-2" type="email" id="email" name="email" required></input>
@@ -40,7 +46,7 @@ async function Signup(){
             <span  id="em_caract">El email es mayor a 5 caracteres?</span>
             <span id="em_simb">Es email incluye el simbolo "@"?</span>
             <span id="cont_caract">La contraseña es mayor a 8 caracteres?</span>
-            
+            <span id = "use_caract">El username es mayor a 3 caracteres?</span>
           </div>     
   
         </div>
