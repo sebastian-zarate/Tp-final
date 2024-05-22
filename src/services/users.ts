@@ -11,7 +11,7 @@ let cantPan = 800
 let cantPiedra= 600
 let unidadesDeTrabajo = 100
 
-export async function createUser(user: { email: string, password: string, username: string}) {
+export async function createUser(user: { email: string, password: string, username: string, profileImage: string }) {
   if (!user.email || user.email.length < 5 || !user.email.includes('@') ) {
     throw new Error('Invalid email');
   }
@@ -45,12 +45,13 @@ export async function createUser(user: { email: string, password: string, userna
     username: user.username,
     email: user.email,
     hash: hashPassword(salt + user.password),
+    profileImage: user.profileImage,
     piedra: cantPiedra,
     pan: cantPan,
     madera: cantMadera,
     nivel:1, 
     salt,
-    unidadesDeTrabajo
+    unidadesDeTrabajo: unidadesDeTrabajo
 }
 
   await prisma.users.create({ data: userWithHash });

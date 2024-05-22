@@ -33,40 +33,22 @@ model Users{
   id String @id @default(auto()) @map("_id") @db.ObjectId
   username String @unique
   email String @unique
-<<<<<<< HEAD
-  hash String
-  salt String
-=======
   hash String?
   salt String?
->>>>>>> 868adf736af5a9557ac2bc6759ed98f2dd202148
+  profileImage String?
   nivel Int
   madera Int
   piedra Int
   pan Int
-<<<<<<< HEAD
-  unidadesDeTrabajo Int
-=======
   unidadesDisponibles Int?
   unidadesDeRecoleccion Int?
   unidadesDeDefensa Int?
   unidadesDeAtaque Int?
->>>>>>> 868adf736af5a9557ac2bc6759ed98f2dd202148
   userEdificios UserEdificios[]
+  unidadesDeTrabajo Int
 }
 model UserEdificios{
-    id String @id @default(auto()) @map("_id") @db.ObjectId
-<<<<<<< HEAD
-    user Users @relation(fields: [userId], references: [id])
-    userId String @db.ObjectId
-    edificio Edificios @relation(fields: [edificioId], references: [id])
-    edificioId String @db.ObjectId
-    nivel Int?
-    posX Int?
-    posY Int?
-    trabajadores Int?
-    ultimaInteraccion DateTime?
-=======
+  id String @id @default(auto()) @map("_id") @db.ObjectId
   edificioId String @db.ObjectId
   posicion_x Int?
   posicion_y Int?
@@ -77,6 +59,5 @@ model UserEdificios{
   trabajadores Int?
 
   edificio Edificios @relation(fields: [edificioId], references: [id])
->>>>>>> 868adf736af5a9557ac2bc6759ed98f2dd202148
 }
 
