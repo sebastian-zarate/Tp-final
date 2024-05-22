@@ -1,18 +1,16 @@
-
+"use server"
 import { cookies } from "next/headers";
 import DynamicButton from "./dynamicButton";
 import { redirect } from "next/navigation";
 import { getUserByHash } from "@/services/users";
 import { verifyJWT } from "@/helpers/jwt";
 
-import { useEffect } from "react";
-
 async function Principal() {
     // Marca este componente como un componente del lado del cliente
    // useClient();
-
+  
    const cooki = cookies().get('user')?.value
-   console.log("cokieessssssssssssssssss",cooki)
+/*    console.log("cokieessssssssssssssssss",cooki) */
    if(!cooki) redirect("/login")
    let valor = cooki
    let user;
@@ -24,8 +22,6 @@ async function Principal() {
    if(!valor && user){
     redirect('/login')
    }
-   
-
 
     return (
         <div>
@@ -33,5 +29,6 @@ async function Principal() {
         </div>
     );
 }
+
 
 export default Principal;

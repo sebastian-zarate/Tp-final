@@ -1,10 +1,14 @@
 'use client'
 import React, { useState, useEffect, useRef } from 'react';
 import MenuDesplegable from './menuDesplegable';
-import {  getUEbyUserId } from '../../services/userEdificios'; //faltan estos 2
-import {  getUserById} from '@/services/users';
+import { GuardarEdificio, getBuildingsByUserId, builtEdificio } from '../../services/userEdificios';
+import { getUser, getUserByHash} from '@/services/users';
 import { getEdificios } from '../../services/edificios';
 import {recolectarRecursos } from '@/services/recursos';
+/* import { useCookies } from 'next-client-cookies'; */
+/* import { useCookies } from 'react-cookie'; */
+import { verifyJWT } from '@/helpers/jwt';
+import { Await } from 'react-router-dom';
 
 type Building = {
   x: number;
@@ -13,10 +17,12 @@ type Building = {
   ancho: number;
   largo: number;
   id: string;
+  nivel: number;
+  costo: number;
 };
 
-
 const DynamicBuildings: React.FC = () => {
+
   const [buildings, setBuildings] = useState<Building[]>([]);
   const [menuOpen, setMenuOpen] = useState(false);
   const [draggedBuildingIndex, setDraggedBuildingIndex] = useState<number | null>(null);
@@ -25,6 +31,21 @@ const DynamicBuildings: React.FC = () => {
   const [piedra, setPiedra] = useState(0);
   const [pan, setPan] = useState(0);
   const [usuario, setUser] = useState('');
+
+/*   const [cookies, setCookie, removeCookie] = useCookies(['user']); */
+/* if (typeof document !== 'undefined') {
+  // Tu código que utiliza document aquí
+  let cookieValue = document.cookie.replace(/(?:(?:^|.*;\s*)user\s*=\s*([^;]*).*$)|^.*$/, "$1");
+  console.log("ACA ESTAAAA LA COKIII--", cookieValue);
+  if (cookieValue) {
+      let hash = verifyJWT(cookieValue);
+      console.log("ACA ESTAAAA LA COKIII--", hash);
+  }
+} */
+ /*  async function usoCooki() {
+    let hash = verifyJWT(cookieValue)
+    return await getUserByHash(hash)
+  } */
   
 
   const mouseMoveRef = useRef<(e: MouseEvent) => void>(() => {});
@@ -33,7 +54,7 @@ const DynamicBuildings: React.FC = () => {
   useEffect(() => {
     const userId = 'tu_id_de_usuario'; // Reemplazar con el ID de usuario actual
     cargarUser();
-    getUEbyUserId(userId)
+    getBuildingsByUserId(userId)
       .then(fetchedBuildings => {
         setBuildings(fetchedBuildings);
       })
@@ -41,30 +62,31 @@ const DynamicBuildings: React.FC = () => {
         console.error("Error fetching buildings:", error);
       });
   }, []);
+  const handleBuildClick = async (id: string, x: number, y: number, buildingType: string, ancho: number, largo: number, nivel: number) => {
+    const newBuilding = { id, x, y, type: buildingType, ancho, largo, nivel, costo: 0};
+    const collisionIndex = getCollidedBuildingIndex(-1, x, y, ancho, largo);
 
-  const handleBuildClick = (x: number, y: number, buildingType: string, ancho: number, largo: number) => {
-    const existingBuilding = buildings.find(building => building.x === x && building.y === y && building.type === buildingType);
-  
-    if (!existingBuilding) {
-      // Crear un nuevo edificio con un ID único
-      const newBuilding = { x, y, type: buildingType, ancho, largo };
-      
-      // Actualizar el estado utilizando una función de callback para asegurar el valor actualizado de buildings
-      setBuildings(prevBuildings => {
-        const updatedBuildings = [...prevBuildings, newBuilding];
-        // Llamar a la función para guardar el edificio en la base de datos con el ID correcto
-        guardarEdificioEnBD(`${buildingType}-${updatedBuildings.length}`, x, y);
-        return updatedBuildings;
-      });
+    if (collisionIndex === -1) {
+      setBuildings([...buildings, newBuilding]);
+
+      // Llamar a la función para guardar el edificio en la base de datos
+      try {
+        await builtEdificio(id, x, y, nivel);
+        console.log('Edificio guardado exitosamente en la base de datos.');
+      } catch (error) {
+        console.error('Error al guardar el edificio en la base de datos:', error);
+      }
     } else {
       console.log('Ya hay un edificio del mismo tipo en estas coordenadas');
     }
   };
-  
 
   const handleMenuClick = () => {
     setMenuOpen(!menuOpen);
   };
+  
+
+
 
   const handleMouseDown = (index: number, event: React.MouseEvent<HTMLDivElement>) => {
     setDraggedBuildingIndex(index);
@@ -87,6 +109,7 @@ const DynamicBuildings: React.FC = () => {
     window.addEventListener('mousemove', mouseMoveRef.current);
     window.addEventListener('mouseup', mouseUpRef.current);
   };
+
   const handleBuildingMove = (index: number, newX: number, newY: number) => {
     setBuildings(prevBuildings => {
       const updatedBuildings = [...prevBuildings];
@@ -94,37 +117,33 @@ const DynamicBuildings: React.FC = () => {
       const maxHeight = 700; // Alto del área de construcción
       const buildingWidth = updatedBuildings[index].ancho; // Ancho de cada edificio
       const buildingHeight = updatedBuildings[index].largo; // Alto de cada edificio
-      const collisionMargin = 10; // Margen de colisión entre edificios
-  
+
       // Limitar las coordenadas x e y dentro del área de construcción
-      const clampedX = Math.min(Math.max(newX, 0), maxWidth - buildingWidth);
+      const clampedX = Math.min(Math.max(newX, 0)+20, maxWidth - buildingWidth);
       const clampedY = Math.min(Math.max(newY, 0), maxHeight - buildingHeight);
-  
+
       // Ajustar la posición si colisiona con otros edificios
-      const collidedBuildingIndex = getCollidedBuildingIndex(index, clampedX, clampedY, buildingWidth, buildingHeight);
-      if (collidedBuildingIndex !== -1) {
-        const collidedBuilding = updatedBuildings[collidedBuildingIndex];
+      const collisionIndex = getCollidedBuildingIndex(index, clampedX, clampedY, buildingWidth, buildingHeight);
+      if (collisionIndex !== -1) {
+        const collidedBuilding = updatedBuildings[collisionIndex];
         const deltaX = clampedX - collidedBuilding.x;
         const deltaY = clampedY - collidedBuilding.y;
-        
+
         // Calcular la dirección de desplazamiento y ajustar la posición del edificio
-        let newX = clampedX;
-        let newY = clampedY;
-  
+        let newClampedX = clampedX;
+        let newClampedY = clampedY;
+
         if (Math.abs(deltaX) < Math.abs(deltaY)) {
           // Desplazamiento horizontal
-          newX = collidedBuilding.x + (deltaX > 0 ? collidedBuilding.ancho + collisionMargin : -buildingWidth - collisionMargin);
+          newClampedX = collidedBuilding.x + (deltaX > 0 ? collidedBuilding.ancho : -buildingWidth);
         } else {
           // Desplazamiento vertical
-          newY = collidedBuilding.y + (deltaY > 0 ? collidedBuilding.largo + collisionMargin : -buildingHeight - collisionMargin);
+          newClampedY = collidedBuilding.y + (deltaY > 0 ? collidedBuilding.largo : -buildingHeight);
         }
-  
+
         // Limitar las coordenadas x e y dentro del área de construcción después del ajuste
-        newX = Math.min(Math.max(newX, 0), maxWidth - buildingWidth);
-        newY = Math.min(Math.max(newY, 0), maxHeight - buildingHeight);
-  
-        updatedBuildings[index].x = newX;
-        updatedBuildings[index].y = newY;
+        updatedBuildings[index].x = Math.min(Math.max(newClampedX, 0), maxWidth - buildingWidth);
+        updatedBuildings[index].y = Math.min(Math.max(newClampedY, 0), maxHeight - buildingHeight);
       } else {
         updatedBuildings[index].x = clampedX;
         updatedBuildings[index].y = clampedY;
@@ -133,26 +152,40 @@ const DynamicBuildings: React.FC = () => {
     });
   };
 
-  const handleCreateBuilding = (buildingName: string) => {
-    setSelectedBuilding(buildingName);
-    handleBuildClick({ clientX: window.innerWidth / 2, clientY: window.innerHeight / 2 } as React.MouseEvent<HTMLDivElement>);
+  const getCollidedBuildingIndex = (index: number, x: number, y: number, width: number, height: number) => {
+    return buildings.findIndex((building, i) =>
+      i !== index &&
+      x < building.x + building.ancho &&
+      x + width > building.x &&
+      y < building.y + building.largo &&
+      y + height > building.y
+    );
   };
-  const guardarEdificioEnBD = (id: string, posX: number, posY: number) => {
-    GuardarEdificio(id, posX, posY);
+
+
+  const guardarEdificioEnBD = (id: string, posX: number, posY: number, nivel : number) => {
+    GuardarEdificio(id, posX, posY, nivel);
   };
 
   const guardarAldea = () => {
-    buildings.forEach((building, index) => {
-      guardarEdificioEnBD(`${building.type}`, building.x, building.y);
+    buildings.forEach(building => {
+      guardarEdificioEnBD(building.id, building.x, building.y, building.nivel);
     });
   };
-  const recolectarRecursos = async () => {
-    const recursos = await calcularRecursosGenerados();
-    console.log("Recursos generados:", recursos);
-    setMadera(madera + recursos);
+  const recolectarRecursosUser = async () => {
+/*     "use server" */
+    const user = await getUser("6642cd26b1865f8de5c7b62b")
+/*   const user = await getUser(usoCooki().then(x => x?.id)) */
+    if(user != null){
+      await recolectarRecursos(user.id);
+      setMadera(user.madera);
+      setPiedra(user.piedra);
+      setPan(user.pan);
+    }
   }
   const cargarUser = async () => {
-    const user = await getUserById("6645239328fab0b97120439e")
+    const user = await getUser("6642cd26b1865f8de5c7b62b")
+/* const user = await getUser(usoCooki().then(x =>x?.id)) */
     if(user != null){
       setMadera(user.madera);
       setPiedra(user.piedra);
@@ -160,7 +193,9 @@ const DynamicBuildings: React.FC = () => {
       setUser(String (user.username));
     }
   }
-
+  const generarUnidades = async () => {
+    window.location.replace("/unidades")
+  }
   return (
     <div className="flex flex-col items-center justify-center w-screen h-screen bg-gray-900">
       <div className="absolute top-0 left-0 p-4 bg-red-500 hover:bg-blue-700 text-blue font-bold py-2 px-4 rounded">
@@ -168,7 +203,10 @@ const DynamicBuildings: React.FC = () => {
         <h3>Madera: {madera}</h3>
         <h3>Piedra: {piedra}</h3>
         <h3>Pan: {pan}</h3>
-        <button onClick={() => recolectarRecursosUser()}> Recolectar Recursos</button>
+        <button onClick={() => recolectarRecursosUser()}> Recolectar Recursos</button>        
+      </div>
+      <div className='absolute top-52 left-0 p-4 bg-red-500 hover:bg-blue-700 text-blue font-bold py-2 px-4 rounded'>
+        <button onClick={() => generarUnidades()}>Asignar Unidades</button>
       </div>
       <div style={{ width: '1200px', height: '700px' }} className="bg-green-500 flex items-center justify-center relative">
         {buildings.map((building, index) => (

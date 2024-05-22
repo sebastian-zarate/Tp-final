@@ -1,23 +1,24 @@
 
 import { verifyJWT } from "@/helpers/jwt";
 import { getEdificioById, getEdificioByName } from "@/services/edificios";
-import {  getUEbyUserIdEdIdNico, getUEbyUserIdRet, updateUE, updateUEunidades } from "@/services/userEdificios";
+import {  getUEbyUserIdEdIdNico, getUEbyUserIdRet, updateUEunidades } from "@/services/userEdificios";
 import {  getUserByHash, getUserById } from "@/services/users"
 /* import Cookies from 'universal-cookie' */
 import { redirect } from "next/navigation" 
 import { cookies } from "next/headers";
-/* import { useState } from "react"; */
+
 
 
 export default async function Unidades(){
 
     const cooki = cookies().get('user')?.value
-    console.log("cokieessssssssssssssssss",cooki)
+   /*  console.log("cokieessssssssssssssssss",cooki) */
     if(!cooki) redirect("/login")
     let valor = cooki
     let user;
     if (valor) {
         let hash = verifyJWT(valor)
+    /*     console.log("valor HASSSSSHHH_",hash) */
         user = await getUserByHash(hash)
 
     }
@@ -77,7 +78,7 @@ export default async function Unidades(){
             
             <div className=" bg-white w-8/12 flex flex-col  p-5 border m-5">
                 <h1 className="flex justify-center p-2 text-lg">Inventario de {user?.username}</h1>
-                <span>Aldeanos libres: {user?.username}</span>
+                <span>Aldeanos libres: {user?.unidadesDeTrabajo}</span>
                 <span> * madera disponible: {user?.madera}</span>
                 <span> * piedra disponible: {user?.piedra}</span>
                 <span> * pan disponible: {user?.pan}</span>

@@ -56,16 +56,27 @@ export async function createUser(user: { email: string, password: string, userna
   await prisma.users.create({ data: userWithHash });
 }
 
-export async function authenticateUser(user: {username:string, email: string, password: string }) {
+export async function authenticateUser(user: { dataUser: string, password: string }) {
 
-  const existing = await prisma.users.findFirst({
+  let u;
+  let existing = await prisma.users.findFirst({
     where: {
-      email: user.email
+      email: user.dataUser
     }
   })
-  if (!existing) {
-    throw new Error('User not found');
+  if(existing) u = await getUserByemail(existing?.email)
+  if(!existing){
+    existing = await prisma.users.findFirst({
+      where: {
+        email: user.dataUser
+      }
+    })
+    if(existing) u = await getUserByUserName(existing?.username)
+    if (!existing ) {
+      throw new Error('User not found');
+    }
   }
+  
   const hash = hashPassword(existing.salt + user.password);
   console.log("el hash nuevo: ", hash)
   console.log("el hash existente: ", existing.hash)
@@ -73,11 +84,9 @@ export async function authenticateUser(user: {username:string, email: string, pa
     throw new Error('Invalid password');
   }
   
-  cookies().set("user" , signJWT(hash) , { httpOnly: true,/*  sameSite: 'strict'  */})
- /*  cookies().set("userName" , user.username , { httpOnly: true, sameSite: 'strict' }) */
- 
+  cookies().set("user" , signJWT(hash) , { httpOnly: true, sameSite: 'strict' })
 
-  return { email: existing.email, username: existing.username };
+  return {u};
 }
 
 
@@ -89,7 +98,7 @@ export const getUserByUserName = async (userName:string) => {
   })        
   return users
 }
-export const getUserByemail = async (email?:string) => {
+export const getUserByemail = async (email:string) => {
   const users = await prisma.users.findFirst({
     where: {
       email: email
@@ -106,16 +115,6 @@ export const getUserByHash = async (hash:string) => {
   if(users)  return users
   /* else return false   */
 }
-//método que me devuelve un booleano de si existe el usuario
-export const getBoolUserExist = async (email:string) => {
-  const users = await prisma.users.findFirst({
-    where: {
-      email: email
-    }
-  })  
-  if(users)  return true
-  else return false    
-}
 export const getUserById= async (Id:string) => {
   const users = await prisma.users.findFirst({
     where: {
@@ -125,6 +124,16 @@ export const getUserById= async (Id:string) => {
   return users
   /* else return false   */
 }
+export async function getUser(Id: string) {
+  const u = await prisma.users.findUnique({
+    where: {
+      id: Id
+    }
+  })
+  console.log(`User ${Id}: `, u)
+  return u
+}
+
 export async function updateUser(Id: string, data: any) {
   const u = await prisma.users.update({
     where: {
