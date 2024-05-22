@@ -4,6 +4,7 @@ import { PrismaClient } from "@prisma/client"
 import { getSalt, hashPassword } from "../helpers/hashPassword";
 import { cookies } from "next/headers";
 import { signJWT } from "@/helpers/jwt";
+import { StyledString } from "next/dist/build/swc";
 
 const prisma = new PrismaClient()
 let cantMadera = 500
@@ -11,7 +12,7 @@ let cantPan = 800
 let cantPiedra= 600
 let unidadesDeTrabajo = 100
 
-export async function createUser(user: { email: string, password: string, username: string}) {
+export async function createUser(user: { email: string, password: string, username: string, profileImage: string}) {
   if (!user.email || user.email.length < 5 || !user.email.includes('@') ) {
     throw new Error('Invalid email');
   }
@@ -45,6 +46,7 @@ export async function createUser(user: { email: string, password: string, userna
     username: user.username,
     email: user.email,
     hash: hashPassword(salt + user.password),
+    profileImage: user.profileImage,
     piedra: cantPiedra,
     pan: cantPan,
     madera: cantMadera,
