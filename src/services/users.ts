@@ -159,3 +159,63 @@ export async function updateUser(Id: string, data: any) {
   console.log(`User ${Id} updated: `, u)
   return u
 }
+
+
+//------------------------------------------------------
+//--------------------------------------------
+/*
+export async function ObtenerEdificiosCreados(userId: string) {
+
+
+  try {
+    // Obtiene solo el campo "muro" para el usuario especificado
+    const edificio = await prisma.users.findUnique({
+      where: {
+        id: userId,
+      },
+      select: {
+        ayuntamiento: true,
+        maderera: true,
+        panaderia: true,
+        cantera: true,
+        canon: true,
+        muro: true,
+        bosque: true,
+        herreria: true,
+      },
+    });
+    return edificio;
+  } catch (error) {
+    console.error("Error obteniendo el edificio:", error);
+    throw error;
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+export async function modificarEdificiosCreados(userId: string, nuevoValorAyuntamiento: number, nuevoValorMaderera: number, nuevoValorPanaderia: number, nuevoValorCantera: number, nuevoValorCanon: number, nuevoValorMuro: number, nuevoValorBosque: number, nuevoValorHerreria: number) {
+  try {
+    const edificio = await prisma.users.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        ayuntamiento: nuevoValorAyuntamiento, // Reemplaza "nuevoValorAyuntamiento" con el nuevo valor que deseas establecer
+        maderera: nuevoValorMaderera, // Reemplaza "nuevoValorMaderera" con el nuevo valor que deseas establecer
+        panaderia: nuevoValorPanaderia, // Reemplaza "nuevoValorPanaderia" con el nuevo valor que deseas establecer
+        cantera: nuevoValorCantera, // Reemplaza "nuevoValorCantera" con el nuevo valor que deseas establecer
+        canon: nuevoValorCanon, // Reemplaza "nuevoValorCanon" con el nuevo valor que deseas establecer
+        muro: nuevoValorMuro, // Reemplaza "nuevoValorMuro" con el nuevo valor que deseas establecer
+        bosque: nuevoValorBosque, // Reemplaza "nuevoValorBosque" con el nuevo valor que deseas establecer
+        herreria: nuevoValorHerreria, // Reemplaza "nuevoValorHerreria" con el nuevo valor que deseas establecer
+      },
+    });
+    return edificio;
+  } catch (error) {
+    console.error("Error modificando los edificios:", error);
+    throw error;
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+*/

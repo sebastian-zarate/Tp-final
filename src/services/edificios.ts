@@ -1,48 +1,92 @@
 'use server'
 import { PrismaClient } from "@prisma/client"
 /* import { NextResponse } from "next/server" */
-
+import { ObjectId } from "mongodb";
 const prisma = new PrismaClient()
 
-  export const addEdificio = async (edificio:any) => {
+export const addEdificio = async (edificio: any, ancho: number, largo: number) => {
     const ed = await prisma.edificios.create({
-        data: edificio
-    })  
-    return ed
-}
-export const getEdificios = async () => {
-    const muchos = await prisma.edificios.findMany()  
-    console.log(muchos)        
-    return muchos
+        data: {
+            ...edificio,
+            ancho: ancho,
+            largo: largo
+        }
+    });  
+    return ed;
 }
 
-export const updateEdificioUltimaInteraccion = async (Id:any, UltimaInteraccion: any) => {
-await prisma.edificios.update({
-    where:{
-        id:Id
-    },
-    data:{
-        ultimaInteraccion: UltimaInteraccion
+// services/edificios.ts
+export async function getEdificios(): Promise<any[]> {
+    try {
+        const edificios = await prisma.edificios.findMany({
+            select: {
+                id: true,
+                name: true,
+                ancho: true,
+                largo: true,
+                cantidad: true,
+                // otros campos que necesites
+            },
+        });
+        return edificios;
+    } catch (error) {
+        console.error("Error fetching edificios:", error);
+        throw error;
     }
-})
 }
+
+//        -----------------------------------------------
+export const updateEdificioUltimaInteraccion = async (
+    Id: any,
+    UltimaInteraccion: any,
+    ancho?: number,
+    largo?: number,
+    costo?: number,
+    descripcion?: string
+  ) => {
+    await prisma.edificios.update({
+      where: {
+        id: Id
+      },
+      data: {
+        nivel: 1,
+        ancho: ancho,
+        largo: largo,
+        costo: costo,
+        descripcion: descripcion
+      }
+    });
+  };
+  
+
 
 export const deleteEdificios = async (Id:string) => {
     await prisma.edificios.delete({
+
         where:{
             id:Id
         }
     })    
+     console.log('El edificio ha sido eliminado exitosamente.');
     return true
-}
-export const getOneEdificio = async (Id:string) => {
-    const e = await prisma.edificios.findUnique({
-        where:{
-            id:Id
+};
+export const getOneEdificio = async (Id: string) => {
+    try {
+        if (!ObjectId.isValid(Id)) {
+            throw new Error("Invalid Id. It must be a valid ObjectID.");
         }
-    })  
-    return e
-}
+
+        const e = await prisma.edificios.findUnique({
+            where: {
+                id: Id
+            }
+        });
+        return e;
+    } catch (error) {
+        console.error("Error retrieving edificio:", error);
+        throw new Error("Error retrieving edificio");
+    }
+};
 /* export const getRecursos = async () => {
     const muchos = await prisma.recursos.findMany()  
     console.log(muchos)        

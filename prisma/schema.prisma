@@ -21,6 +21,9 @@ model Edificios {
   largo Int?
   nivel Int?
   costo Int?
+  //--------------------------------------------------------------------------------------------------
+  cantidad  Int?// canatidad de capacidad de contruccion de unidades de este tipo de edificio        |
+  //--------------------------------------------------------------------------------------------------
   descripcion String?
   recursoPorMinuto Int?
   tipoRecurso String?
@@ -39,10 +42,29 @@ model Users{
   madera Int
   piedra Int
   pan Int
+  //-------------------------------------------------------------------------------------------
+  //-------------------------------------------------------------------------------------------
   unidadesDisponibles Int?
   unidadesDeRecoleccion Int?
   unidadesDeDefensa Int?
   unidadesDeAtaque Int?
+
+
+  canon Int?
+  ayuntamiento Int?
+  panaderia Int?
+  cantera Int?
+  maderera Int?
+  herreria Int?
+  muro Int?
+  bosque Int?
+
+//-----------------------------------------------
+
+
+
+
+
   userEdificios UserEdificios[]
 }
 model UserEdificios{
@@ -55,6 +77,7 @@ model UserEdificios{
   ultimaInteraccion DateTime?
   nivel Int?
   trabajadores Int?
+  
 
   edificio Edificios @relation(fields: [edificioId], references: [id])
 }
