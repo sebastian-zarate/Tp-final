@@ -46,7 +46,8 @@ const DynamicBuildings: React.FC = () => {
     let hash = verifyJWT(cookieValue)
     return await getUserByHash(hash)
   } */
-  
+  let cookieValue = document.cookie.replace(/(?:(?:^|.*;\s*)user\s*=\s*([^;]*).*$)|^.*$/, "$1");
+  console.log("ACA ESTAAAA LA COKIII--", cookieValue);
 
   const mouseMoveRef = useRef<(e: MouseEvent) => void>(() => {});
   const mouseUpRef = useRef<() => void>(() => {});

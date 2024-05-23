@@ -34,16 +34,33 @@ model Users{
   username String @unique
   email String @unique
   hash String?
+  profileImage String?
   salt String?
+<<<<<<< HEAD
+=======
+  profileImage String?
+>>>>>>> 83b138d2272cfbb2b538c0992b1f3d1b83fcd4f2
   nivel Int
   madera Int
   piedra Int
   pan Int
+<<<<<<< HEAD
   unidadesDeTrabajo Int?
+=======
+  unidadesDisponibles Int?
+  unidadesDeRecoleccion Int?
+  unidadesDeDefensa Int?
+  unidadesDeAtaque Int?
+>>>>>>> 83b138d2272cfbb2b538c0992b1f3d1b83fcd4f2
   userEdificios UserEdificios[]
+  unidadesDeTrabajo Int
 }
 model UserEdificios{
+<<<<<<< HEAD
     id String @id @default(auto()) @map("_id") @db.ObjectId
+=======
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+>>>>>>> 83b138d2272cfbb2b538c0992b1f3d1b83fcd4f2
   edificioId String @db.ObjectId
   posicion_x Int?
   posicion_y Int?
