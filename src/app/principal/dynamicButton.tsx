@@ -222,12 +222,7 @@ const handleBuildingMove = (index: number, newX: number, newY: number) => {
         Menú
       </button>
       {menuOpen && <MenuDesplegable onBuildClick={handleBuildClick} />}
-      <button
-        className="absolute bottom-4 left-4 bg-blue-500 hover:bg-white text-white font-bold py-2 px-4 rounded"
-        onClick={guardarAldea}
-      >
-        Guardar Aldea
-      </button>
+     
     </div>
   );
 };
