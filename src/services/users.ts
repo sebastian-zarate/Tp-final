@@ -12,11 +12,7 @@ let cantPan = 800
 let cantPiedra= 600
 let unidadesDeTrabajo = 100
 
-<<<<<<< HEAD
 export async function createUser(user: { email: string, password: string, username: string, profileImage: string}) {
-=======
-export async function createUser(user: { email: string, password: string, username: string, profileImage: string }) {
->>>>>>> 83b138d2272cfbb2b538c0992b1f3d1b83fcd4f2
   if (!user.email || user.email.length < 5 || !user.email.includes('@') ) {
     throw new Error('Invalid email');
   }

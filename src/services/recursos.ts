@@ -1,5 +1,5 @@
 "use server"
-import { Edificios } from "@prisma/client";
+/* import { Edificios } from "@prisma/client"; */
 import { getUser, updateUser } from "./users";
 import { getOneEdificio, updateEdificioUltimaInteraccion } from "./edificios";
 import {getUEbyUserId, getUEbyUserIdEdId, updateUE} from "./userEdificios"
