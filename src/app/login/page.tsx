@@ -12,9 +12,10 @@ async function Login(){
           email: data.get('email') as string,
           password: data.get('password') as string
         }
-        const cooki = cookies().get('user')?.value
-        if(!cooki) await authenticateUser(user)  
-        else{ redirect('/principal')}
+        const validaU = await authenticateUser(user)  
+
+        if(validaU) redirect('/principal')
+   
 
 
     }

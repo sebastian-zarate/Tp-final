@@ -3,8 +3,9 @@ import { PrismaClient } from "@prisma/client"
 
 import { getSalt, hashPassword } from "../helpers/hashPassword";
 import { cookies } from "next/headers";
-import { signJWT } from "@/helpers/jwt";
+import { signJWT, verifyJWT } from "@/helpers/jwt";
 import { StyledString } from "next/dist/build/swc";
+import { redirect } from "next/dist/server/api-utils";
 
 const prisma = new PrismaClient()
 let cantMadera = 500
@@ -60,20 +61,20 @@ export async function createUser(user: { email: string, password: string, userna
 
 export async function authenticateUser(user: { dataUser: string, password: string }) {
 
-  let u;
+  let userTemp;
   let existing = await prisma.users.findFirst({
     where: {
       email: user.dataUser
     }
   })
-  if(existing) u = await getUserByemail(existing?.email)
+  if(existing) userTemp = await getUserByemail(existing?.email)
   if(!existing){
     existing = await prisma.users.findFirst({
       where: {
         email: user.dataUser
       }
     })
-    if(existing) u = await getUserByUserName(existing?.username)
+    if(existing) userTemp = await getUserByUserName(existing?.username)
     if (!existing ) {
       throw new Error('User not found');
     }
@@ -88,7 +89,7 @@ export async function authenticateUser(user: { dataUser: string, password: strin
   
   cookies().set("user" , signJWT(hash) , { httpOnly: true, sameSite: 'strict' })
 
-  return {u};
+  return {userTemp};
 }
 
 
@@ -108,7 +109,7 @@ export const getUserByemail = async (email:string) => {
   })   
    return users
 }
-export const getUserByHash = async (hash:string) => {
+export const getUserByHash = async (hash?:string) => {
   const users = await prisma.users.findFirst({
     where: {
       hash: hash
@@ -146,3 +147,11 @@ export async function updateUser(Id: string, data: any) {
   console.log(`User ${Id} updated: `, u)
   return u
 }
+
+export async function getCooki() {
+  const cooki = cookies().get('user')?.value
+  let hash = verifyJWT(cooki)
+  const user = getUserByHash(hash)
+  return user
+}
+

@@ -2,7 +2,7 @@
 import { cookies } from "next/headers";
 import DynamicButton from "./dynamicButton";
 import { redirect } from "next/navigation";
-import { getUserByHash } from "@/services/users";
+import { getCooki, getUserByHash } from "@/services/users";
 import { verifyJWT } from "@/helpers/jwt";
 
 async function Principal() {
@@ -10,7 +10,6 @@ async function Principal() {
    // useClient();
   
    const cooki = cookies().get('user')?.value
-/*    console.log("cokieessssssssssssssssss",cooki) */
    if(!cooki) redirect("/login")
    let valor = cooki
    let user;
@@ -19,9 +18,10 @@ async function Principal() {
        user = await getUserByHash(hash)
 
    }
-   if(!valor && user){
+ /*   const user = getCooki()
+   if(!user){
     redirect('/login')
-   }
+   } */
 
     return (
         <div>

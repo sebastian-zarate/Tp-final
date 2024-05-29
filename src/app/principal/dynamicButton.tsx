@@ -2,11 +2,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import MenuDesplegable from './menuDesplegable';
 import { GuardarEdificio, getBuildingsByUserId, builtEdificio } from '../../services/userEdificios';
-import { getUser, getUserByHash} from '@/services/users';
+import { getCooki, getUser, getUserByHash} from '@/services/users';
 import { getEdificios } from '../../services/edificios';
 import {recolectarRecursos } from '@/services/recursos';
 /* import { useCookies } from 'next-client-cookies'; */
-/* import { useCookies } from 'react-cookie'; */
+import { useCookies } from 'react-cookie';
 import { verifyJWT } from '@/helpers/jwt';
 import { Await } from 'react-router-dom';
 
@@ -32,22 +32,7 @@ const DynamicBuildings: React.FC = () => {
   const [pan, setPan] = useState(0);
   const [usuario, setUser] = useState('');
 
-/*   const [cookies, setCookie, removeCookie] = useCookies(['user']); */
-/* if (typeof document !== 'undefined') {
-  // Tu código que utiliza document aquí
-  let cookieValue = document.cookie.replace(/(?:(?:^|.*;\s*)user\s*=\s*([^;]*).*$)|^.*$/, "$1");
-  console.log("ACA ESTAAAA LA COKIII--", cookieValue);
-  if (cookieValue) {
-      let hash = verifyJWT(cookieValue);
-      console.log("ACA ESTAAAA LA COKIII--", hash);
-  }
-} */
- /*  async function usoCooki() {
-    let hash = verifyJWT(cookieValue)
-    return await getUserByHash(hash)
-  } */
-  let cookieValue = document.cookie.replace(/(?:(?:^|.*;\s*)user\s*=\s*([^;]*).*$)|^.*$/, "$1");
-  console.log("ACA ESTAAAA LA COKIII--", cookieValue);
+
 
   const mouseMoveRef = useRef<(e: MouseEvent) => void>(() => {});
   const mouseUpRef = useRef<() => void>(() => {});
@@ -88,7 +73,13 @@ const DynamicBuildings: React.FC = () => {
   
 
 
-
+  async function usoCooki() {
+    const cookieValue = await getCooki()
+  /*   let hash = verifyJWT(cookieValue)  */
+/*      return await getUserByHash(cookieValue) */
+    return cookieValue
+  }
+  /* console.log(usoCooki().then(x=>x)) */
   const handleMouseDown = (index: number, event: React.MouseEvent<HTMLDivElement>) => {
     setDraggedBuildingIndex(index);
     const startX = event.clientX;
@@ -175,8 +166,11 @@ const DynamicBuildings: React.FC = () => {
   };
   const recolectarRecursosUser = async () => {
 /*     "use server" */
-    const user = await getUser("6642cd26b1865f8de5c7b62b")
-/*   const user = await getUser(usoCooki().then(x => x?.id)) */
+     usoCooki().then((resultado) => {
+      console.log("RESULTADOOOO", resultado?.username)
+     })
+/*     const user = await getUser("6642cd26b1865f8de5c7b62b") */
+    const user = await usoCooki().then((resultado)=> resultado)
     if(user != null){
       await recolectarRecursos(user.id);
       setMadera(user.madera);
@@ -185,7 +179,7 @@ const DynamicBuildings: React.FC = () => {
     }
   }
   const cargarUser = async () => {
-    const user = await getUser("6642cd26b1865f8de5c7b62b")
+    const user = await usoCooki().then((resultado)=> resultado)
 /* const user = await getUser(usoCooki().then(x =>x?.id)) */
     if(user != null){
       setMadera(user.madera);

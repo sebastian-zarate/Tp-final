@@ -2,7 +2,7 @@
 import { verifyJWT } from "@/helpers/jwt";
 import { getEdificioById, getEdificioByName } from "@/services/edificios";
 import {  getUEbyUserIdEdIdNico, getUEbyUserIdRet, updateUEunidades } from "@/services/userEdificios";
-import {  getUserByHash, getUserById } from "@/services/users"
+import {  getCooki, getUserByHash, getUserById } from "@/services/users"
 /* import Cookies from 'universal-cookie' */
 import { redirect } from "next/navigation" 
 import { cookies } from "next/headers";
@@ -11,21 +11,23 @@ import { cookies } from "next/headers";
 
 export default async function Unidades(){
 
-    const cooki = cookies().get('user')?.value
-   /*  console.log("cokieessssssssssssssssss",cooki) */
+/* /*     const cooki = cookies().get('user')?.value
     if(!cooki) redirect("/login")
     let valor = cooki
-    let user;
+    let user:any;
     if (valor) {
         let hash = verifyJWT(valor)
-    /*     console.log("valor HASSSSSHHH_",hash) */
-        user = await getUserByHash(hash)
+        if(hash)user = await getUserByHash(hash)
 
     }
     if(!valor && user){
      redirect('/login')
+    } */
+/*     user = await getUserById(user?.id)  */
+    const user = getCooki()
+    if(!user){
+     redirect('/login')
     }
-    user = await getUserById(user?.id)
     const list = await getUEbyUserIdRet(user?.id)
 
 
@@ -38,8 +40,8 @@ export default async function Unidades(){
     // Función para manejar la selección
     async function updateEdifUser(data: FormData) {
         "use server"
-      let id_edif = await getEdificioByName(data.get('edificios') as string).then(x => x?.id)
-      let userEdif = await getUEbyUserIdEdIdNico(user?.id, id_edif)
+      let id_edif = await getEdificioByName(data.get('edificios') as string)
+      let userEdif = await getUEbyUserIdEdIdNico(user?.id, id_edif?.id)
     
       let unidades = data.get('unidadesEdif')
       let id_EU = userEdif?.id
@@ -54,7 +56,7 @@ export default async function Unidades(){
 
       if(id_EU) {
         console.log("acualizo doc------")
-        await updateUEunidades(id_EU, parseInt(unidades))
+        await updateUEunidades(id_EU, parseInt(unidades?))
         }
         
     }
