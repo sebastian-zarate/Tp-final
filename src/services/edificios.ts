@@ -24,7 +24,7 @@ export async function getEdificios(): Promise<any[]> {
                 name: true,
                 ancho: true,
                 largo: true,
-                cantidad: true,
+             
                 // otros campos que necesites
             },
         });

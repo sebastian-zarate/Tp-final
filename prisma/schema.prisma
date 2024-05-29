@@ -44,27 +44,14 @@ model Users{
   pan Int
   //-------------------------------------------------------------------------------------------
   //-------------------------------------------------------------------------------------------
-  unidadesDisponibles Int?
-  unidadesDeRecoleccion Int?
-  unidadesDeDefensa Int?
-  unidadesDeAtaque Int?
 
-
-  canon Int?
-  ayuntamiento Int?
-  panaderia Int?
-  cantera Int?
-  maderera Int?
-  herreria Int?
-  muro Int?
-  bosque Int?
 
 //-----------------------------------------------
 
 
 
 
-
+  nivelEdificios    nivelEdificio[]
   userEdificios UserEdificios[]
 }
 model UserEdificios{
@@ -82,3 +69,19 @@ model UserEdificios{
   edificio Edificios @relation(fields: [edificioId], references: [id])
 }
 
+model nivelEdificio {
+  id                String           @id @default(auto()) @map("_id") @db.ObjectId
+  nivel             Int
+  userId            String           @db.ObjectId
+  user              Users            @relation(fields: [userId], references: [id])
+  canon             Int?
+  maderera          Int?
+  panaderia         Int?
+  ayuntamiento      Int?
+  cantera           Int?
+  muros             Int?
+  bosque            Int?
+  herreria          Int?
+  // Define the self-relation with the same model
+ 
+}

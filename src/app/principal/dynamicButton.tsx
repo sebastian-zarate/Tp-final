@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef,useMemo } from 'react';
 import MenuDesplegable from './menuDesplegable';
 import { GuardarEdificio, getBuildingsByUserId, builtEdificio  } from '../../services/userEdificios';
 import { getUser} from '@/services/users';
@@ -16,7 +16,6 @@ type Building = {
   id: string;
 };
 
-
 const DynamicBuildings: React.FC = () => {
   const [buildings, setBuildings] = useState<Building[]>([]);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -25,15 +24,22 @@ const DynamicBuildings: React.FC = () => {
   const [madera, setMadera] = useState(0);
   const [piedra, setPiedra] = useState(0);
   const [pan, setPan] = useState(0);
-  const [usuario, setUser] = useState('');
-  
+  const [usuario, setUser] = useState<string | null>(null);
 
   const mouseMoveRef = useRef<(e: MouseEvent) => void>(() => {});
   const mouseUpRef = useRef<() => void>(() => {});
 
   useEffect(() => {
-    const userId = 'tu_id_de_usuario'; // Reemplazar con el ID de usuario actual
-    cargarUser();
+    const userId = '6645239328fab0b97120439e'; // Reemplazar con el ID de usuario actual
+    const fetchUser = async () => {
+      const user = await getUser(userId);
+      if (user) {
+        setUser(user.username);
+        setMadera(user.madera);
+        setPiedra(user.piedra);
+        setPan(user.pan);
+      }
+    };
     getBuildingsByUserId(userId)
       .then(fetchedBuildings => {
         setBuildings(fetchedBuildings);
@@ -41,6 +47,7 @@ const DynamicBuildings: React.FC = () => {
       .catch(error => {
         console.error("Error fetching buildings:", error);
       });
+    fetchUser();
   }, []);
 
   const handleBuildClick = async (id: string, x: number, y: number, buildingType: string, ancho: number, largo: number ) => {
@@ -52,9 +59,10 @@ const DynamicBuildings: React.FC = () => {
 
       // Llamar a la función para guardar el edificio en la base de datos
       try {
-        await  builtEdificio(id, x, y);
+        await  builtEdificio(id, x, y,1);
         
         console.log('Edificio guardado exitosamente en la base de datos.');
+        window.location.reload();
       } catch (error) {
         console.error('Error al guardar el edificio en la base de datos:', error);
       }
@@ -91,52 +99,51 @@ const DynamicBuildings: React.FC = () => {
     window.addEventListener('mousemove', mouseMoveRef.current);
     window.addEventListener('mouseup', mouseUpRef.current);
   };
-  const handleBuildingMove = (index: number, newX: number, newY: number) => {
-    setBuildings(prevBuildings => {
-      const updatedBuildings = [...prevBuildings];
-      const maxWidth = 1200; // Ancho del área de construcción
-      const maxHeight = 700; // Alto del área de construcción
-      const buildingWidth = updatedBuildings[index].ancho; // Ancho de cada edificio
-      const buildingHeight = updatedBuildings[index].largo; // Alto de cada edificio
-      const collisionMargin = 10; // Margen de colisión entre edificios
   
-      // Limitar las coordenadas x e y dentro del área de construcción
-      const clampedX = Math.min(Math.max(newX, 0), maxWidth - buildingWidth);
-      const clampedY = Math.min(Math.max(newY, 0), maxHeight - buildingHeight);
-  
-      // Ajustar la posición si colisiona con otros edificios
-      const collidedBuildingIndex = getCollidedBuildingIndex(index, clampedX, clampedY, buildingWidth, buildingHeight);
-      if (collidedBuildingIndex !== -1) {
-        const collidedBuilding = updatedBuildings[collidedBuildingIndex];
-        const deltaX = clampedX - collidedBuilding.x;
-        const deltaY = clampedY - collidedBuilding.y;
-        
-        // Calcular la dirección de desplazamiento y ajustar la posición del edificio
-        let newX = clampedX;
-        let newY = clampedY;
-  
-        if (Math.abs(deltaX) < Math.abs(deltaY)) {
-          // Desplazamiento horizontal
-          newX = collidedBuilding.x + (deltaX > 0 ? collidedBuilding.ancho + collisionMargin : -buildingWidth - collisionMargin);
-        } else {
-          // Desplazamiento vertical
-          newY = collidedBuilding.y + (deltaY > 0 ? collidedBuilding.largo + collisionMargin : -buildingHeight - collisionMargin);
-        }
-  
-        // Limitar las coordenadas x e y dentro del área de construcción después del ajuste
-        newX = Math.min(Math.max(newX, 0), maxWidth - buildingWidth);
-        newY = Math.min(Math.max(newY, 0), maxHeight - buildingHeight);
-  
-        updatedBuildings[index].x = newX;
-        updatedBuildings[index].y = newY;
-      } else {
-        updatedBuildings[index].x = clampedX;
-        updatedBuildings[index].y = clampedY;
+  let timeoutId: ReturnType<typeof setTimeout> | null = null;
+
+  //let timeoutId: NodeJS.Timeout | null = null;
+
+const handleBuildingMove = (index: number, newX: number, newY: number) => {
+  setBuildings(prevBuildings => {
+    const updatedBuildings = [...prevBuildings];
+    const maxWidth = 1170; // Ancho del área de construcción
+    const maxHeight = 700; // Alto del área de construcción
+    const buildingWidth = updatedBuildings[index].ancho; // Ancho de cada edificio
+    const buildingHeight = updatedBuildings[index].largo; // Alto de cada edificio
+    const collisionMargin = 10; // Margen de colisión entre edificios
+
+    // Limitar las coordenadas x e y dentro del área de construcción
+    const clampedX = Math.min(Math.max(newX, 0) + 20, maxWidth - buildingWidth);
+    const clampedY = Math.min(Math.max(newY, 0), maxHeight - buildingHeight);
+
+    // Ajustar la posición si colisiona con otros edificios
+    const collidedBuildingIndex = getCollidedBuildingIndex(index, clampedX, clampedY, buildingWidth, buildingHeight);
+    if (collidedBuildingIndex !== -1) {
+      // Lógica de manejo de colisiones...
+    } else {
+      // Actualizar la posición del edificio directamente
+      updatedBuildings[index].x = clampedX;
+      updatedBuildings[index].y = clampedY;
+
+      // Cancelar la solicitud anterior si existe
+      if (timeoutId !== null) {
+        clearTimeout(timeoutId);
       }
-      return updatedBuildings;
-    });
-  };
-  
+
+      // Programar una nueva solicitud después de 500 ms
+      timeoutId = setTimeout(() => {
+        guardarEdificioEnBD(updatedBuildings[index].id, clampedX, clampedY);
+        
+        timeoutId = null;
+      }, 500); // Ajusta este valor según tus necesidades
+    }
+
+    return updatedBuildings;
+  });
+};
+
+ 
   
   const getCollidedBuildingIndex = (index: number, x: number, y: number, width: number, height: number) => {
     const updatedBuildings = buildings.filter((_, i) => i !== index); // Excluir el edificio actual
@@ -149,7 +156,7 @@ const DynamicBuildings: React.FC = () => {
   };
 
   const guardarEdificioEnBD = (id: string, posX: number, posY: number) => {
-    GuardarEdificio(id, posX, posY,2);
+    GuardarEdificio(id, posX, posY, 2);
   };
 
   const guardarAldea = () => {

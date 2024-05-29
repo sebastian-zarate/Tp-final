@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { getEdificios } from '../../services/edificios';
-
+import { getNivelUser } from '../../services/nivelUser';
 interface Props {
   onBuildClick: (id: string, x: number, y: number, buildingType: string, ancho: number, largo: number) => void;
 }
 
 const MenuDesplegable: React.FC<Props> = ({ onBuildClick }) => {
-  const [edificios, setEdificios] = useState<Edificio[]>([]);
+  const [edificios, setEdificios] = useState<any[]>([]);
+  
+
 
   useEffect(() => {
     fetchBuildingData();
@@ -14,12 +16,21 @@ const MenuDesplegable: React.FC<Props> = ({ onBuildClick }) => {
 
   async function fetchBuildingData() {
     try {
+      // Obtener los datos de los edificios desde la base de datos
+    
+       
       const edificiosData = await getEdificios();
       setEdificios(edificiosData);
     } catch (error) {
       console.error("Error al obtener datos de edificios:", error);
     }
   };
+
+
+
+
+
+
 
   // Función para llamar a la función onBuildClick con el tipo de edificio seleccionado
   const handleBuildSelection = (buildingType: string) => {
