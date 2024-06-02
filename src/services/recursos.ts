@@ -2,11 +2,6 @@
 import { getUser, updateUser } from "./users";
 import { getOneEdificio, updateEdificioUltimaInteraccion } from "./edificios";
 import { getUEbyUserId, getUEbyUserIdEdId, updateUE } from "./userEdificios"
-<<<<<<< HEAD
-=======
-import { Console } from "console";
-import { get } from "http";
->>>>>>> 2db5b613bc7cf8a0ee304594ef0143139d2340a9
 
 
 export async function calcularTiempo(date: any) {
@@ -76,11 +71,7 @@ export async function recolectarRecursos(userId: string) {
                 //sumar el pan extra por la cantidad de trabajadores (1% mas por trabajador)
                 panEdificio = Math.ceil(panEdificio * (1 + (Number(userEdificio.trabajadores) * 0.01)))
                 pan += panEdificio
-<<<<<<< HEAD
                 await updateUE(userEdificio.id, { ultimaInteraccion: new Date() })
-=======
-                // await updateUE(userEdificio.id, {ultimaInteraccion: new Date()})
->>>>>>> 2db5b613bc7cf8a0ee304594ef0143139d2340a9
                 console.log(`userId:${user.id}/ edificioId:${userEdificio.id} / tipoRecurso: ${edificio.tipoRecurso} / recursoGenerado: ${panEdificio} / minutos: ${minutos} / trabajadores: ${userEdificio.trabajadores}`)
                 // await updateUser(userId, {pan: panEdificio});
 
@@ -96,7 +87,6 @@ export async function recolectarRecursos(userId: string) {
     console.log("Pan TOTALLLLLLLLLLLLLLLLLLLLLLLLLLL: ", pan);
     //actualizar el usuario con los recursos generados
     await updateUser(userId, { madera: Number(user?.madera || 0) + madera, piedra: Number(user?.piedra || 0) + piedra, pan: Number(user?.pan || 0) + pan });
-<<<<<<< HEAD
 }
 
 // METODO PARA CALCULAR LA MADERA POR SEGUNDO
@@ -149,6 +139,4 @@ export async function calcularPan(userId: string){
     }
    // console.log("pan por segundo TOTAL: ", panPorSegundo)
     return panPorSegundo
-=======
->>>>>>> 2db5b613bc7cf8a0ee304594ef0143139d2340a9
 }
