@@ -137,6 +137,7 @@ export async function getUser(Id: string) {
   return u
 }
 
+//actualizo user
 export async function updateUser(Id: string, data: any) {
   const u = await prisma.users.update({
     where: {
@@ -148,9 +149,13 @@ export async function updateUser(Id: string, data: any) {
   return u
 }
 
-export async function getCooki() {
+//Devuelve el user en base a la cookie
+export async function getUserByCooki() {
+  //obtengo el valor de la cookie user
   const cooki = cookies().get('user')?.value
+  //se obtiene el hash de traducir el token
   let hash = verifyJWT(cooki)
+  //se obtiene el user por el hash
   const user = getUserByHash(hash)
   return user
 }

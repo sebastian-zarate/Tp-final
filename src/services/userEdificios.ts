@@ -1,6 +1,8 @@
 'use server'
 import { PrismaClient } from "@prisma/client"
 import { getUserById } from "./users"
+import { getEdificioById } from "./edificios"
+import { error } from "console"
 
 const prisma = new PrismaClient()
 
@@ -194,36 +196,51 @@ export const getUEbyUserIdEdIdNico = async (userId: string, edificioId: string) 
     return e
 }
 
-export const updateUEunidades= async (Id: string, data: any) => {
+export const updateUEunidades= async (Id: string, unidades: any, panXunidad:any) => {
+
+    //obtengo el doc userEdificio
     const ue = await prisma.userEdificios.findFirst({
         where:{
             id:Id
         }
     })
-    const us_id = getUserById(ue?.userId).then(x=> x?.id)
-    const usuario = await prisma.users.findFirst({
-        where:{
-            id:us_id
-        }
-    })
-    let resultado = (usuario?.unidadesDeTrabajo) - data
+    //obtengo el id del user que se encuentra en el documento userEdificio
+    const us_id = ue?.userId
+    const usuario = await getUserById(us_id)
+    //cantidad de unidades de trabajo que le quedan al user
+    let resultadoUnidades = (usuario?.unidadesDeTrabajo) - unidades
+
+    if(resultadoUnidades < 0) return error("Unidades insuficientes")
+
+    let panUser = usuario?.pan - (panXunidad * unidades)
+
+    if(panUser < 0) return error("Pan insuficiente para alimentar a las unidades")
+
+    let unidadesEdif = unidades + (ue?.trabajadores)
+
+    //actualizo el documento userEdificio
     const e = await prisma.userEdificios.update({
         where: {
             id: Id
         },
         data: {
-           trabajadores: data
+           trabajadores: unidadesEdif
         }
     })
+    //actualizo las unidades de trabajo restantes del usuario, y el pan restante del usuario
     await prisma.users.update({
         where:{
             id:usuario?.id
         },
         data: {
-            unidadesDeTrabajo:resultado
+            unidadesDeTrabajo:resultadoUnidades,
+            pan:panUser
         }
     })
-    console.log(`User Edificio ${Id} updated: `, e)
+    let edif = await getEdificioById(ue?.edificioId).then(x=>x)
+    console.log("------------------Después de actualizar-------------------------------")
+    console.log(`Edificio: ${edif?.name}- trabajadores: ${ue?.trabajadores} ` )
+    console.log(`User: ${usuario?.id}- trabajadores: ${usuario?.unidadesDeTrabajo} ` )
     return e
 }
 

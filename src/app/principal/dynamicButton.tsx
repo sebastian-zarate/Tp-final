@@ -1,14 +1,16 @@
 'use client'
 import React, { useState, useEffect, useRef } from 'react';
 import MenuDesplegable from './menuDesplegable';
-import { GuardarEdificio, getBuildingsByUserId, builtEdificio } from '../../services/userEdificios';
-import { getCooki, getUser, getUserByHash} from '@/services/users';
+import menuAsignar from './menuAsignar';
+import { GuardarEdificio, getBuildingsByUserId, builtEdificio, getUEbyUserId } from '../../services/userEdificios';
+import { getUserByCooki, getUser, getUserByHash} from '@/services/users';
 import { getEdificios } from '../../services/edificios';
 import {recolectarRecursos } from '@/services/recursos';
 /* import { useCookies } from 'next-client-cookies'; */
 import { useCookies } from 'react-cookie';
 import { verifyJWT } from '@/helpers/jwt';
 import { Await } from 'react-router-dom';
+
 
 type Building = {
   x: number;
@@ -31,6 +33,8 @@ const DynamicBuildings: React.FC = () => {
   const [piedra, setPiedra] = useState(0);
   const [pan, setPan] = useState(0);
   const [usuario, setUser] = useState('');
+  const[menuButton, setMenBut] = useState(false);
+
 
 
 
@@ -38,7 +42,8 @@ const DynamicBuildings: React.FC = () => {
   const mouseUpRef = useRef<() => void>(() => {});
 
   useEffect(() => {
-    const userId = 'tu_id_de_usuario'; // Reemplazar con el ID de usuario actual
+
+    let userId = getUserByCooki().then((resultado)=>resultado?.id) // Reemplazar con el ID de usuario actual
     cargarUser();
     getBuildingsByUserId(userId)
       .then(fetchedBuildings => {
@@ -72,14 +77,6 @@ const DynamicBuildings: React.FC = () => {
   };
   
 
-
-  async function usoCooki() {
-    const cookieValue = await getCooki()
-  /*   let hash = verifyJWT(cookieValue)  */
-/*      return await getUserByHash(cookieValue) */
-    return cookieValue
-  }
-  /* console.log(usoCooki().then(x=>x)) */
   const handleMouseDown = (index: number, event: React.MouseEvent<HTMLDivElement>) => {
     setDraggedBuildingIndex(index);
     const startX = event.clientX;
@@ -166,11 +163,7 @@ const DynamicBuildings: React.FC = () => {
   };
   const recolectarRecursosUser = async () => {
 /*     "use server" */
-     usoCooki().then((resultado) => {
-      console.log("RESULTADOOOO", resultado?.username)
-     })
-/*     const user = await getUser("6642cd26b1865f8de5c7b62b") */
-    const user = await usoCooki().then((resultado)=> resultado)
+    const user = await getUserByCooki()
     if(user != null){
       await recolectarRecursos(user.id);
       setMadera(user.madera);
@@ -179,7 +172,7 @@ const DynamicBuildings: React.FC = () => {
     }
   }
   const cargarUser = async () => {
-    const user = await usoCooki().then((resultado)=> resultado)
+    const user = await getUserByCooki()
 /* const user = await getUser(usoCooki().then(x =>x?.id)) */
     if(user != null){
       setMadera(user.madera);
@@ -188,11 +181,32 @@ const DynamicBuildings: React.FC = () => {
       setUser(String (user.username));
     }
   }
-  const generarUnidades = async () => {
-    window.location.replace("/unidades")
+  const generarUnidades = () => {
+    setMenBut(true)
+  }
+
+  function handleClick(event: MouseEvent) {
+    if (event.button === 0) {
+      console.log('Clic izquierdo');
+    } else if (event.button === 1) {
+      console.log('Clic central (rueda)');
+    } else if (event.button === 2) {
+      console.log('Clic derecho');
+    }
+  }
+        // Ejemplo de uso en un elemento HTML (por ejemplo, un botón)
+        const miBoton = document.getElementById('miBoton');
+        miBoton?.addEventListener('click', handleClick);
+
+  
+
+  const getUE = async () => {
+    const user = await getUserByCooki()
+    const h= await getUEbyUserId(user.id)
+    return h
   }
   return (
-    <div className="flex flex-col items-center justify-center w-screen h-screen bg-gray-900">
+    <div className="hola flex flex-col items-center justify-center w-screen h-screen bg-gray-900">
       <div className="absolute top-0 left-0 p-4 bg-red-500 hover:bg-blue-700 text-blue font-bold py-2 px-4 rounded">
         <h3>Usuario: {usuario}</h3>
         <h3>Madera: {madera}</h3>
@@ -200,7 +214,7 @@ const DynamicBuildings: React.FC = () => {
         <h3>Pan: {pan}</h3>
         <button onClick={() => recolectarRecursosUser()}> Recolectar Recursos</button>        
       </div>
-      <div className='absolute top-52 left-0 p-4 bg-red-500 hover:bg-blue-700 text-blue font-bold py-2 px-4 rounded'>
+      <div className='absolute top-0 left-100 p-4 bg-red-500 hover:bg-blue-700 text-blue font-bold py-2 px-4 rounded'>
         <button onClick={() => generarUnidades()}>Asignar Unidades</button>
       </div>
       <div style={{ width: '1200px', height: '700px' }} className="bg-green-500 flex items-center justify-center relative">
@@ -219,8 +233,19 @@ const DynamicBuildings: React.FC = () => {
               cursor: 'pointer',
             }}
             onMouseDown={(e) => handleMouseDown(index, e)}
+            
           >
             <div>{building.type} - X: {building.x}, Y: {building.y}</div>
+            <button className='bg-red-500 hover:bg-red-700 text-white font-bold  rounded"' 
+            onClick={() => {setMenBut(!menuButton); console.log(menuButton)}}>Asignar</button>
+              {menuButton ? <menuAsignar /> : null}
+              {/* <div id={building.id} className="dropdowm relative" style={{display:"flex", transform: "rotateX(-32deg) rotateZ(50deg)"}}>                
+                <form className=" flex flex-col"  action={updateEdifUser}>                       
+                    <input type="number" name="unidadesEdif" placeholder="Nº-trabajadores del edificio" />                    
+                    <button type="submit" className=" mt-5 bg-blue-500 hover:bg-blue-700 " >Agregar</button>
+                </form>
+              </div> */}
+
           </div>
         ))}
       </div>
@@ -231,6 +256,8 @@ const DynamicBuildings: React.FC = () => {
         Menú
       </button>
       {menuOpen && <MenuDesplegable onBuildClick={handleBuildClick} />}
+
+
       <button
         className="absolute bottom-4 left-4 bg-blue-500 hover:bg-white text-white font-bold py-2 px-4 rounded"
         onClick={guardarAldea}

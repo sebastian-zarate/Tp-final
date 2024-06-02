@@ -2,8 +2,7 @@
 import { verifyJWT } from "@/helpers/jwt";
 import { getEdificioById, getEdificioByName } from "@/services/edificios";
 import {  getUEbyUserIdEdIdNico, getUEbyUserIdRet, updateUEunidades } from "@/services/userEdificios";
-import {  getCooki, getUserByHash, getUserById } from "@/services/users"
-/* import Cookies from 'universal-cookie' */
+import {  getUserByCooki, getUserByHash, getUserById } from "@/services/users"
 import { redirect } from "next/navigation" 
 import { cookies } from "next/headers";
 
@@ -11,8 +10,9 @@ import { cookies } from "next/headers";
 
 export default async function Unidades(){
 
-/* /*     const cooki = cookies().get('user')?.value
+   const cooki = cookies().get('user')?.value
     if(!cooki) redirect("/login")
+/*
     let valor = cooki
     let user:any;
     if (valor) {
@@ -24,7 +24,7 @@ export default async function Unidades(){
      redirect('/login')
     } */
 /*     user = await getUserById(user?.id)  */
-    const user = getCooki()
+    const user = await getUserByCooki()
     if(!user){
      redirect('/login')
     }
@@ -37,13 +37,14 @@ export default async function Unidades(){
             esp.style.display == "none"
         }, 15000)
     } 
+    let panXunidad = 10
     // Función para manejar la selección
     async function updateEdifUser(data: FormData) {
         "use server"
       let id_edif = await getEdificioByName(data.get('edificios') as string)
       let userEdif = await getUEbyUserIdEdIdNico(user?.id, id_edif?.id)
     
-      let unidades = data.get('unidadesEdif')
+      let unidades = data.get('unidadesEdif') as string
       let id_EU = userEdif?.id
       if (typeof document !== 'undefined') {
         // Tu código que utiliza document aquí
@@ -54,9 +55,14 @@ export default async function Unidades(){
         console.log("espera-----")
       }
 
-      if(id_EU) {
+      if(id_EU && unidades) {
         console.log("acualizo doc------")
-        await updateUEunidades(id_EU, parseInt(unidades?))
+        try{
+            await updateUEunidades(id_EU, parseInt(unidades), panXunidad)
+        }catch(e){
+            alert("error: "+ e)
+        }
+       
         }
         
     }
@@ -91,8 +97,8 @@ export default async function Unidades(){
                 <form className=" flex  flex-col" action={updateEdifUser}>     
                     <label htmlFor="edificios">Elige un edificio:</label>              
                     <select name="edificios" id="ed">
-                       { ((await getEdifs()).map((x) => (
-                             <option value={x} >{x}</option>
+                       { ((await getEdifs()).map((resultado) => (
+                             <option value={resultado} >{resultado}</option>
                         )))} 
                        
                     </select>                   
