@@ -1,11 +1,11 @@
 'use client'
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, use } from 'react';
 import MenuDesplegable from './menuDesplegable';
 import MenuAsignar from './menuAsignar';
 import { GuardarEdificio, getBuildingsByUserId, builtEdificio, getUEbyUserId } from '../../services/userEdificios';
-import { getUserByCooki, getUser, getUserByHash} from '@/services/users';
+import { getUserByCooki, getUser, getUserByHash, updateUser} from '@/services/users';
 import { getEdificios } from '../../services/edificios';
-import {recolectarRecursos } from '@/services/recursos';
+import {recolectarRecursos, calcularMadera, calcularPiedra, calcularPan} from '@/services/recursos';
 /* import { useCookies } from 'next-client-cookies'; */
 import { useCookies } from 'react-cookie';
 import { verifyJWT } from '@/helpers/jwt';
@@ -22,7 +22,7 @@ type Building = {
   nivel: number;
   costo: number;
 };
-
+//#region  VARIBLES
 const DynamicBuildings: React.FC = () => {
 
   const [buildings, setBuildings] = useState<Building[]>([]);
@@ -33,26 +33,121 @@ const DynamicBuildings: React.FC = () => {
   const [piedra, setPiedra] = useState(0);
   const [pan, setPan] = useState(0);
   const [usuario, setUser] = useState('');
+  const [usuarioId, setUserId] = useState('');
   const[menuButton, setMenBut] = useState(false);
 
-
-
+  // VARIABLES PARA LA RECOLECCION DE RECURSOS AUTOMATICA
+  const [maderaPorSegundo, setMaderaPorSegundo] = useState(0);
+  const [piedraPorSegundo, setPiedraPorSegundo] = useState(0);
+  const [panPorSegundo, setPanPorSegundo] = useState(0);
+  const maderaRef = useRef(madera);
+  const piedraRef = useRef(piedra);
+  const panRef = useRef(pan);
 
   const mouseMoveRef = useRef<(e: MouseEvent) => void>(() => {});
   const mouseUpRef = useRef<() => void>(() => {});
-
+  
+  //#region USEEFFECTS USUARIO
+  //useffect para obetener el id de user 
   useEffect(() => {
-
-    let userId = getUserByCooki().then((resultado)=>resultado?.id) // Reemplazar con el ID de usuario actual
-    cargarUser();
+    async function fetchUserId() {
+      let resultado = await getUserByCooki();
+      let userId = resultado?.id;
+      console.log(userId);
+      setUserId(String(userId));
+    }
+    fetchUserId();
+    /*cargarUser();
     getBuildingsByUserId(userId)
       .then(fetchedBuildings => {
         setBuildings(fetchedBuildings);
       })
       .catch(error => {
         console.error("Error fetching buildings:", error);
+      });*/
+  }, [usuarioId]);
+
+
+  //#region USEEFFECTS RECURSOS
+  //useffect para cargar las cosas del user  (ESTE ESTA MAL CREO)
+  useEffect(() => {
+    cargarUser();
+    getBuildingsByUserId(usuarioId)
+      .then(fetchedBuildings => {
+        setBuildings(fetchedBuildings);
+        console.log("fetchedBuildings", fetchedBuildings);
+      })
+      .catch(error => {
+        console.error("Error fetching buildings:", error);
       });
-  }, []);
+  }, [usuarioId]);
+  
+  //useffect para recolectar recursos automaticamente
+  useEffect(() => {
+    const fetchMadera = async () => {
+      const result = await calcularMadera(usuarioId);
+      console.log("Madera por segundo: ", result);
+      setMaderaPorSegundo(result);
+    };
+    const fetchPiedra = async () => {
+      const result = await calcularPiedra(usuarioId);
+      console.log("Piedra por segundo: ", result);
+      setPiedraPorSegundo(result);
+      console.log("variable piedraPorSegundo", piedraPorSegundo)
+    };
+    const fetchPan = async () => {
+      const result = await calcularPan(usuarioId);
+      console.log("Pan por segundo: ", result);
+      setPanPorSegundo(result);
+      console.log("variable panPorSegunbdo", panPorSegundo);
+    };
+    
+    if(usuarioId.length > 5){
+      fetchMadera();
+      fetchPiedra();
+      fetchPan();
+    }    
+  }, [usuarioId]);
+
+  // UseEffect para actualizar recursos cada 2 segundos
+  useEffect(() => {
+    cargarUser();
+    const timer = setInterval(() => {
+      console.log('Setting up interval');
+      setMadera(madera => {
+        const newMadera = madera + maderaPorSegundo;
+        maderaRef.current = newMadera;
+        return newMadera;
+      });
+      setPiedra(piedra => {
+        const newPiedra = piedra + piedraPorSegundo;
+        piedraRef.current = newPiedra;
+        return newPiedra;
+      });
+      setPan(pan => {
+        const newPan = pan + panPorSegundo;
+        panRef.current = newPan;
+        return newPan;
+      });
+    }, 2000);
+  
+    return () => clearInterval(timer);
+  }, [maderaPorSegundo, piedraPorSegundo, panPorSegundo]);
+  
+  //actualizar en bdd cada 10 segundos
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const update = async () => {
+        await updateUser(usuarioId, { madera: maderaRef.current, piedra: piedraRef.current, pan: panRef.current });
+      };
+      update();
+      console.log('recursos actualizados');
+    }, 10000);
+  
+    return () => clearInterval(timer);
+  }, [usuarioId]);
+
+//region METODOS VARIOS
   const handleBuildClick = async (id: string, x: number, y: number, buildingType: string, ancho: number, largo: number, nivel: number) => {
     const newBuilding = { id, x, y, type: buildingType, ancho, largo, nivel, costo: 0};
     const collisionIndex = getCollidedBuildingIndex(-1, x, y, ancho, largo);
@@ -199,20 +294,22 @@ const DynamicBuildings: React.FC = () => {
         miBoton?.addEventListener('click', handleClick);
 
   
-
+/*
   const getUE = async () => {
     const user = await getUserByCooki()
     const h= await getUEbyUserId(user.id)
     return h
-  }
+  }*/
+  
+  // #region RETURN 
+  
   return (
     <div className="hola flex flex-col items-center justify-center w-screen h-screen bg-gray-900">
-      <div className="absolute top-0 left-0 p-4 bg-red-500 hover:bg-blue-700 text-blue font-bold py-2 px-4 rounded">
+      <div className="absolute top-0 left-0 p-4 bg-red-500 text-blue font-bold py-2 px-4 rounded">
         <h3>Usuario: {usuario}</h3>
-        <h3>Madera: {madera}</h3>
-        <h3>Piedra: {piedra}</h3>
-        <h3>Pan: {pan}</h3>
-        <button onClick={() => recolectarRecursosUser()}> Recolectar Recursos</button>        
+        <h3>Madera: {madera} || PS: {maderaPorSegundo}  </h3>
+        <h3>Piedra: {piedra} || PS: {piedraPorSegundo}  </h3>
+        <h3>Pan:    {pan}    || PS: {panPorSegundo}     </h3>
       </div>
       <div className='absolute top-0 left-100 p-4 bg-red-500 hover:bg-blue-700 text-blue font-bold py-2 px-4 rounded'>
         <button onClick={() => generarUnidades()}>Asignar Unidades</button>
