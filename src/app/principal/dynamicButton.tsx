@@ -1,10 +1,10 @@
 'use client'
-import React, { useState, useEffect, useRef,useMemo } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import MenuDesplegable from './menuDesplegable';
-import { GuardarEdificio, getBuildingsByUserId, builtEdificio  } from '../../services/userEdificios';
-import { getUser} from '@/services/users';
+import { GuardarEdificio, getBuildingsByUserId, builtEdificio } from '../../services/userEdificios';
+import { getUser, updateUserBuildings } from '@/services/users'; // Asegúrate de importar updateUserBuildings
 import { getEdificios } from '../../services/edificios';
-import {recolectarRecursos } from '@/services/recursos';
+import { recolectarRecursos } from '@/services/recursos';
 import Edificios from '../recursos/page';
 
 type Building = {
@@ -14,6 +14,7 @@ type Building = {
   ancho: number;
   largo: number;
   id: string;
+  cantidad: number;
 };
 
 const DynamicBuildings: React.FC = () => {
@@ -24,6 +25,15 @@ const DynamicBuildings: React.FC = () => {
   const [madera, setMadera] = useState(0);
   const [piedra, setPiedra] = useState(0);
   const [pan, setPan] = useState(0);
+  const [canon, setCanon] = useState(0);
+  const [maderera, setMaderera] = useState(0);
+  const [cantera, setCantera] = useState(0);
+  const [panaderia, setPanaderia] = useState(0);
+  const [bosque, setBosque] = useState(0);
+  const [muros, setMuros] = useState(0);
+  const [ayuntamiento, setAyuntamiento] = useState(0);
+  const [herreria, setHerreria] = useState(0);
+
   const [usuario, setUser] = useState<string | null>(null);
 
   const mouseMoveRef = useRef<(e: MouseEvent) => void>(() => {});
@@ -38,6 +48,14 @@ const DynamicBuildings: React.FC = () => {
         setMadera(user.madera);
         setPiedra(user.piedra);
         setPan(user.pan);
+        setCanon(user.canon);
+        setMaderera(user.maderera);
+        setCantera(user.cantera);
+        setPanaderia(user.panaderia);
+        setBosque(user.bosque);
+        setMuros(user.muros);
+        setAyuntamiento(user.ayuntamiento);
+        setHerreria(user.herreria);
       }
     };
     getBuildingsByUserId(userId)
@@ -50,27 +68,147 @@ const DynamicBuildings: React.FC = () => {
     fetchUser();
   }, []);
 
-  const handleBuildClick = async (id: string, x: number, y: number, buildingType: string, ancho: number, largo: number ) => {
-    const existingBuilding = buildings.find(building => building.x === x && building.y === y && building.id === id);
+
+
+
+  const handleBuildClick = async (id: string, x: number, y: number, buildingType: string, ancho: number, largo: number) => {
+   const existingBuilding = false //buildings.find(building => building.x === x && building.y === y && building.id === id);
   
     if (!existingBuilding) {
-      const newBuilding = { id, x, y, type: buildingType, ancho, largo};
-      setBuildings([...buildings, newBuilding]);
-
+      
+  
+      // Actualizar el estado del usuario
+      const construir = await updateBuildingCount(id); // devuelve 1 si se puede construir, 0 si no
+       // window.location.reload();
       // Llamar a la función para guardar el edificio en la base de datos
-      try {
-        await  builtEdificio(id, x, y,1);
-        
-        console.log('Edificio guardado exitosamente en la base de datos.');
-        window.location.reload();
-      } catch (error) {
-        console.error('Error al guardar el edificio en la base de datos:', error);
+      if (construir === 1) {
+        buildings.find(building => building.x === x && building.y === y && building.id === id);
+        const newBuilding = { id, x, y, type: buildingType, ancho, largo, cantidad: 1 };
+        setBuildings([...buildings, newBuilding]);
+        try {
+          // Evita recargar la página, en su lugar actualiza el estado
+          await builtEdificio(id, x, y, 1);
+          console.log('Edificio guardado exitosamente en la base de datos.');
+         
+        } catch (error) {
+          console.error('Error al guardar el edificio en la base de datos:', error);
+        }
       }
     } else {
       console.log('Ya hay un edificio del mismo tipo en estas coordenadas');
     }
   };
+  
+  const updateBuildingCount = async (id: string) => {
+    const userId = '6645239328fab0b97120439e'; // Reemplazar con el ID de usuario actual
+    let countsMax = 0;
+  
+    const newCounts = {
+      canon,
+      maderera,
+      cantera,
+      panaderia,
+      bosque,
+      muros,
+      ayuntamiento,
+      herreria,
+    };
+  
+    switch (id) {
+      case '663ac05e044ccf6167cf703c':
+        if (canon < 3) {
+          newCounts.canon += 1;
+          setCanon(newCounts.canon);
+          countsMax = 1;
+        } else {
+          console.log('No puedes tener más de 3 cañones');
+        }
+        break;
+      case '663ac05f044ccf6167cf7041':
+        if (maderera < 3) {
+          newCounts.maderera += 1;
+          setMaderera(newCounts.maderera);
+          countsMax = 1;
+        } else {
+          console.log('Condition for maderera not met');
+        }
+        break;
+      case '663ac05f044ccf6167cf7040':
+        if (cantera < 3) {
+          newCounts.cantera += 1;
+          setCantera(newCounts.cantera);
+          countsMax = 1;
+        } else {
+          console.log('Condition for cantera not met');
+        }
+        break;
+      case '663ac518044ccf6167cf7054':
+        if (panaderia < 3) {
+          newCounts.panaderia += 1;
+          setPanaderia(newCounts.panaderia);
+          countsMax = 1;
+        } else {
+          console.log('Condition for panaderia not met');
+        }
+        break;
+      case '663ac060044ccf6167cf7042':
+        if (bosque < 3) {
+          newCounts.bosque += 1;
+          setBosque(newCounts.bosque);
+          countsMax = 1;
+        } else {
+          console.log('Condition for bosque not met');
+        }
+        break;
+      case '663ac05f044ccf6167cf703e':
+        if (muros < 3) {
+          newCounts.muros += 1;
+          setMuros(newCounts.muros);
+          countsMax = 1;
+        } else {
+          console.log('No puedes tener más de 3 muros');
+        }
+        break;
+      case '663ac05f044ccf6167cf703d': // ayuntamiento (changed ID)
+        if (ayuntamiento < 1) {
+          newCounts.ayuntamiento += 1;
+          setAyuntamiento(newCounts.ayuntamiento);
+          countsMax = 1;
+        } else {
+          console.log('Condition for ayuntamiento not met');
+        }
+        break;
+      case '663ac05f044ccf6167cf703f':
+        
+        if (herreria < 3) {
+          newCounts.herreria += 1;
+          setHerreria(newCounts.herreria);
+          countsMax = 1;
+        } else {
+          console.log('Condition for herreria not met');
+        }
+        break;
+    }
+  
+    try {
+      await updateUserBuildings(
+        userId,
+        newCounts.canon,
+        newCounts.muros,
+        newCounts.bosque,
+        newCounts.herreria,
+        newCounts.cantera,
+        newCounts.maderera,
+        newCounts.panaderia,
+        newCounts.ayuntamiento,
+      );
+      console.log('User buildings count updated successfully.');
+    } catch (error) {
+      console.error('Error updating user buildings count:', error);
+    }
 
+    return countsMax;
+  };
   
   
 
@@ -99,54 +237,43 @@ const DynamicBuildings: React.FC = () => {
     window.addEventListener('mousemove', mouseMoveRef.current);
     window.addEventListener('mouseup', mouseUpRef.current);
   };
-  
+
   let timeoutId: ReturnType<typeof setTimeout> | null = null;
 
-  //let timeoutId: NodeJS.Timeout | null = null;
+  const handleBuildingMove = (index: number, newX: number, newY: number) => {
+    setBuildings(prevBuildings => {
+      const updatedBuildings = [...prevBuildings];
+      const maxWidth = 1170;
+      const maxHeight = 700;
+      const buildingWidth = updatedBuildings[index].ancho;
+      const buildingHeight = updatedBuildings[index].largo;
 
-const handleBuildingMove = (index: number, newX: number, newY: number) => {
-  setBuildings(prevBuildings => {
-    const updatedBuildings = [...prevBuildings];
-    const maxWidth = 1170; // Ancho del área de construcción
-    const maxHeight = 700; // Alto del área de construcción
-    const buildingWidth = updatedBuildings[index].ancho; // Ancho de cada edificio
-    const buildingHeight = updatedBuildings[index].largo; // Alto de cada edificio
-    const collisionMargin = 10; // Margen de colisión entre edificios
+      const clampedX = Math.min(Math.max(newX, 0) + 20, maxWidth - buildingWidth);
+      const clampedY = Math.min(Math.max(newY, 0), maxHeight - buildingHeight);
 
-    // Limitar las coordenadas x e y dentro del área de construcción
-    const clampedX = Math.min(Math.max(newX, 0) + 20, maxWidth - buildingWidth);
-    const clampedY = Math.min(Math.max(newY, 0), maxHeight - buildingHeight);
+      const collidedBuildingIndex = getCollidedBuildingIndex(index, clampedX, clampedY, buildingWidth, buildingHeight);
+      if (collidedBuildingIndex !== -1) {
+        // Lógica de manejo de colisiones...
+      } else {
+        updatedBuildings[index].x = clampedX;
+        updatedBuildings[index].y = clampedY;
 
-    // Ajustar la posición si colisiona con otros edificios
-    const collidedBuildingIndex = getCollidedBuildingIndex(index, clampedX, clampedY, buildingWidth, buildingHeight);
-    if (collidedBuildingIndex !== -1) {
-      // Lógica de manejo de colisiones...
-    } else {
-      // Actualizar la posición del edificio directamente
-      updatedBuildings[index].x = clampedX;
-      updatedBuildings[index].y = clampedY;
+        if (timeoutId !== null) {
+          clearTimeout(timeoutId);
+        }
 
-      // Cancelar la solicitud anterior si existe
-      if (timeoutId !== null) {
-        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => {
+          guardarEdificioEnBD(updatedBuildings[index].id, clampedX, clampedY);
+          timeoutId = null;
+        }, 500);
       }
 
-      // Programar una nueva solicitud después de 500 ms
-      timeoutId = setTimeout(() => {
-        guardarEdificioEnBD(updatedBuildings[index].id, clampedX, clampedY);
-        
-        timeoutId = null;
-      }, 500); // Ajusta este valor según tus necesidades
-    }
+      return updatedBuildings;
+    });
+  };
 
-    return updatedBuildings;
-  });
-};
-
- 
-  
   const getCollidedBuildingIndex = (index: number, x: number, y: number, width: number, height: number) => {
-    const updatedBuildings = buildings.filter((_, i) => i !== index); // Excluir el edificio actual
+    const updatedBuildings = buildings.filter((_, i) => i !== index);
     return updatedBuildings.findIndex(building =>
       x < building.x + building.ancho &&
       x + width > building.x &&
@@ -159,31 +286,18 @@ const handleBuildingMove = (index: number, newX: number, newY: number) => {
     GuardarEdificio(id, posX, posY, 2);
   };
 
-  const guardarAldea = () => {
-    buildings.forEach((building, index) => {
-      guardarEdificioEnBD(`${building.id}`, building.x, building.y);
-    });
-  };
+ 
 
-  
   const recolectarRecursosUser = async () => {
-    const user = await getUser("6645239328fab0b97120439e")
-    if(user != null){
+    const userId = '6645239328fab0b97120439e'; // Reemplazar con el ID de usuario actual
+    const user = await getUser(userId);
+    if (user != null) {
       await recolectarRecursos(user.id);
       setMadera(user.madera);
       setPiedra(user.piedra);
       setPan(user.pan);
     }
-  }
-  const cargarUser = async () => {
-    const user = await getUser("6645239328fab0b97120439e")
-    if(user != null){
-      setMadera(user.madera);
-      setPiedra(user.piedra);
-      setPan(user.pan);
-      setUser(String (user.username));
-    }
-  }
+  };
 
   return (
     <div className="flex flex-col items-center justify-center w-screen h-screen bg-gray-900">
@@ -192,7 +306,15 @@ const handleBuildingMove = (index: number, newX: number, newY: number) => {
         <h3>Madera: {madera}</h3>
         <h3>Piedra: {piedra}</h3>
         <h3>Pan: {pan}</h3>
-        <button onClick={() => recolectarRecursosUser()}> Recolectar Recursos</button>
+        <h3>canon: {canon}</h3>
+        <h3>maderera: {maderera}</h3>
+        <h3>cantera: {cantera}</h3>
+        <h3>panaderia: {panaderia}</h3>
+        <h3>bosque: {bosque}</h3>
+        <h3>muros: {muros}</h3>
+        <h3>ayuntamiento: {ayuntamiento}</h3>
+        <h3>herreria: {herreria}</h3>
+        <button className="bg-green-500" onClick={recolectarRecursosUser}> Recolectar Recursos</button>
       </div>
       <div style={{ width: '1200px', height: '700px' }} className="bg-green-500 flex items-center justify-center relative">
         {buildings.map((building, index) => (
@@ -222,7 +344,6 @@ const handleBuildingMove = (index: number, newX: number, newY: number) => {
         Menú
       </button>
       {menuOpen && <MenuDesplegable onBuildClick={handleBuildClick} />}
-     
     </div>
   );
 };

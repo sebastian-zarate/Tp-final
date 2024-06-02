@@ -140,7 +140,8 @@ export async function getBuildingsByUserId(user1Id: string): Promise<any[]> {
                         name: true,
                         ancho: true,
                         largo: true,
-                        costo: true
+                        costo: true,
+                        cantidad: true
                     }
                 }
             }
@@ -161,7 +162,8 @@ export async function getBuildingsByUserId(user1Id: string): Promise<any[]> {
             costo: building.edificio.costo,
             ancho: building.edificio.ancho,
             largo: building.edificio.largo,
-            nivel: building.nivel
+            nivel: building.nivel,
+            cantidad: building.edificio.cantidad
         }));
     } catch (error) {
         console.error("Error fetching buildings by user ID:", error);

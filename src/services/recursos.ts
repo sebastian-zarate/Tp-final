@@ -52,9 +52,7 @@ export async function recolectarRecursos(userId: string) {
                 //actualizar edificio con la ultima interaccion
                 await updateUE(userEdificio.id, { ultimaInteraccion: new Date() })
                 //sumar la madera al usuario
-                console.log(`userId:${user.id}/ edificioId:${userEdificio.id} / tipoRecurso: ${edificio.tipoRecurso} / recursoGenerado: ${maderaEdificio} / minutos: ${minutos} / trabajadores: ${userEdificio.trabajadores}`)
-                //  await updateUser(userId, {madera: maderaEdificio});
-                console.log(" f1 Madera TOTALLLLLLLLLLLLLLLLLLLLLLLL: ", madera);
+             
             }
             else if (edificio.tipoRecurso == "piedra") {
                 let piedraEdificio = 0
@@ -65,8 +63,6 @@ export async function recolectarRecursos(userId: string) {
                 piedra += piedraEdificio
                 await updateUE(userEdificio.id, { ultimaInteraccion: new Date() })
                 //await updateUser(userId, {piedra: piedraEdificio});
-                console.log(`userId:${user.id}/ edificioId:${userEdificio.id} / tipoRecurso: ${edificio.tipoRecurso} / recursoGenerado: ${piedraEdificio} / minutos: ${minutos} / trabajadores: ${userEdificio.trabajadores}`)
-                console.log(" f2 Piedra TOTALLLLLLLLLLLLLLLLLLLLLLLL: ", piedra);
             }
             else if (edificio.tipoRecurso == "pan") {
                 let panEdificio = 0
@@ -76,8 +72,7 @@ export async function recolectarRecursos(userId: string) {
                 panEdificio = Math.ceil(panEdificio * (1 + (Number(userEdificio.trabajadores) * 0.01)))
                 pan += panEdificio
                 // await updateUE(userEdificio.id, {ultimaInteraccion: new Date()})
-                console.log(`userId:${user.id}/ edificioId:${userEdificio.id} / tipoRecurso: ${edificio.tipoRecurso} / recursoGenerado: ${panEdificio} / minutos: ${minutos} / trabajadores: ${userEdificio.trabajadores}`)
-                // await updateUser(userId, {pan: panEdificio});
+                   // await updateUser(userId, {pan: panEdificio});
 
 
             }

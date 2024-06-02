@@ -40,8 +40,20 @@ model Users{
   salt String?
   nivel Int
   madera Int
-  piedra Int
-  pan Int
+  piedra Int?
+  pan Int?
+  canon Int?
+  maderera Int?
+  panaderia Int?
+  ayuntamiento Int?
+  cantera Int?
+  muros Int?
+  bosque Int?
+  herreria Int?
+
+
+
+
   //-------------------------------------------------------------------------------------------
   //-------------------------------------------------------------------------------------------
 

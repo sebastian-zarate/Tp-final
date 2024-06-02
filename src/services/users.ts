@@ -10,6 +10,14 @@ let cantMadera = 500
 let cantPan = 800
 let cantPiedra= 600
 let unidadesDeTrabajo = 100
+let cantCantera = 0
+let cantMaderera = 0
+let cantPanaderia = 0
+let cantAyuntamiento = 0
+let cantCanon = 0
+let cantMuro = 0
+let cantBosque = 0
+let cantHerreria = 0
 
 export async function createUser(user: { email: string, password: string, username: string}) {
   if (!user.email || user.email.length < 5 || !user.email.includes('@') ) {
@@ -45,15 +53,25 @@ export async function createUser(user: { email: string, password: string, userna
     username: user.username,
     email: user.email,
     hash: hashPassword(salt + user.password),
+    
     piedra: cantPiedra,
     pan: cantPan,
     madera: cantMadera,
     nivel:1, 
     salt,
-    unidadesDeTrabajo
+    unidadesDeTrabajo,
+    canon : 0,
+    muro : 0,
+    bosque : 0,
+    herreria : 0,
+    cantera : 0,
+    maderera :0,
+    panaderia : 0,
+    ayuntamiento : 0,
+
 }
 
-  await prisma.users.create({ data: userWithHash });
+  await prisma.nivelEdificio.create({ data: userWithHash });
 }
 
 export async function authenticateUser(user: {username:string, email: string, password: string }) {
@@ -159,6 +177,98 @@ export async function updateUser(Id: string, data: any) {
   console.log(`User ${Id} updated: `, u)
   return u
 }
+//---------------------------------------------------------------
+//----------------------
+export async function updateUserBuildings(
+  userId: string,
+  canon: number,
+  muro: number,
+  bosque: number,
+  herreria: number,
+  cantera: number,
+  maderera: number,
+  panaderia: number,
+  ayuntamientos: number,
+) {
+  try {
+    // Buscar al usuario
+    const user = await prisma.users.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+
+    if (user) {
+      // Actualizar los campos de edificios con las cantidades proporcionadas
+      await prisma.users.update({
+        where: {
+          id: userId,
+        },
+        data: {
+          canon: canon,
+          muros: muro,
+          bosque: bosque,
+          herreria: herreria,
+          cantera: cantera,
+          maderera: maderera,
+          panaderia: panaderia,
+          ayuntamiento: ayuntamientos,
+        },
+      });
+      console.log('User buildings updated successfully.');
+    } else {
+      console.log(`User with ID ${userId} not found.`);
+    }
+  } catch (error) {
+    console.error('Error updating user buildings:', error);
+    throw error;
+  }
+};
+
+const getUserBuildings = async (userId: string) => {
+  try {
+    // Buscar al usuario
+    const user = await prisma.users.findUnique({
+      where: {
+        id: userId,
+      },
+      select: {
+        canon: true,
+        muros: true,
+        bosque: true,
+        herreria: true,
+        cantera: true,
+        maderera: true,
+        panaderia: true,
+        ayuntamiento: true
+      },
+    });
+
+    if (user) {
+      // Devolver un objeto con las cantidades de cada tipo de edificio
+      return {
+        canon: user.canon,
+        muro: user.muros,
+        bosque: user.bosque,
+        herreria: user.herreria,
+        cantera: user.cantera,
+        maderera: user.maderera,
+        panaderia: user.panaderia,
+        ayuntamiento: user.ayuntamiento,
+      };
+    } else {
+      console.log(`User with ID ${userId} not found.`);
+      return null;
+    }
+  } catch (error) {
+    console.error('Error fetching user buildings:', error);
+    throw error;
+  }
+};
+
+
+
+
 
 
 //------------------------------------------------------
