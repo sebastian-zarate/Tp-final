@@ -6,6 +6,7 @@ import { getUser, updateUserBuildings } from '@/services/users'; // Asegúrate d
 import { getEdificios } from '../../services/edificios';
 import { recolectarRecursos } from '@/services/recursos';
 import Edificios from '../recursos/page';
+import { Piedra } from 'next/font/google';
 
 type Building = {
   x: number;
@@ -15,6 +16,7 @@ type Building = {
   largo: number;
   id: string;
   cantidad: number;
+  costo: number;
 };
 
 const DynamicBuildings: React.FC = () => {
@@ -33,6 +35,7 @@ const DynamicBuildings: React.FC = () => {
   const [muros, setMuros] = useState(0);
   const [ayuntamiento, setAyuntamiento] = useState(0);
   const [herreria, setHerreria] = useState(0);
+  const [costo, setCosto] = useState(0);
 
   const [usuario, setUser] = useState<string | null>(null);
 
@@ -56,6 +59,7 @@ const DynamicBuildings: React.FC = () => {
         setMuros(user.muros);
         setAyuntamiento(user.ayuntamiento);
         setHerreria(user.herreria);
+        
       }
     };
     getBuildingsByUserId(userId)
@@ -71,20 +75,22 @@ const DynamicBuildings: React.FC = () => {
 
 
 
-  const handleBuildClick = async (id: string, x: number, y: number, buildingType: string, ancho: number, largo: number) => {
+  const handleBuildClick = async (id: string, x: number, y: number, buildingType: string, ancho: number, largo: number, costos: number) => {
    const existingBuilding = false //buildings.find(building => building.x === x && building.y === y && building.id === id);
-  
+     
     if (!existingBuilding) {
       
-  
+        console.log('Construyendo edificio...', buildingType);
+        console.log('Costo:', costos);
       // Actualizar el estado del usuario
-      const construir = await updateBuildingCount(id); // devuelve 1 si se puede construir, 0 si no
+      const construir = await updateBuildingCount(id, costos); // devuelve 1 si se puede construir, 0 si no
        // window.location.reload();
       // Llamar a la función para guardar el edificio en la base de datos
       if (construir === 1) {
         buildings.find(building => building.x === x && building.y === y && building.id === id);
+        window.location.reload();
         const newBuilding = { id, x, y, type: buildingType, ancho, largo, cantidad: 1 };
-        setBuildings([...buildings, newBuilding]);
+        setBuildings([...buildings, newBuilding,]);
         try {
           // Evita recargar la página, en su lugar actualiza el estado
           await builtEdificio(id, x, y, 1);
@@ -99,10 +105,10 @@ const DynamicBuildings: React.FC = () => {
     }
   };
   
-  const updateBuildingCount = async (id: string) => {
+  const updateBuildingCount = async (id: string, costos: number) => {
     const userId = '6645239328fab0b97120439e'; // Reemplazar con el ID de usuario actual
     let countsMax = 0;
-  
+    
     const newCounts = {
       canon,
       maderera,
@@ -112,22 +118,34 @@ const DynamicBuildings: React.FC = () => {
       muros,
       ayuntamiento,
       herreria,
+      pan,
+      madera,
+      piedra,
     };
   
     switch (id) {
       case '663ac05e044ccf6167cf703c':
-        if (canon < 3) {
-          newCounts.canon += 1;
+        if (canon < 3 && piedra >= costos) {
+          
+          newCounts.canon += 1;// sumo 1  a la cantidad de cañones
+         
+          
+          newCounts.piedra = (piedra - costos); // Deduct costos from piedra
           setCanon(newCounts.canon);
+           
+          setPiedra(newCounts.piedra);
+          
           countsMax = 1;
         } else {
-          console.log('No puedes tener más de 3 cañones');
+          console.log('No puedes tener más de 3 cañones o no tienes suficiente piedra');
         }
         break;
       case '663ac05f044ccf6167cf7041':
-        if (maderera < 3) {
+        if (maderera < 3 && madera >= costos) {
           newCounts.maderera += 1;
           setMaderera(newCounts.maderera);
+          newCounts.madera = (madera - costos);
+          setMadera(newCounts.madera);
           countsMax = 1;
         } else {
           console.log('Condition for maderera not met');
@@ -143,9 +161,11 @@ const DynamicBuildings: React.FC = () => {
         }
         break;
       case '663ac518044ccf6167cf7054':
-        if (panaderia < 3) {
+        if (panaderia < 3 && pan >= costos) {
           newCounts.panaderia += 1;
+          newCounts.pan = (pan - costos);
           setPanaderia(newCounts.panaderia);
+          setPan(newCounts.pan);
           countsMax = 1;
         } else {
           console.log('Condition for panaderia not met');
@@ -201,6 +221,9 @@ const DynamicBuildings: React.FC = () => {
         newCounts.maderera,
         newCounts.panaderia,
         newCounts.ayuntamiento,
+        newCounts.pan,
+        newCounts.madera,
+        newCounts.piedra,
       );
       console.log('User buildings count updated successfully.');
     } catch (error) {
@@ -333,7 +356,7 @@ const DynamicBuildings: React.FC = () => {
             }}
             onMouseDown={(e) => handleMouseDown(index, e)}
           >
-            <div>{building.id} - X: {building.x}, Y: {building.y}</div>
+            <div>{building.costo} - X: {building.x}, Y: {building.y}</div>
           </div>
         ))}
       </div>

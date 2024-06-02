@@ -189,6 +189,9 @@ export async function updateUserBuildings(
   maderera: number,
   panaderia: number,
   ayuntamientos: number,
+  pans : number,
+  maderas : number,
+  piedras : number
 ) {
   try {
     // Buscar al usuario
@@ -213,6 +216,9 @@ export async function updateUserBuildings(
           maderera: maderera,
           panaderia: panaderia,
           ayuntamiento: ayuntamientos,
+          pan: pans,
+          madera: maderas,
+          piedra: piedras,
         },
       });
       console.log('User buildings updated successfully.');

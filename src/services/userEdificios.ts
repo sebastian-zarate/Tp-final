@@ -103,7 +103,7 @@ export async function builtEdificio(edificioID: string, edificioX: number,edific
     try {
         // Obtener el ID del usuario
         const usuarioId = '6645239328fab0b97120439e';
-        console.log("usuarioId: ", edificioID)
+       
         // Crear el edificio en la base de datos utilizando Prisma
         const nuevoEdificio = await prisma.userEdificios.create({
             data: {
