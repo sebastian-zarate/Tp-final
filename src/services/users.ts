@@ -64,26 +64,28 @@ export async function authenticateUser(user: { dataUser: string, password: strin
   let userTemp;
   let existing = await prisma.users.findFirst({
     where: {
-      email: user.dataUser
-    }
+      email: user.dataUser,
+    } 
   })
-  if(existing) userTemp = await getUserByemail(existing?.email)
+
+  if(existing) userTemp = existing
+
   if(!existing){
-    existing = await prisma.users.findFirst({
+    let existing2 = await prisma.users.findFirst({
       where: {
-        email: user.dataUser
+        username: user.dataUser
       }
     })
-    if(existing) userTemp = await getUserByUserName(existing?.username)
-    if (!existing ) {
+    if(existing2) userTemp = existing2
+    if (!existing2 ) {
       throw new Error('User not found');
     }
   }
   
-  const hash = hashPassword(existing.salt + user.password);
-  console.log("el hash nuevo: ", hash)
-  console.log("el hash existente: ", existing.hash)
-  if (hash !== existing.hash) {
+  const hash = hashPassword(userTemp?.salt + user.password);
+  console.log(`hash nuevo: ${hash} - signJWT: ${signJWT(hash)}`)
+  console.log(`hash existente: ${userTemp?.hash} - signJWT: ${signJWT(userTemp?.hash)}`)
+  if (hash !== userTemp?.hash) {
     throw new Error('Invalid password');
   }
   

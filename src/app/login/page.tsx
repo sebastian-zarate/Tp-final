@@ -9,7 +9,7 @@ async function Login(){
         'use server'
         const user = {
           /* username: data.get('username') as string, */
-          email: data.get('email') as string,
+          dataUser: data.get('dataUser') as string,
           password: data.get('password') as string
         }
         const validaU = await authenticateUser(user)  
@@ -25,9 +25,9 @@ async function Login(){
               <h1 className=" border-solid text-xl  text-white bg-gray-400">Login</h1>
               
               <form  action={logUser}>  
-                <label htmlFor="email">Email o Username</label>
+                <label htmlFor="dataUser">Email o Username</label>
                 <p/>
-                <input className="border px-2" type="text" id="email" name="email" required></input>
+                <input className="border px-2" type="text" id="dataUser" name="dataUser" required></input>
                 <p/>
                 <label htmlFor="password">Password</label>
                 <p/>

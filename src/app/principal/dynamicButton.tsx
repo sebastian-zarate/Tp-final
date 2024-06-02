@@ -1,7 +1,7 @@
 'use client'
 import React, { useState, useEffect, useRef } from 'react';
 import MenuDesplegable from './menuDesplegable';
-import menuAsignar from './menuAsignar';
+import MenuAsignar from './menuAsignar';
 import { GuardarEdificio, getBuildingsByUserId, builtEdificio, getUEbyUserId } from '../../services/userEdificios';
 import { getUserByCooki, getUser, getUserByHash} from '@/services/users';
 import { getEdificios } from '../../services/edificios';
@@ -238,7 +238,7 @@ const DynamicBuildings: React.FC = () => {
             <div>{building.type} - X: {building.x}, Y: {building.y}</div>
             <button className='bg-red-500 hover:bg-red-700 text-white font-bold  rounded"' 
             onClick={() => {setMenBut(!menuButton); console.log(menuButton)}}>Asignar</button>
-              {menuButton ? <menuAsignar /> : null}
+              {menuButton ? <MenuAsignar /> : null}
               {/* <div id={building.id} className="dropdowm relative" style={{display:"flex", transform: "rotateX(-32deg) rotateZ(50deg)"}}>                
                 <form className=" flex flex-col"  action={updateEdifUser}>                       
                     <input type="number" name="unidadesEdif" placeholder="Nº-trabajadores del edificio" />                    
