@@ -206,13 +206,15 @@ export const updateUEunidades= async (Id: string, unidades: any, panXunidad:any)
     })
     //obtengo el id del user que se encuentra en el documento userEdificio
     const us_id = ue?.userId
-    const usuario = await getUserById(us_id)
+    const usuario = await getUserById(String(us_id || ""))
     //cantidad de unidades de trabajo que le quedan al user
-    let resultadoUnidades = (usuario?.unidadesDeTrabajo) - unidades
+    let resultadoUnidades = 0
+    if(usuario != null && usuario != undefined && usuario?.unidadesDeTrabajo != undefined && usuario?.unidadesDeTrabajo != null){
+        resultadoUnidades = (usuario?.unidadesDeTrabajo) - unidades}
 
     if(resultadoUnidades < 0) return error("Unidades insuficientes")
 
-    let panUser = usuario?.pan - (panXunidad * unidades)
+    let panUser = Number(usuario?.pan || 0) - (panXunidad * unidades)
 
     if(panUser < 0) return error("Pan insuficiente para alimentar a las unidades")
 
@@ -237,7 +239,7 @@ export const updateUEunidades= async (Id: string, unidades: any, panXunidad:any)
             pan:panUser
         }
     })
-    let edif = await getEdificioById(ue?.edificioId).then(x=>x)
+    let edif = await getEdificioById(String(ue?.edificioId || "")).then(x=>x)
     console.log("------------------Después de actualizar-------------------------------")
     console.log(`Edificio: ${edif?.name}- trabajadores: ${ue?.trabajadores} ` )
     console.log(`User: ${usuario?.id}- trabajadores: ${usuario?.unidadesDeTrabajo} ` )
