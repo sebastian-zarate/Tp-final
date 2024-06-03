@@ -6,7 +6,7 @@ interface Props {
 }
 
 const MenuDesplegable: React.FC<Props> = ({ onBuildClick }) => {
-  const [edificios, setEdificios] = useState<Edificio[]>([]);
+  const [edificios, setEdificios] = useState<any[]>([]);
 
   useEffect(() => {
     fetchBuildingData();
