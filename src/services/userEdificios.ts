@@ -181,19 +181,20 @@ export const getUEbyUserIdRet = async (Id: string) => {
 }
 
 // GET todos los edificios  del mismo EdificioId que construyó un usuario
-export const getUEbyUserIdEdIdNico = async (userId: string, edificioId: string) => {
-    const e = await prisma.userEdificios.findFirst({
+export const getUEbyUserIdEdIdNico = async (UserId: string, EdificioId: string) => {
+    const ue = await prisma.userEdificios.findFirst({
         where: {
             userId: {
-                equals: userId,
+                equals: UserId,
             },
             edificioId: {
-                equals: edificioId,
+                equals: EdificioId,
             }
         }
     })
-    console.log(`UserID ${userId} EdificiosID ${edificioId}: `, e)
-    return e
+
+    console.log(`User ${await getUserById(UserId).then(X=>X?.username)} EdificiosID ${EdificioId} `, ue?.id)
+    return ue
 }
 
 export const updateUEunidades= async (Id: string, unidades: any, panXunidad:any) => {

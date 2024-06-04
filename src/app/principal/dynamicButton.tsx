@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import MenuDesplegable from './menuDesplegable';
 import MenuAsignar from './menuAsignar';
-import { GuardarEdificio, getBuildingsByUserId, builtEdificio, getUEbyUserId } from '../../services/userEdificios';
+import { GuardarEdificio, getBuildingsByUserId, builtEdificio, getUEbyUserId, getUEById } from '../../services/userEdificios';
 import { getUserByCooki, getUser, getUserByHash} from '@/services/users';
 import { getEdificios } from '../../services/edificios';
 import {recolectarRecursos } from '@/services/recursos';
@@ -10,6 +10,7 @@ import {recolectarRecursos } from '@/services/recursos';
 import { useCookies } from 'react-cookie';
 import { verifyJWT } from '@/helpers/jwt';
 import { Await } from 'react-router-dom';
+import { eventNames } from 'process';
 
 
 type Building = {
@@ -22,7 +23,10 @@ type Building = {
   nivel: number;
   costo: number;
 };
-
+type datos = {
+  edifId: string,
+  userId: string
+}
 const DynamicBuildings: React.FC = () => {
 
   const [buildings, setBuildings] = useState<Building[]>([]);
@@ -33,8 +37,17 @@ const DynamicBuildings: React.FC = () => {
   const [piedra, setPiedra] = useState(0);
   const [pan, setPan] = useState(0);
   const [usuario, setUser] = useState('');
+  const [userId, setUserId] = useState('')
+  //cuando se cliclea un botón se habilita 
   const[menuButton, setMenBut] = useState(false);
+  const[menuButton2, setMenBut2] = useState("");
 
+
+  //este método obtiene el dato recibido del hijo menuAsignar, el cual será usado para setear cerrar el botón
+  const recibirDatosDelHijo = (datos) => {
+    console.log("datos222", datos)
+     setMenBut(!menuButton);
+  };
 
 
 
@@ -44,6 +57,7 @@ const DynamicBuildings: React.FC = () => {
   useEffect(() => {
 
     let userId = getUserByCooki().then((resultado)=>resultado?.id) // Reemplazar con el ID de usuario actual
+    if (userId) setUserId(userId)
     cargarUser();
     getBuildingsByUserId(userId)
       .then(fetchedBuildings => {
@@ -97,6 +111,7 @@ const DynamicBuildings: React.FC = () => {
 
     window.addEventListener('mousemove', mouseMoveRef.current);
     window.addEventListener('mouseup', mouseUpRef.current);
+
   };
 
   const handleBuildingMove = (index: number, newX: number, newY: number) => {
@@ -181,30 +196,23 @@ const DynamicBuildings: React.FC = () => {
       setUser(String (user.username));
     }
   }
-  const generarUnidades = () => {
-    setMenBut(true)
+
+   function handleClick(event: React.MouseEvent<HTMLButtonElement>) {  
+
+    const elementoClicado = event.target as HTMLElement;
+    const idUE = elementoClicado.id;
+    console.log('id UE:', idUE);
+    if(!menuButton )    setMenBut(!menuButton);
+    setMenBut2(idUE)
+
   }
 
-  function handleClick(event: MouseEvent) {
-    if (event.button === 0) {
-      console.log('Clic izquierdo');
-    } else if (event.button === 1) {
-      console.log('Clic central (rueda)');
-    } else if (event.button === 2) {
-      console.log('Clic derecho');
-    }
-  }
-        // Ejemplo de uso en un elemento HTML (por ejemplo, un botón)
-        const miBoton = document.getElementById('miBoton');
-        miBoton?.addEventListener('click', handleClick);
+// id maderera  663ac05f044ccf6167cf7041
+async function trabajadores(id:string){
+  const UEtrabajadores= await getUEById(id).then(resultado=> resultado?.trabajadores)
+  return UEtrabajadores
+}
 
-  
-
-  const getUE = async () => {
-    const user = await getUserByCooki()
-    const h= await getUEbyUserId(user.id)
-    return h
-  }
   return (
     <div className="hola flex flex-col items-center justify-center w-screen h-screen bg-gray-900">
       <div className="absolute top-0 left-0 p-4 bg-red-500 hover:bg-blue-700 text-blue font-bold py-2 px-4 rounded">
@@ -214,14 +222,15 @@ const DynamicBuildings: React.FC = () => {
         <h3>Pan: {pan}</h3>
         <button onClick={() => recolectarRecursosUser()}> Recolectar Recursos</button>        
       </div>
-      <div className='absolute top-0 left-100 p-4 bg-red-500 hover:bg-blue-700 text-blue font-bold py-2 px-4 rounded'>
+{/*       <div className='absolute top-0 left-100 p-4 bg-red-500 hover:bg-blue-700 text-blue font-bold py-2 px-4 rounded'>
         <button onClick={() => generarUnidades()}>Asignar Unidades</button>
-      </div>
+      </div> */}
       <div style={{ width: '1200px', height: '700px' }} className="bg-green-500 flex items-center justify-center relative">
         {buildings.map((building, index) => (
           <div
             key={index}
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            id={building.id}
+            className={` bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded`}
             style={{
               left: `${building.x}px`,
               top: `${building.y}px`,
@@ -233,20 +242,15 @@ const DynamicBuildings: React.FC = () => {
               cursor: 'pointer',
             }}
             onMouseDown={(e) => handleMouseDown(index, e)}
-            
+            onClick={(e) => handleClick(e)}  
+               
           >
+           
             <div>{building.type} - X: {building.x}, Y: {building.y}</div>
-            <button className='bg-red-500 hover:bg-red-700 text-white font-bold  rounded"' 
-            onClick={() => {setMenBut(!menuButton); console.log(menuButton)}}>Asignar</button>
-              {menuButton ? <MenuAsignar /> : null}
-              {/* <div id={building.id} className="dropdowm relative" style={{display:"flex", transform: "rotateX(-32deg) rotateZ(50deg)"}}>                
-                <form className=" flex flex-col"  action={updateEdifUser}>                       
-                    <input type="number" name="unidadesEdif" placeholder="Nº-trabajadores del edificio" />                    
-                    <button type="submit" className=" mt-5 bg-blue-500 hover:bg-blue-700 " >Agregar</button>
-                </form>
-              </div> */}
-
+              {(menuButton2 == building.id) ? <MenuAsignar  datos= {building.id} enviarDatosAlPadre={recibirDatosDelHijo} dato2= {menuButton}/> : null  }
+  
           </div>
+
         ))}
       </div>
       <button
