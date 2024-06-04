@@ -36,6 +36,7 @@ const DynamicBuildings: React.FC = () => {
   const [madera, setMadera] = useState(0);
   const [piedra, setPiedra] = useState(0);
   const [pan, setPan] = useState(0);
+  const[unidadesDisponibles, setUnidadesDisp] = useState(0)
   const [usuario, setUser] = useState('');
   const [userId, setUserId] = useState('')
   //cuando se cliclea un botón se habilita 
@@ -47,6 +48,7 @@ const DynamicBuildings: React.FC = () => {
   const recibirDatosDelHijo = (datos) => {
     console.log("datos222", datos)
      setMenBut(!menuButton);
+     setMenBut2("")
   };
 
 
@@ -194,6 +196,7 @@ const DynamicBuildings: React.FC = () => {
       setPiedra(user.piedra);
       setPan(user.pan);
       setUser(String (user.username));
+      setUnidadesDisp(user.unidadesDeTrabajo)
     }
   }
 
@@ -203,7 +206,10 @@ const DynamicBuildings: React.FC = () => {
     const idUE = elementoClicado.id;
     console.log('id UE:', idUE);
     if(!menuButton )    setMenBut(!menuButton);
-    setMenBut2(idUE)
+    if(elementoClicado.id){
+      setMenBut2(idUE)
+    }
+
 
   }
 
@@ -220,6 +226,7 @@ async function trabajadores(id:string){
         <h3>Madera: {madera}</h3>
         <h3>Piedra: {piedra}</h3>
         <h3>Pan: {pan}</h3>
+        <h3>Trabajadores disponibles: {unidadesDisponibles}</h3>
         <button onClick={() => recolectarRecursosUser()}> Recolectar Recursos</button>        
       </div>
 {/*       <div className='absolute top-0 left-100 p-4 bg-red-500 hover:bg-blue-700 text-blue font-bold py-2 px-4 rounded'>
@@ -247,7 +254,7 @@ async function trabajadores(id:string){
           >
            
             <div>{building.type} - X: {building.x}, Y: {building.y}</div>
-              {(menuButton2 == building.id) ? <MenuAsignar  datos= {building.id} enviarDatosAlPadre={recibirDatosDelHijo} dato2= {menuButton}/> : null  }
+              {(menuButton2 == building.id) ? <MenuAsignar  datos= {building.id} enviarDatosAlPadre={recibirDatosDelHijo}/> : null  }
   
           </div>
 
