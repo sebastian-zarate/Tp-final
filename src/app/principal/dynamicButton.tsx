@@ -48,7 +48,6 @@ const DynamicBuildings: React.FC = () => {
   const recibirDatosDelHijo = (datos) => {
     console.log("datos222", datos)
      setMenBut(!menuButton);
-     setMenBut2("")
   };
 
 
@@ -59,9 +58,9 @@ const DynamicBuildings: React.FC = () => {
   useEffect(() => {
 
     let userId = getUserByCooki().then((resultado)=>resultado?.id) // Reemplazar con el ID de usuario actual
-    if (userId) setUserId(userId)
+    if (userId) setUserId(String(userId))
     cargarUser();
-    getBuildingsByUserId(userId)
+    getBuildingsByUserId(String(userId))
       .then(fetchedBuildings => {
         setBuildings(fetchedBuildings);
       })
@@ -212,12 +211,9 @@ const DynamicBuildings: React.FC = () => {
 
 
   }
-
-// id maderera  663ac05f044ccf6167cf7041
-async function trabajadores(id:string){
-  const UEtrabajadores= await getUEById(id).then(resultado=> resultado?.trabajadores)
-  return UEtrabajadores
-}
+  function viajesuliChat(){
+    window.location.replace("/chatuser")
+  }
 
   return (
     <div className="hola flex flex-col items-center justify-center w-screen h-screen bg-gray-900">
@@ -229,9 +225,9 @@ async function trabajadores(id:string){
         <h3>Trabajadores disponibles: {unidadesDisponibles}</h3>
         <button onClick={() => recolectarRecursosUser()}> Recolectar Recursos</button>        
       </div>
-{/*       <div className='absolute top-0 left-100 p-4 bg-red-500 hover:bg-blue-700 text-blue font-bold py-2 px-4 rounded'>
-        <button onClick={() => generarUnidades()}>Asignar Unidades</button>
-      </div> */}
+      <div className='absolute top-0 left-100 p-4 bg-red-500 hover:bg-blue-700 text-blue font-bold py-2 px-4 rounded'>
+        <button onClick={() => viajesuliChat()}>Chat</button>
+      </div>
       <div style={{ width: '1200px', height: '700px' }} className="bg-green-500 flex items-center justify-center relative">
         {buildings.map((building, index) => (
           <div
@@ -254,7 +250,8 @@ async function trabajadores(id:string){
           >
            
             <div>{building.type} - X: {building.x}, Y: {building.y}</div>
-              {(menuButton2 == building.id) ? <MenuAsignar  datos= {building.id} enviarDatosAlPadre={recibirDatosDelHijo}/> : null  }
+            {/* Si el id seleccionado es el mismo al id del UE, y si menuButoon esta habilitado entonces abrir el form del boton */}
+              {( (menuButton2 == building.id)&&menuButton ) ? <MenuAsignar  datos= {building.id} enviarDatosAlPadre={recibirDatosDelHijo}/> : null  }
   
           </div>
 

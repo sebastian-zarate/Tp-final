@@ -6,6 +6,7 @@ import { cookies } from "next/headers";
 import { signJWT, verifyJWT } from "@/helpers/jwt";
 import { StyledString } from "next/dist/build/swc";
 import { redirect } from "next/dist/server/api-utils";
+import { error } from "console";
 
 const prisma = new PrismaClient()
 let cantMadera = 500
@@ -150,15 +151,39 @@ export async function updateUser(Id: string, data: any) {
   console.log(`User ${Id} updated: `, u)
   return u
 }
+//actualizo recursos de user
+export async function updateUserRecursos(Id: string, madera: number, piedra: number, pan:number) {
+  const u = await getUserById(Id)
+  if((Number(u?.madera) < madera) || (Number(u?.piedra) < piedra) 
+    || (Number(u?.pan) < pan)) { 
+      throw error("Insuficientes recursos")
+    }
+  let maderaUpdated = Number(u?.madera) - madera
+  let piedraUpdated = Number(u?.piedra) - piedra
+  let panUpdated = Number(u?.pan) - pan
 
+  const userUpdated = await prisma.users.update({
+    where: {
+      id: Id
+    },
+    data: {
+      madera: maderaUpdated,
+      piedra:piedraUpdated,
+      pan:panUpdated
+    }
+  })
+
+  console.log(`User ${Id} updated: `, userUpdated)
+  return userUpdated
+}
 //Devuelve el user en base a la cookie
 export async function getUserByCooki() {
   //obtengo el valor de la cookie user
   const cooki = cookies().get('user')?.value
   //se obtiene el hash de traducir el token
-  let hash = verifyJWT(cooki)
+  let hash = verifyJWT(String(cooki))
   //se obtiene el user por el hash
-  const user = getUserByHash(hash)
+  const user = getUserByHash(String(hash))
   return user
 }
 
