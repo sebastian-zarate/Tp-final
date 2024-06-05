@@ -2,7 +2,7 @@
 import { cookies } from "next/headers";
 import DynamicButton from "./dynamicButton";
 import { redirect } from "next/navigation";
-import { getCooki, getUserByHash } from "@/services/users";
+import {getUserByHash } from "@/services/users";
 import { verifyJWT } from "@/helpers/jwt";
 
 async function Principal() {
@@ -15,7 +15,7 @@ async function Principal() {
    let user;
    if (valor) {
        let hash = verifyJWT(valor)
-       user = await getUserByHash(hash)
+       user = await getUserByHash(String(hash || ""))
 
    }
  /*   const user = getCooki()
