@@ -1,67 +1,65 @@
 
-<<<<<<< HEAD
-=======
-import { getEdificioById, getEdificioByName } from "@/services/edificios";
-import {  getUEbyUserIdEdIdNico, getUEbyUserIdRet, updateUEunidades } from "@/services/userEdificios";
-import { getUser } from "@/services/users";
-import React from "react";
->>>>>>> 42a04d10d3ee9c48b4e24b31ae3302a15d12e0be
+import React, { useState, useEffect } from 'react';
+import { getEdificios } from '../../services/edificios';
 
-import { updateUEunidades } from "@/services/userEdificios";
-
-export default function MenuAsignar({datos, enviarDatosAlPadre}){
-
-    let panXunidad = 10
-    function espera(esp: any) {
-      esp.style.display == "flex"
-      setTimeout(() => {
-          esp.style.display == "none"
-      }, 15000)
-    } 
-
-    // Función para manejar la selección
-    async function updateEdifUser(data: FormData) {
-<<<<<<< HEAD
-      console.log("IDDDD EDIFUSER", datos)
-=======
-       /*  "use server" */
-       // LO AGREGUE PARA QUE DEJE DE TIRAR ERROR ESTO
-        let user = await getUser("6642cd26b1865f8de5c7b62b")
-      let id_edif = await getEdificioByName(data.get('edificios') as string)
-      let userEdif = await getUEbyUserIdEdIdNico(String(user?.id || ""), String(id_edif?.id || ""))
-    
-      let unidades = data.get('unidadesEdif') as string
-      let id_EU = userEdif?.id
->>>>>>> 42a04d10d3ee9c48b4e24b31ae3302a15d12e0be
-
-      let unidades = data.get('unidadesEdif') as string
-      let id_EU = datos
-
-      console.log("IDDD EU", id_EU)
-      if(id_EU && unidades) {
-          console.log("acualizo doc------")
-          try{
-              await updateUEunidades(id_EU, parseInt(unidades), panXunidad)
-          }catch(e){
-              alert("error: "+ e)
-          }       
-        }
-
-    }
-    const enviarDatos = () => {
-        let estado = true
-        console.log("dato enviado al padre ",estado)
-        enviarDatosAlPadre(estado);
-      };
-
-
-    return( 
-    <div id={datos} className=" flex-col" style={{display:"flex", marginLeft: "20px",transform: "rotateX(-32deg) rotateZ(50deg)  scale(1.15)"}}  >               
-        <form  action={updateEdifUser} >                       
-            <input className="text-black" type="number" name="unidadesEdif" placeholder="Trabajadores" />            
-            <button type="submit" className=" text-black bg-yellow-500 hover:bg-yellow-700 " >Agregar</button>
-            <button type="button" className=" text-black bg-yellow-500 hover:bg-yellow-700 " onClick={enviarDatos}>Cerrar</button>
-        </form>       
-    </div>
-      )
+interface Props {
+  onBuildClick: (id: string, x: number, y: number, buildingType: string, ancho: number, largo: number, costo:number) => void;
 }
+
+const MenuDesplegable: React.FC<Props> = ({ onBuildClick }) => {
+  const [edificios, setEdificios] = useState<any[]>([]);
+  
+
+
+  useEffect(() => {
+    fetchBuildingData();
+  }, []);
+
+  async function fetchBuildingData() {
+    try {
+      // Obtener los datos de los edificios desde la base de datos
+    
+       
+      const edificiosData = await getEdificios();
+      setEdificios(edificiosData);
+    } catch (error) {
+      console.error("Error al obtener datos de edificios:", error);
+    }
+  };
+
+
+
+
+
+
+
+  // Función para llamar a la función onBuildClick con el tipo de edificio seleccionado
+  const handleBuildSelection = (buildingType: string) => {
+    const selectedEdificio = edificios.find(edificio => edificio.name === buildingType);
+    if (selectedEdificio) {
+      // Aquí puedes definir las coordenadas x, y donde quieres construir el edificio
+      const x = 100; // Por ejemplo, 100px desde el borde izquierdo del cuadro verde
+      const y = 100; // Por ejemplo, 100px desde el borde superior del cuadro verde
+      const ancho = selectedEdificio.ancho || 20; // Usar ancho predeterminado si no está definido en la base de datos
+      const largo = selectedEdificio.largo || 20; // Usar largo predeterminado si no está definido en la base de datos
+      const costo = selectedEdificio.costo ; // Usar costo predeterminado si no está definido en la base de datos
+      onBuildClick(selectedEdificio.id, x, y, buildingType, ancho, largo, costo);
+    } else {
+      console.error(`No se encontró el edificio con el nombre "${buildingType}"`);
+    }
+  };
+
+  return (
+    <div className="absolute top-0 right-0 p-4 bg-red-500 hover:bg-blue-700 text-blue font-bold py-2 px-4 rounded">
+      <h3>Crear edificios</h3>
+      {/* Renderizar los botones para seleccionar el tipo de edificio */}
+      {edificios.map((edificio, index) => (
+        <div key={index} style={{ marginBottom: '10px' }}>
+          <button onClick={() => handleBuildSelection(edificio.name)}>{edificio.name}</button>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+export default MenuDesplegable;

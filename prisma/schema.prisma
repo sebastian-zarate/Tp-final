@@ -26,6 +26,14 @@ model Edificios {
   tipoRecurso String?
   ultimaInteraccion DateTime?
   userEdificios UserEdificios[]
+  //----------------------------------------------------------------------------------
+//---------------------------------------------------------------------------- SEBA ----------------
+
+ cantidad  Int?// canatidad de capacidad de contruccion de unidades de este tipo de edificio        |
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//-------------SOLO ESO  EN EDIFICIO----------------------
+
  
 }
 
@@ -40,6 +48,18 @@ model Users{
   madera Int
   piedra Int
   pan Int
+  ///------------------------------------------------------------------------------------------------
+  ///------------------------------------SEBA-------------------------------------------------------
+  maderera Int
+  panaderia Int
+  ayuntamiento Int
+  cantera Int
+  muros Int
+  bosque Int
+  herreria Int
+  //------------------------------------------------------------------------------------------------
+  //--------------------------------SOLO ESO----------------------------------------------------------------
+
   unidadesDeTrabajo Int
   userEdificios UserEdificios[]
   mensajes Mensajes[]
