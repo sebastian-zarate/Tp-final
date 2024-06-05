@@ -187,7 +187,7 @@ export async function getUserByCooki() {
   return user
 }
 
-export function getChatIdByCooki(){
+export async function getChatIdByCooki(){
   const chatId = cookies().get('chatId')?.value
   return chatId
 }
