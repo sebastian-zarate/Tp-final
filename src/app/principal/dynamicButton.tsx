@@ -264,6 +264,7 @@ useEffect(() => {
         <button onClick={() => handleMensajeria()}>Chat</button>
       </div>
       <Mensajeria
+        userId= {userId}
         mostrarMensajeria={mostrarMensajeria}
         userLoaded={userLoaded}
         chats={chats}

@@ -1,7 +1,8 @@
 "use client"
-import React from 'react';
+import React, { use } from 'react';
 
 interface MensajeriaProps {
+  userId: string;
   mostrarMensajeria: boolean;
   userLoaded: boolean;
   chats: any[];
@@ -10,16 +11,17 @@ interface MensajeriaProps {
   getMensajes: (id: string) => void;
 }
 
-const Mensajeria: React.FC<MensajeriaProps> = ({ mostrarMensajeria, userLoaded, chats, chatnames, handleMensajeria, getMensajes }) => {
+const Mensajeria: React.FC<MensajeriaProps> = ({ userId, mostrarMensajeria, userLoaded, chats, chatnames, handleMensajeria, getMensajes }) => {
   if (!mostrarMensajeria || !userLoaded) {
     return null;
   }
 
-  const handleRedirect = (chatid: string) => {
-   window.location.href = `/chatuser`
-   console.log("chatid", chatid)
-   localStorage.setItem('chatId', chatid)
-  }
+  const handleRedirect = (chatid: string, userid: string) => {
+    window.location.href = `/chat`
+    console.log("chatid", chatid)
+    localStorage.setItem('chatId', chatid)
+    localStorage.setItem('userId', userid) 
+ }
   return (
     <div className="fixed inset-0 w-full h-full z-50 bg-black bg-opacity-50 flex items-center justify-center">
       <div className="relative w-1/2 h-1/2 bg-white rounded-lg">
@@ -30,7 +32,7 @@ const Mensajeria: React.FC<MensajeriaProps> = ({ mostrarMensajeria, userLoaded, 
             {chats.map((chat: any, index: number) => (
               <li key={chat.id} className='flex flex-row justify-around items-center space-x-4'>
                 <h2> ({chat.id}) Chat: {chatnames[index]}</h2>
-                <button  onClick={() => handleRedirect(chat.id)} className='bg-gray-500'>abrir </button>
+                <button  onClick={() => handleRedirect(chat.id, userId)} className='bg-gray-500'>abrir </button>
               </li>
             ))}
           </ul>
