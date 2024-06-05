@@ -235,19 +235,25 @@ export const getUEbyUserIdEdIdNico = async (UserId: string, EdificioId: string) 
     return ue
 }
 
-export const updateUEunidades= async (Id: string, unidades: any, panXunidad:any) => {
+export const updateUEunidades = async (Id: string, unidades: any, panXunidad: any) => {
 
     //obtengo el doc userEdificio
     const ue = await prisma.userEdificios.findFirst({
-        where:{
-            id:Id
+        where: {
+            id: Id
         }
     })
     //obtengo el id del user que se encuentra en el documento userEdificio
     const us_id = ue?.userId
+    const usuario = await getUserById(String(us_id))
+    //cantidad de unidades de trabajo que le quedan al user
+    let resultadoUnidades = (Number(usuario?.unidadesDeTrabajo)) - unidades
 
+    if (resultadoUnidades < 0) return error("Unidades insuficientes")
 
-    if(panUser < 0) return error("Pan insuficiente para alimentar a las unidades")
+    let panUser = Number(usuario?.pan) - (panXunidad * unidades)
+
+    if (panUser < 0) return error("Pan insuficiente para alimentar a las unidades")
 
     let unidadesEdif = unidades + (ue?.trabajadores)
 
@@ -257,23 +263,23 @@ export const updateUEunidades= async (Id: string, unidades: any, panXunidad:any)
             id: Id
         },
         data: {
-           trabajadores: unidadesEdif
+            trabajadores: unidadesEdif
         }
     })
     //actualizo las unidades de trabajo restantes del usuario, y el pan restante del usuario
     await prisma.users.update({
-        where:{
-            id:usuario?.id
+        where: {
+            id: usuario?.id
         },
         data: {
-            unidadesDeTrabajo:resultadoUnidades,
-            pan:panUser
+            unidadesDeTrabajo: resultadoUnidades,
+            pan: panUser
         }
     })
-
+    let edif = await getEdificioById(String(ue?.edificioId)).then(x => x)
     console.log("------------------Después de actualizar-------------------------------")
-    console.log(`Edificio: ${edif?.name}- trabajadores: ${ue?.trabajadores} ` )
-    console.log(`User: ${usuario?.id}- trabajadores: ${usuario?.unidadesDeTrabajo} ` )
+    console.log(`Edificio: ${edif?.name}- trabajadores: ${ue?.trabajadores} `)
+    console.log(`User: ${usuario?.id}- trabajadores: ${usuario?.unidadesDeTrabajo} `)
     return e
 }
 

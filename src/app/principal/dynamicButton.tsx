@@ -4,12 +4,11 @@ import MenuDesplegable from './menuDesplegable';
 import MenuAsignar from './menuAsignar';
 import Mensajeria from './menuChats';
 import { GuardarEdificio, getBuildingsByUserId, builtEdificio, getUEbyUserId, getUEById } from '../../services/userEdificios';
-import { getUserByCooki, getUser, getUserByHash} from '@/services/users';
+import { getUserByCooki, getUser, getUserByHash, updateUserBuildings} from '@/services/users';
 import {recolectarRecursos } from '@/services/recursos';
 import { getChats, getUsernameOther, getChatName } from '@/services/chats';
 import { getMensajes } from '@/services/mensajes';
-//-
-import { updateUserBuildings } from '@/services/users';
+
 
 type Building = {
   x: number;
@@ -32,7 +31,7 @@ const DynamicBuildings: React.FC = () => {
   const [draggedBuildingIndex, setDraggedBuildingIndex] = useState<number | null>(null);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [madera, setMadera] = useState(0);
-  const [piedras, setPiedra] = useState(0);
+  const [piedra, setPiedra] = useState(0);
   const [pan, setPan] = useState(0);
   const[unidadesDisponibles, setUnidadesDisp] = useState(0)
   const [usuario, setUser] = useState('');
@@ -40,8 +39,9 @@ const DynamicBuildings: React.FC = () => {
   //cuando se cliclea un botón se habilita 
   const[menuButton, setMenBut] = useState(false);
   const[menuButton2, setMenBut2] = useState("");
-
-  ////-----------------------------------------------------------
+  
+  
+   ////-----------------------------------------------------------
 //---------------------seba--------------------------------------
 //-----------------------------------------------------------
 const [canon, setCanon] = useState(0);
@@ -78,58 +78,46 @@ const [message, setMessage] = useState('');
   //#region USEEFFECTS USUARIO
   //useffect para obetener el id de user 
   useEffect(() => {
-    const fetchUserAndBuildings = async () => {
+    async function fetchData() {
       try {
-        // Fetch the user ID
-        const user = await getUserByCooki();
-        const userId = user?.id;
-
-        if (userId) {
-          const userIdString = userId.toString();
-          setUser(userIdString);
-
-          // Fetch buildings by user ID
-          const fetchedBuildings = await getBuildingsByUserId(userIdString);
-          setBuildings(fetchedBuildings);
-        } else {
-          console.error("User ID is undefined");
+        let resultado = await getUserByCooki();
+        let usuarioId = resultado?.id;
+        if (!usuarioId) {
+          console.error('No user ID found');
+          return;
         }
+        console.log(usuarioId);
+        setUserId(String(usuarioId));
+        setUserLoaded(true);
+        cargarUser();
+        const [fetchedBuildings, chats] = await Promise.all([
+          getBuildingsByUserId(usuarioId),
+          getChats(usuarioId),
+        ]);
+        setBuildings(fetchedBuildings);
+        console.log("fetchedBuildings", fetchedBuildings);
+        setChats(chats);
+        console.log('Chats:', chats);
       } catch (error) {
-        console.error("Error fetching buildings:", error);
+        console.error("Error fetching data:", error);
       }
-    };
-
-    fetchUserAndBuildings();
-
-    // Load user data (assuming this is a synchronous function)
-    cargarUser();
-  }, []);
-//------------------------
-//-------------------------------------------
-
-useEffect(() => {
-  if (message) {
-    const timer = setTimeout(() => setMessage(''), 10000);
-    return () => clearTimeout(timer);
-  }
-}, [message]);
-
-const messageDivStyle = {
-  display: message ? 'block' : 'none', // Mostrar el mensaje solo cuando hay un mensaje para mostrar
-};
-
-
-//----------------
-//----------------
-//----------------
-
+    }
+    fetchData();
+  }, [userId]);
 
 //conseguir todos los nombres de los chats
-
-  //---------------------------------------------------
-  //---------------------------------------------------
-  //---------------------------------------------------
-
+useEffect(() => {
+  if (chats.length > 0 && userId) {
+    console.log('Fetching chat names...')
+    Promise.all(chats.map(chat => getChatName(chat, userId)))
+      .then(chatnames => {
+        setChatNames(chatnames);
+        console.log('Chat names:', chatnames);
+      })
+      .catch(error => console.error('Error fetching chat names:', error));
+  }
+}, [chats, userId]);
+  
 const handleBuildClick = async (id: string, x: number, y: number, buildingType: string, ancho: number, largo: number, costos: number) => {
   const existingBuilding = false //buildings.find(building => building.x === x && building.y === y && building.id === id);
     
@@ -145,7 +133,7 @@ const handleBuildClick = async (id: string, x: number, y: number, buildingType: 
        
        const newBuilding = { id, x, y, type: buildingType, ancho, largo, cantidad: 1 };
        //setBuildings([...buildings, newBuilding]);
-      window.location.reload();
+       window.location.reload();
        try {
          // Evita recargar la página, en su lugar actualiza el estado
          await builtEdificio(userId, id, x, y, 1);
@@ -159,9 +147,7 @@ const handleBuildClick = async (id: string, x: number, y: number, buildingType: 
      console.log('Ya hay un edificio del mismo tipo en estas coordenadas');
    }
  }; 
- 
- //------------------------------------------------------------
- //----------------------------------
+
   const handleMenuClick = () => {
     setMenuOpen(!menuOpen);
   };
@@ -203,8 +189,15 @@ const handleBuildClick = async (id: string, x: number, y: number, buildingType: 
   };
 
 
+  const guardarEdificioEnBD = (id: string, posX: number, posY: number, nivel : number) => {
+    GuardarEdificio(userId, id, posX, posY, nivel);
+  };
 
- 
+  const guardarAldea = () => {
+    buildings.forEach(building => {
+      guardarEdificioEnBD(building.id, building.x, building.y, building.nivel);
+    });
+  };
   const recolectarRecursosUser = async () => {
 /*     "use server" */
     const user = await getUserByCooki()
@@ -224,19 +217,14 @@ const handleBuildClick = async (id: string, x: number, y: number, buildingType: 
       setPan(user.pan);
       setUser(String (user.username));
       setUnidadesDisp(user.unidadesDeTrabajo)
-      //--------------------------
-      //----------------------
-      //----------------------
       setUserId(user.id);
-      setMaderera(user.maderera);
-      setCantera(user.cantera);
-      setPanaderia(user.panaderia);
-      setBosque(user.bosque);
-      setMuros(user.muros);
-      setAyuntamiento(user.ayuntamiento);
-      setHerreria(user.herreria);
-//----------------------------------------------------------------
-//----------------------------------------------------------------
+      setMaderera(Number(user.maderera));
+      setCantera(Number(user.cantera));
+      setPanaderia(Number(user.panaderia));
+      setBosque(Number(user.bosque));
+      setMuros(Number(user.muros));
+      setAyuntamiento(Number(user.ayuntamiento));
+      setHerreria(Number(user.herreria));
     }
   }
    // React.MouseEvent<HTMLButtonElement>
@@ -252,36 +240,13 @@ const handleBuildClick = async (id: string, x: number, y: number, buildingType: 
 
 
   }
-  function viajesuliChat(){
-    window.location.replace("/chatuser")
-  }
+  
+
   function handleMensajeria() {
     setMostrarMensajeria(!mostrarMensajeria);
   }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  /////////////////-----------------seba-------------------------
+   /////////////////-----------------seba-------------------------
   //---------------------------------
   //------------------------------
   //---------------------------------
@@ -317,13 +282,8 @@ const handleBuildClick = async (id: string, x: number, y: number, buildingType: 
       }
 
       return updatedBuildings;
-    });
-  };
-
-  const guardarEdificioEnBD = (id: string, posX: number, posY: number, nivel : number) => {
-    GuardarEdificio(userId ,id, posX, posY, nivel);
-  };
-
+  });
+ };
   const updateBuildingCount = async (id: string, costos: number) => {
     const userIdd = '665fd3b9b927599f41789278'; // Reemplazar con el ID de usuario actual
     let countsMax = 0;
@@ -339,7 +299,7 @@ const handleBuildClick = async (id: string, x: number, y: number, buildingType: 
       herreria,
       pan,
       madera,
-      piedras,
+      piedra,
     };
   
     switch (id) {
@@ -405,8 +365,8 @@ const handleBuildClick = async (id: string, x: number, y: number, buildingType: 
         if (muros < 3) {
           newCounts.muros += 1;
           setMuros(newCounts.muros);
-          newCounts.piedras = (piedras - costos);
-          setPiedra(newCounts.piedras);
+          newCounts.piedra = (piedra - costos);
+          setPiedra(newCounts.piedra);
           countsMax = 1;
         } else {
           console.log('No puedes tener más de 3 muros');
@@ -428,8 +388,8 @@ const handleBuildClick = async (id: string, x: number, y: number, buildingType: 
         if (herreria < 2) {
           newCounts.herreria += 1;
           setHerreria(newCounts.herreria);
-          newCounts.piedras = (piedras - costos);
-          setPiedra(newCounts.piedras);
+          newCounts.piedra = (piedra - costos);
+          setPiedra(newCounts.piedra);
           countsMax = 1;
         } else {
           console.log('Condition for herreria not met');
@@ -449,33 +409,24 @@ const handleBuildClick = async (id: string, x: number, y: number, buildingType: 
         newCounts.ayuntamiento,
         newCounts.pan,
         newCounts.madera,
-        newCounts.piedras
+        newCounts.piedra
       );
       console.log('User buildings count updated successfully.');
     } catch (error) {
       console.error('Error updating user buildings count:', error);
     }
   
-    return countsMax;
+    return countsMax;
   };
-  
 
   //-------------------------
   return (
     <div className="hola flex flex-col items-center justify-center w-screen h-screen bg-gray-900">
       <div className="absolute top-0 left-0 p-4 bg-red-500 text-blue font-bold py-2 px-4 rounded">
-      <h3>Usuario: {userId}</h3>
+        <h3>Usuario: {usuario}</h3>
         <h3>Madera: {madera}</h3>
-        <h3>Piedra: {piedras}</h3>
+        <h3>Piedra: {piedra}</h3>
         <h3>Pan: {pan}</h3>
-        <h3>Canon: {canon}</h3>
-        <h3>Maderera: {maderera}</h3>
-        <h3>Cantera: {cantera}</h3>
-        <h3>Panaderia: {panaderia}</h3>
-        <h3>Bosque: {bosque}</h3>
-        <h3>Muros: {muros}</h3>
-        <h3>Ayuntamiento: {ayuntamiento}</h3>
-        <h3>Herreria: {herreria}</h3>
         <h3>Trabajadores disponibles: {unidadesDisponibles}</h3>
         <button onClick={() => recolectarRecursosUser()}> Recolectar Recursos</button>        
       </div>
@@ -483,6 +434,7 @@ const handleBuildClick = async (id: string, x: number, y: number, buildingType: 
         <button onClick={() => handleMensajeria()}>Chat</button>
       </div>
       <Mensajeria
+        userId= {userId}
         mostrarMensajeria={mostrarMensajeria}
         userLoaded={userLoaded}
         chats={chats}
@@ -491,15 +443,11 @@ const handleBuildClick = async (id: string, x: number, y: number, buildingType: 
         getMensajes={getMensajes}
       />
       <div style={{ width: '1200px', height: '700px' }} className="bg-green-500 flex items-center justify-center relative">
-      
-      <div id="messageDiv" style={messageDivStyle} className="absolute top-0 left-0 p-4 bg-yellow-500 text-black font-bold py-2 px-4 rounded">
-    {message}
-  </div>
- 
-  {buildings.map((building, index) => (
+        {buildings.map((building, index) => (
           <div
             key={index}
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            id={building.id}
+            className={` bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded`}
             style={{
               left: `${building.x}px`,
               top: `${building.y}px`,
@@ -511,20 +459,16 @@ const handleBuildClick = async (id: string, x: number, y: number, buildingType: 
               cursor: 'pointer',
             }}
             onMouseDown={(e) => handleMouseDown(index, e)}
-            
+            onClick={(e) => handleClick(e)}  
+               
           >
+           
             <div>{building.type} - X: {building.x}, Y: {building.y}</div>
-            <button className='bg-red-500 hover:bg-red-700 text-white font-bold  rounded"' 
-            onClick={() => {setMenBut(!menuButton); console.log(menuButton)}}>Asignar</button>
-              {menuButton ? <MenuAsignar /> : null}
-              {/* <div id={building.id} className="dropdowm relative" style={{display:"flex", transform: "rotateX(-32deg) rotateZ(50deg)"}}>                
-                <form className=" flex flex-col"  action={updateEdifUser}>                       
-                    <input type="number" name="unidadesEdif" placeholder="Nº-trabajadores del edificio" />                    
-                    <button type="submit" className=" mt-5 bg-blue-500 hover:bg-blue-700 " >Agregar</button>
-                </form>
-              </div> */}
-
+            {/* Si el id seleccionado es el mismo al id del UE, y si menuButoon esta habilitado entonces abrir el form del boton */}
+              {( (menuButton2 == building.id)&&menuButton ) ? <MenuAsignar  datos= {building.id} enviarDatosAlPadre={recibirDatosDelHijo}/> : null  }
+  
           </div>
+
         ))}
       </div>
       <button
@@ -534,9 +478,6 @@ const handleBuildClick = async (id: string, x: number, y: number, buildingType: 
         Menú
       </button>
       {menuOpen && <MenuDesplegable onBuildClick={handleBuildClick} />}
-
-
-     
     </div>
   );
 };
