@@ -2,15 +2,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import MenuDesplegable from './menuDesplegable';
 import MenuAsignar from './menuAsignar';
+import Mensajeria from './menuChats';
 import { GuardarEdificio, getBuildingsByUserId, builtEdificio, getUEbyUserId, getUEById } from '../../services/userEdificios';
 import { getUserByCooki, getUser, getUserByHash} from '@/services/users';
-import { getEdificios } from '../../services/edificios';
 import {recolectarRecursos } from '@/services/recursos';
-/* import { useCookies } from 'next-client-cookies'; */
-import { useCookies } from 'react-cookie';
-import { verifyJWT } from '@/helpers/jwt';
-import { Await } from 'react-router-dom';
-import { eventNames } from 'process';
+import { getChats, getUsernameOther, getChatName } from '@/services/chats';
+import { getMensajes } from '@/services/mensajes';
 
 
 type Building = {
@@ -42,10 +39,15 @@ const DynamicBuildings: React.FC = () => {
   //cuando se cliclea un botón se habilita 
   const[menuButton, setMenBut] = useState(false);
   const[menuButton2, setMenBut2] = useState("");
+  // para la mensajeria
+  const [userLoaded, setUserLoaded] = useState(false);
+  const [mostrarMensajeria, setMostrarMensajeria] = useState(false);
+  const [chats, setChats] = useState<any[]>([]);
+  const [chatnames, setChatNames] = useState<string[]>([]);
 
 
   //este método obtiene el dato recibido del hijo menuAsignar, el cual será usado para setear cerrar el botón
-  const recibirDatosDelHijo = (datos) => {
+  const recibirDatosDelHijo = (datos: any) => {
     console.log("datos222", datos)
      setMenBut(!menuButton);
   };
@@ -56,18 +58,46 @@ const DynamicBuildings: React.FC = () => {
   const mouseUpRef = useRef<() => void>(() => {});
 
   useEffect(() => {
-
-    let userId = getUserByCooki().then((resultado)=>resultado?.id) // Reemplazar con el ID de usuario actual
-    if (userId) setUserId(String(userId))
-    cargarUser();
-    getBuildingsByUserId(String(userId))
-      .then(fetchedBuildings => {
+    async function fetchData() {
+      try {
+        let resultado = await getUserByCooki();
+        let usuarioId = resultado?.id;
+        if (!usuarioId) {
+          console.error('No user ID found');
+          return;
+        }
+        console.log(usuarioId);
+        setUserId(String(usuarioId));
+        setUserLoaded(true);
+        cargarUser();
+        const [fetchedBuildings, chats] = await Promise.all([
+          getBuildingsByUserId(usuarioId),
+          getChats(usuarioId),
+        ]);
         setBuildings(fetchedBuildings);
+        console.log("fetchedBuildings", fetchedBuildings);
+        setChats(chats);
+        console.log('Chats:', chats);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    }
+    fetchData();
+  }, [userId]);
+
+//conseguir todos los nombres de los chats
+useEffect(() => {
+  if (chats.length > 0 && userId) {
+    console.log('Fetching chat names...')
+    Promise.all(chats.map(chat => getChatName(chat, userId)))
+      .then(chatnames => {
+        setChatNames(chatnames);
+        console.log('Chat names:', chatnames);
       })
-      .catch(error => {
-        console.error("Error fetching buildings:", error);
-      });
-  }, []);
+      .catch(error => console.error('Error fetching chat names:', error));
+  }
+}, [chats, userId]);
+  
   const handleBuildClick = async (id: string, x: number, y: number, buildingType: string, ancho: number, largo: number, nivel: number) => {
     const newBuilding = { id, x, y, type: buildingType, ancho, largo, nivel, costo: 0};
     const collisionIndex = getCollidedBuildingIndex(-1, x, y, ancho, largo);
@@ -198,8 +228,8 @@ const DynamicBuildings: React.FC = () => {
       setUnidadesDisp(user.unidadesDeTrabajo)
     }
   }
-
-   function handleClick(event: React.MouseEvent<HTMLButtonElement>) {  
+   // React.MouseEvent<HTMLButtonElement>
+   function handleClick(event: any) {  
 
     const elementoClicado = event.target as HTMLElement;
     const idUE = elementoClicado.id;
@@ -214,6 +244,9 @@ const DynamicBuildings: React.FC = () => {
   function viajesuliChat(){
     window.location.replace("/chatuser")
   }
+  function handleMensajeria() {
+    setMostrarMensajeria(!mostrarMensajeria);
+  }
 
   return (
     <div className="hola flex flex-col items-center justify-center w-screen h-screen bg-gray-900">
@@ -226,8 +259,16 @@ const DynamicBuildings: React.FC = () => {
         <button onClick={() => recolectarRecursosUser()}> Recolectar Recursos</button>        
       </div>
       <div className='absolute top-0 left-100 p-4 bg-red-500 hover:bg-blue-700 text-blue font-bold py-2 px-4 rounded'>
-        <button onClick={() => viajesuliChat()}>Chat</button>
+        <button onClick={() => handleMensajeria()}>Chat</button>
       </div>
+      <Mensajeria
+        mostrarMensajeria={mostrarMensajeria}
+        userLoaded={userLoaded}
+        chats={chats}
+        chatnames={chatnames}
+        handleMensajeria={handleMensajeria}
+        getMensajes={getMensajes}
+      />
       <div style={{ width: '1200px', height: '700px' }} className="bg-green-500 flex items-center justify-center relative">
         {buildings.map((building, index) => (
           <div
