@@ -1,4 +1,11 @@
 
+<<<<<<< HEAD
+=======
+import { getEdificioById, getEdificioByName } from "@/services/edificios";
+import {  getUEbyUserIdEdIdNico, getUEbyUserIdRet, updateUEunidades } from "@/services/userEdificios";
+import { getUser } from "@/services/users";
+import React from "react";
+>>>>>>> 42a04d10d3ee9c48b4e24b31ae3302a15d12e0be
 
 import { updateUEunidades } from "@/services/userEdificios";
 
@@ -14,7 +21,18 @@ export default function MenuAsignar({datos, enviarDatosAlPadre}){
 
     // Función para manejar la selección
     async function updateEdifUser(data: FormData) {
+<<<<<<< HEAD
       console.log("IDDDD EDIFUSER", datos)
+=======
+       /*  "use server" */
+       // LO AGREGUE PARA QUE DEJE DE TIRAR ERROR ESTO
+        let user = await getUser("6642cd26b1865f8de5c7b62b")
+      let id_edif = await getEdificioByName(data.get('edificios') as string)
+      let userEdif = await getUEbyUserIdEdIdNico(String(user?.id || ""), String(id_edif?.id || ""))
+    
+      let unidades = data.get('unidadesEdif') as string
+      let id_EU = userEdif?.id
+>>>>>>> 42a04d10d3ee9c48b4e24b31ae3302a15d12e0be
 
       let unidades = data.get('unidadesEdif') as string
       let id_EU = datos
