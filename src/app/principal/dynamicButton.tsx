@@ -20,10 +20,7 @@ type Building = {
   nivel: number;
   costo: number;
 };
-type datos = {
-  edifId: string,
-  userId: string
-}
+
 const DynamicBuildings: React.FC = () => {
 
   const [buildings, setBuildings] = useState<Building[]>([]);
@@ -36,9 +33,10 @@ const DynamicBuildings: React.FC = () => {
   const[unidadesDisponibles, setUnidadesDisp] = useState(0)
   const [usuario, setUser] = useState('');
   const [userId, setUserId] = useState('')
-  //cuando se cliclea un botón se habilita 
+  
+  //cuando se cliclea un botón se habilita la compuerta que habre el formulario de asignar unidades
   const[menuButton, setMenBut] = useState(false);
-  const[menuButton2, setMenBut2] = useState("");
+  const[idUEClick, setIdUEClick] = useState("");    //id de userEdificios seleccionado ante un click
   
 // VARIABLES PARA LA RECOLECCION DE RECURSOS AUTOMATICA
 const [maderaPorSegundo, setMaderaPorSegundo] = useState(0);
@@ -73,14 +71,7 @@ const [message, setMessage] = useState('');
   const [chatnames, setChatNames] = useState<string[]>([]);
 
 
-  //este método obtiene el dato recibido del hijo menuAsignar, el cual será usado para setear cerrar el botón
-  const recibirDatosDelHijo = (datos: any) => {
-    console.log("datos222", datos)
-     setMenBut(!menuButton);
-  };
-
-
-
+ 
   const mouseMoveRef = useRef<(e: MouseEvent) => void>(() => {});
   const mouseUpRef = useRef<() => void>(() => {});
   
@@ -90,7 +81,7 @@ const [message, setMessage] = useState('');
     async function fetchData() {
       try {
         let resultado = await getUserByCooki();
-        let usuarioId = resultado?.id;
+        let usuarioId = String(resultado?.id);
         if (!usuarioId) {
           console.error('No user ID found');
           return;
@@ -270,7 +261,7 @@ const handleBuildClick = async (id: string, x: number, y: number, buildingType: 
     const user = await getUserByCooki()
     if(user != null){
       await recolectarRecursos(user.id);
-      setMadera(user.madera);
+      setMadera(Number(user));
       setPiedra(user.piedra);
       setPan(user.pan);
     }
@@ -294,26 +285,22 @@ const handleBuildClick = async (id: string, x: number, y: number, buildingType: 
       setHerreria(Number(user.herreria));
     }
   }
-   // React.MouseEvent<HTMLButtonElement>
+  //método para obtener el id del userEdificio seleccionado
    function handleClick(event: any) {  
-
-    const elementoClicado = event.target as HTMLElement;
-    const idUE = elementoClicado.id;
-    console.log('id UE:', idUE);
-    if(!menuButton )    setMenBut(!menuButton);
-    if(elementoClicado.id){
-      setMenBut2(idUE)
-    }
-
-
+      const elementoClicado = event.target as HTMLElement;  
+      const idUE = elementoClicado.id;
+      console.log('id UE:', idUE);
+      if(!menuButton )    setMenBut(!menuButton);
+      if(elementoClicado.id){
+        setIdUEClick(idUE)
+      }
   }
-  
 
   function handleMensajeria() {
     setMostrarMensajeria(!mostrarMensajeria);
   }
 
-   /////////////////-----------------seba-------------------------
+   //region-----------------seba-------------------------
   //---------------------------------
   //------------------------------
   //---------------------------------
@@ -352,7 +339,8 @@ const handleBuildClick = async (id: string, x: number, y: number, buildingType: 
   });
  };
   const updateBuildingCount = async (id: string, costos: number) => {
-    const userIdd = '665fd3b9b927599f41789278'; // Reemplazar con el ID de usuario actual
+   /*  const userIdd = '665fd3b9b927599f41789278'; // Reemplazar con el ID de usuario actual */
+   
     let countsMax = 0;
     
     const newCounts = {
@@ -368,7 +356,6 @@ const handleBuildClick = async (id: string, x: number, y: number, buildingType: 
       madera,
       piedra,
     };
-  
     switch (id) {
       
       case '663ac05f044ccf6167cf7041':
@@ -466,7 +453,7 @@ const handleBuildClick = async (id: string, x: number, y: number, buildingType: 
   
     try {
       await updateUserBuildings(
-        userIdd,
+        userId,
         newCounts.muros,
         newCounts.bosque,
         newCounts.herreria,
@@ -486,7 +473,7 @@ const handleBuildClick = async (id: string, x: number, y: number, buildingType: 
     return countsMax;
   };
 
-  //-------------------------
+  //region hasta aca seba-------------------------
   return (
     <div className="hola flex flex-col items-center justify-center w-screen h-screen bg-gray-900">
       <div className="absolute top-0 left-0 p-4 bg-red-500 text-blue font-bold py-2 px-4 rounded">
@@ -531,8 +518,7 @@ const handleBuildClick = async (id: string, x: number, y: number, buildingType: 
           >
            
             <div>{building.type} - X: {building.x}, Y: {building.y}</div>
-            {/* Si el id seleccionado es el mismo al id del UE, y si menuButoon esta habilitado entonces abrir el form del boton */}
-              {( (menuButton2 == building.id)&&menuButton ) ? <MenuAsignar  datos= {building.id} enviarDatosAlPadre={recibirDatosDelHijo}/> : null  }
+              {( (idUEClick == building.id)&&menuButton ) ? <MenuAsignar  idUE= {building.id} cerrarCompuerta= {setMenBut} estadoCompuerta={menuButton}/> : null  }
   
           </div>
 

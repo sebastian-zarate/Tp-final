@@ -2,12 +2,10 @@
 import React from "react"
 import { useEffect, useState } from "react";
 import { createMensaje, getMensajes } from "@/services/mensajes";
-import { getUser } from "@/services/users";
-
+import { getCookie, getReturnByCooki, getUser, getUserByUserName, updateUserRecursos } from "@/services/users";
 import { getChatNameById } from "@/services/chats";
 
 
-import { get } from "http";
 
 const Chats: React.FC = () => {
 
@@ -17,11 +15,27 @@ const Chats: React.FC = () => {
     const [userId, setUserId] = useState<string>("")
     const [usernameOther, setUsernameOther] = useState<string>("")
 
-    
+//region verficar la cookie------------------
+   const [cooki, setCooki] = useState<string>("")
+   async function verificarCooki() {
+        //obtengo el valor de la cookie user
+        const cok = await getCookie()
+        setCooki(cok)
+        await getReturnByCooki(cooki,"chat") 
+    }
+   useEffect(() => {    
+        verificarCooki()
+        //cada 5 segundos se chequea la cookie
+        const intervalId = setInterval(() => {
+            verificarCooki()
+        }, 5000);
+        return () => clearInterval(intervalId);
+    }, [cooki]);
+//------------------------------------------------
 
     useEffect(() => {
-        const chatLocalStorage = localStorage.getItem('chatId')
-        const userIdLocalStorage = localStorage.getItem('userId')
+        const chatLocalStorage = localStorage.getItem('chatId')     //obtengo el id del chat del localStorage
+        const userIdLocalStorage = localStorage.getItem('userId')   //obtengo el id del useario del localStorage
 
         //conseguir chatId
         if (chatLocalStorage) {
@@ -48,7 +62,7 @@ const Chats: React.FC = () => {
             })
         }
 
-
+        //conseguir el username del receptor del mensaje
         if(chatId !== "" && userId !== ""){
             getChatNameById(chatId, userId).then(setUsernameOther)
         }
@@ -88,10 +102,14 @@ const Chats: React.FC = () => {
         }
 
         // create the message
-        const m = await createMensaje(mensaje);
-        console.log("El mensaje creado: ", m);
-        setMensajes(prevMensajes => [...prevMensajes, m]);
-
+        if(mensaje.madera >= 0 && mensaje.piedra >=0 && mensaje.pan >=0){
+            const m = await createMensaje(mensaje);
+            console.log("El mensaje creado: ", m);
+            setMensajes(prevMensajes => [...prevMensajes, m]);
+            //se actualizan los recursos del emisor y receptor
+            const emis = updateUserRecursos(userId, usernameOther,mensaje.madera, mensaje.piedra, mensaje.pan)        
+            console.log("emisorrrrrrr:",emis)
+        }else alert("No se pueden enviar recursos negativos")
         event.target.reset();
     }
     return (

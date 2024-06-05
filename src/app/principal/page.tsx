@@ -1,27 +1,30 @@
-"use server"
-import { cookies } from "next/headers";
+'use client'
 import DynamicButton from "./dynamicButton";
 import { redirect } from "next/navigation";
-import {getUserByHash } from "@/services/users";
-import { verifyJWT } from "@/helpers/jwt";
+import {getCookie, getReturnByCooki, getUserByHash } from "@/services/users";
+import { useEffect, useState } from "react";
 
-async function Principal() {
+function Principal() {
     // Marca este componente como un componente del lado del cliente
    // useClient();
-  
-   const cooki = cookies().get('user')?.value
-   if(!cooki) redirect("/login")
-   let valor = cooki
-   let user;
-   if (valor) {
-       let hash = verifyJWT(valor)
-       user = await getUserByHash(String(hash || ""))
+    const [cooki, setCooki] = useState<string>("")
 
-   }
- /*   const user = getCooki()
-   if(!user){
-    redirect('/login')
-   } */
+   async function verificarCooki() {
+        //obtengo el valor de la cookie user
+        const cok = await getCookie()
+        setCooki(String(cok))
+        await getReturnByCooki(cooki,"principal") 
+    }
+
+   useEffect(() => {    
+    const intervalId = setInterval(() => {
+        //cada 5 segundos se chequea la cookie
+        verificarCooki()
+        console.log("comprobando cookie")
+    }, 5000);
+    return () => clearInterval(intervalId);
+}, [cooki]);
+
 
     return (
         <div>

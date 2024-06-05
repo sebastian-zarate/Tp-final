@@ -130,7 +130,6 @@ export async function builtEdificio( usuarioId: string, edificioID: string, edif
 
 
 
-
 export async function getBuildingsByUserId(usuarioId: string): Promise<any[]> {
     console.log("usuarioId",usuarioId)
      let user = usuarioId
@@ -189,25 +188,6 @@ export async function getBuildingsByUserId(usuarioId: string): Promise<any[]> {
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 //misma funcionalidad que el de matu, pero aca retorna el documento
 export const getUEbyUserIdRet = async (Id: string) => {
     const e = await prisma.userEdificios.findMany({
@@ -234,9 +214,9 @@ export const getUEbyUserIdEdIdNico = async (UserId: string, EdificioId: string) 
     console.log(`User ${await getUserById(UserId).then(X=>X?.username)} EdificiosID ${EdificioId} `, ue?.id)
     return ue
 }
-
-export const updateUEunidades = async (Id: string, unidades: any, panXunidad: any) => {
-
+//region cambie esto (Nico)
+//método para agregar unidades de un edificio
+export const updateUEunidadesAdd = async (Id: string, unidades: any, panXunidad: any) => {
     //obtengo el doc userEdificio
     const ue = await prisma.userEdificios.findFirst({
         where: {
@@ -253,9 +233,9 @@ export const updateUEunidades = async (Id: string, unidades: any, panXunidad: an
 
     let panUser = Number(usuario?.pan) - (panXunidad * unidades)
 
-    if (panUser < 0) return error("Pan insuficiente para alimentar a las unidades")
+    if (panUser < 0) throw new Error("Pan insuficiente para alimentar a las unidades")
 
-    if(panUser < 0) return error("Pan insuficiente para alimentar a las unidades")
+    if(panUser < 0) throw new Error("Pan insuficiente para alimentar a las unidades")
 
 
     let unidadesEdif = unidades + (ue?.trabajadores)
@@ -285,4 +265,8 @@ export const updateUEunidades = async (Id: string, unidades: any, panXunidad: an
     console.log(`User: ${usuario?.id}- trabajadores: ${usuario?.unidadesDeTrabajo} `)
     return e
 }
-
+//método para restar unidades de un edificio
+export const updateUEunidadesSubstract = async(Id: string, unidades: any, panXunidad: any) => {
+    let unid = 0 - unidades
+    await updateUEunidadesAdd(Id, unid, panXunidad)
+}

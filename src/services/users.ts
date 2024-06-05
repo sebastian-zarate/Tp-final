@@ -5,8 +5,8 @@ import { getSalt, hashPassword } from "../helpers/hashPassword";
 import { cookies } from "next/headers";
 import { signJWT, verifyJWT } from "@/helpers/jwt";
 import { StyledString } from "next/dist/build/swc";
-import { redirect } from "next/dist/server/api-utils";
 import { error } from "console";
+import { redirect } from "next/navigation";
 
 const prisma = new PrismaClient()
 let cantMadera = 500
@@ -166,20 +166,24 @@ export async function updateUser(Id: string, data: any) {
   console.log(`User ${Id} updated: `, u)
   return u
 }
-//actualizo recursos de user
-export async function updateUserRecursos(Id: string, madera: number, piedra: number, pan:number) {
-  const u = await getUserById(Id)
+//region cambios Nico
+export async function updateUserRecursos(idEmisor: string, usernameReceptor: string, madera: number, piedra: number, pan:number) {
+  //consigo el id del usuario
+  let u = await getUserById(idEmisor)
+  //si la madera o la piedra o el pan que se quieran regalar son mayores en cantidad a los que posee el usuario, negar la acción
   if((Number(u?.madera) < madera) || (Number(u?.piedra) < piedra) 
     || (Number(u?.pan) < pan)) { 
-      throw error("Insuficientes recursos")
+      throw new Error("Insuficientes recursos")
     }
+
+  //lógica para restar recursos al emisor
   let maderaUpdated = Number(u?.madera) - madera
   let piedraUpdated = Number(u?.piedra) - piedra
   let panUpdated = Number(u?.pan) - pan
-
-  const userUpdated = await prisma.users.update({
+    //actualizo al emisor del mensaje
+  const emisorUpdated = await prisma.users.update({
     where: {
-      id: Id
+      id:idEmisor
     },
     data: {
       madera: maderaUpdated,
@@ -187,21 +191,57 @@ export async function updateUserRecursos(Id: string, madera: number, piedra: num
       pan:panUpdated
     }
   })
-
-  console.log(`User ${Id} updated: `, userUpdated)
-  return userUpdated
+  console.log(`se actualizooooo a ${u?.username} `, emisorUpdated)
+  
+//lógica para sumar recursos al receptor
+  u = await getUserByUserName(usernameReceptor)
+  let maderaReceptorUpdate = Number(u?.madera) + madera
+  let piedraReceptorUpdate = Number(u?.piedra) + piedra
+  let panReceptorUpdate = Number(u?.pan) + pan
+    //actualizo al receptor del mensaje
+  const receptorUpdated =await prisma.users.update({
+    where: {
+      username: usernameReceptor
+    },
+    data: {
+      madera: maderaReceptorUpdate,
+      piedra:piedraReceptorUpdate,
+      pan:panReceptorUpdate
+    }
+  })
+  console.log(`se actualizoooooo a ${u?.username} `, receptorUpdated)
+  return receptorUpdated
 }
-//Devuelve el user en base a la cookie
+
+// Devuelve el user en base a la cookie
 export async function getUserByCooki() {
   //obtengo el valor de la cookie user
   const cooki = cookies().get('user')?.value
   //se obtiene el hash de traducir el token
   let hash = verifyJWT(String(cooki))
   //se obtiene el user por el hash
-  const user = getUserByHash(String(hash))
+  const user = await getUserByHash(String(hash))
   return user
 }
+//devuelve a una página en base de la cooki
+export async function getReturnByCooki(cooki:any, pagina:string) {
+  //se obtiene el hash de traducir el token
+  if(!cooki) return('login')
+  let hash = verifyJWT(String(cooki))
+  //se obtiene el user por el hash
+  const user = await getUserByHash(String(hash))
+  if (user) return redirect(`/${pagina}`)
+  else{return redirect('login')}
 
+}
+//obtengo el valor de la cookie
+export async function getCookie() {
+  //obtengo el valor de la cookie user
+  const cooki = cookies().get('user')?.value
+  if(!cooki) return redirect("/login")
+  return String(cooki)
+}
+//region hasta aca Nico
 
 
 //-----------------------------------------------------------------------------------------------------

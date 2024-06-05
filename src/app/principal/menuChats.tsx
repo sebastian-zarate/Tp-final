@@ -63,16 +63,16 @@ const Mensajeria: React.FC<MensajeriaProps> = ({ userId, mostrarMensajeria, user
       <div className="relative w-1/2 h-1/2 bg-white rounded-lg">
         <button className="absolute top-2 right-2 text-lg font-bold" onClick={handleMensajeria}>X</button>
         <h1 className="text-1xl font-bold text-center">Mensajeria</h1>
-        <form onSubmit={handleCreateChat} className="mx-auto pb-4">
-          <input type="text" value={username} onChange={handleUsernameChange} placeholder="Username" required className="text-center" />
-          <button type="submit">Create chat</button>
+        <form onSubmit={handleCreateChat} className=" mx-auto pb-4 flex flex-col items-center justify-center">
+          <input type="text" value={username} onChange={handleUsernameChange} placeholder="Username" required className="text-center px-2 w-1/4 rounded-md bg-gray-200" />
+          <button type="submit" className='  px-2 mt-1 w-1/4 rounded-md bg-gray-400 hover:bg-gray-600'>Create chat</button>
         </form>
         <div>
           <ul className='flex flex-col items-center'>
             {chats.map((chat: any, index: number) => (
               <li key={chat.id} className='flex flex-row justify-around items-center space-x-4'>
                 <h2> ({chat.id}) Chat: {chatnames[index]}</h2>
-                <button onClick={() => handleRedirect(chat.id, userId)} className='bg-gray-500'>abrir </button>
+                <button onClick={() => handleRedirect(chat.id, userId)} className=' px-2 rounded-md bg-gray-400 hover:bg-gray-600'>abrir </button>
               </li>
             ))}
           </ul>
