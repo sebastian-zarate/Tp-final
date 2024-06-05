@@ -78,6 +78,8 @@ const Chats: React.FC = () => {
         const m = await createMensaje(mensaje);
         console.log("El mensaje creado: ", m);
         setMensajes(prevMensajes => [...prevMensajes, m]);
+
+        event.target.reset();
     }
     return (
         <main>
@@ -87,7 +89,7 @@ const Chats: React.FC = () => {
                 </div>
 
                 <div className=" bg-white p-10 m-2 w-8/12 flex-col flex justify-between">
-                    <div className="p-5 flex flex-col font-bold text-sm bg-slate-300">
+                    <div className="p-5 flex flex-col font-bold text-sm bg-slate-300 overflow-auto max-h-[500px]">
                         {mensajes.map((mensaje, index) => (
                             <div key={index} className=" m-2" >
                                 <span key={index} className=" text-slate-500 text-xs"> - {mensaje.emisorUserName} - {mensaje.fecha.toLocaleDateString()} -{mensaje.fecha.toLocaleTimeString()}</span>

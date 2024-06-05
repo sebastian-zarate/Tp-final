@@ -192,3 +192,14 @@ export async function getChatIdByCooki(){
   return chatId
 }
 
+export async function getOtherUsers(userId: string){
+  const users = await prisma.users.findMany({
+    where: {
+      NOT: {
+        id: userId
+      }
+    }
+  })
+  return users
+}
+
