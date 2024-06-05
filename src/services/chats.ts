@@ -81,3 +81,16 @@ export const getChatName = (chat: any, userId: string) =>{
     }
     else return "UNKNOWN"
 }
+
+export const getChatNameById = async (chatId: string, userId: string) =>{
+    const chat = await getChat(chatId)
+    if(chat && userId){
+        //devuelven el nombre del otro usuario del chat
+        if(chat.user1 === userId){
+            return String(chat.username2 || "UNKNOWN")
+        }else{
+            return String(chat.username1 || "UNKNOWN")
+        }
+    }
+    else return "U"
+}
