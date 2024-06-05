@@ -32,7 +32,7 @@ const DynamicBuildings: React.FC = () => {
   const [draggedBuildingIndex, setDraggedBuildingIndex] = useState<number | null>(null);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [madera, setMadera] = useState(0);
-  const [piedra, setPiedra] = useState(0);
+  const [piedras, setPiedra] = useState(0);
   const [pan, setPan] = useState(0);
   const[unidadesDisponibles, setUnidadesDisp] = useState(0)
   const [usuario, setUser] = useState('');
@@ -145,7 +145,7 @@ const handleBuildClick = async (id: string, x: number, y: number, buildingType: 
        
        const newBuilding = { id, x, y, type: buildingType, ancho, largo, cantidad: 1 };
        //setBuildings([...buildings, newBuilding]);
-       window.location.reload();
+      window.location.reload();
        try {
          // Evita recargar la página, en su lugar actualiza el estado
          await builtEdificio(userId, id, x, y, 1);
@@ -324,54 +324,26 @@ const handleBuildClick = async (id: string, x: number, y: number, buildingType: 
     GuardarEdificio(userId ,id, posX, posY, nivel);
   };
 
-
   const updateBuildingCount = async (id: string, costos: number) => {
-    // Reemplazar con el ID de usuario actual
-    const userIdd = userId; 
+    const userIdd = '665fd3b9b927599f41789278'; // Reemplazar con el ID de usuario actual
     let countsMax = 0;
     
     const newCounts = {
-
+  
+      muros,
       maderera,
       cantera,
       panaderia,
       bosque,
-      muros,
       ayuntamiento,
       herreria,
       pan,
       madera,
-      piedra,
+      piedras,
     };
   
     switch (id) {
-      /*case '663ac05e044ccf6167cf703c':
-        if (canon < 3 && piedra >= costos) {
-          
-          newCounts.canon += 1;// sumo 1  a la cantidad de cañones
-         
-          
-          newCounts.piedra = (piedra - costos); // Deduct costos from piedra
-          setCanon(newCounts.canon);
-           
-          setPiedra(newCounts.piedra);
-          
-          countsMax = 1;
-        } else {
-          if (canon >= 3) 
-            {setMessage('No puedes tener más de 3 cañones');
-          }
-         if (piedra < costos) 
-          {
-            setMessage('No tienes suficiente piedra');
-          }
-  
-  
-        }
-        break;
-      */
-  
-  
+      
       case '663ac05f044ccf6167cf7041':
         if (maderera < 3 && madera >= costos) {
           newCounts.maderera += 1;
@@ -433,15 +405,15 @@ const handleBuildClick = async (id: string, x: number, y: number, buildingType: 
         if (muros < 3) {
           newCounts.muros += 1;
           setMuros(newCounts.muros);
-          newCounts.piedra = (piedra - costos);
-          setPiedra(newCounts.piedra);
+          newCounts.piedras = (piedras - costos);
+          setPiedra(newCounts.piedras);
           countsMax = 1;
         } else {
           console.log('No puedes tener más de 3 muros');
         }
         break;
       case '663ac05f044ccf6167cf703d': // ayuntamiento (changed ID)
-        if (ayuntamiento < 2) {
+        if (ayuntamiento < 1) {
           newCounts.ayuntamiento += 1;
           setAyuntamiento(newCounts.ayuntamiento);
           newCounts.madera = (madera - costos);
@@ -456,8 +428,8 @@ const handleBuildClick = async (id: string, x: number, y: number, buildingType: 
         if (herreria < 2) {
           newCounts.herreria += 1;
           setHerreria(newCounts.herreria);
-          newCounts.piedra = (piedra - costos);
-          setPiedra(newCounts.piedra);
+          newCounts.piedras = (piedras - costos);
+          setPiedra(newCounts.piedras);
           countsMax = 1;
         } else {
           console.log('Condition for herreria not met');
@@ -467,7 +439,7 @@ const handleBuildClick = async (id: string, x: number, y: number, buildingType: 
   
     try {
       await updateUserBuildings(
-        userId,
+        userIdd,
         newCounts.muros,
         newCounts.bosque,
         newCounts.herreria,
@@ -477,7 +449,7 @@ const handleBuildClick = async (id: string, x: number, y: number, buildingType: 
         newCounts.ayuntamiento,
         newCounts.pan,
         newCounts.madera,
-        newCounts.piedra,
+        newCounts.piedras
       );
       console.log('User buildings count updated successfully.');
     } catch (error) {
@@ -486,6 +458,7 @@ const handleBuildClick = async (id: string, x: number, y: number, buildingType: 
   
     return countsMax;
   };
+  
 
   //-------------------------
   return (
@@ -493,7 +466,7 @@ const handleBuildClick = async (id: string, x: number, y: number, buildingType: 
       <div className="absolute top-0 left-0 p-4 bg-red-500 text-blue font-bold py-2 px-4 rounded">
       <h3>Usuario: {userId}</h3>
         <h3>Madera: {madera}</h3>
-        <h3>Piedra: {piedra}</h3>
+        <h3>Piedra: {piedras}</h3>
         <h3>Pan: {pan}</h3>
         <h3>Canon: {canon}</h3>
         <h3>Maderera: {maderera}</h3>

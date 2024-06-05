@@ -262,51 +262,7 @@ export async function builtEdificio(usuarioId: string,edificioID: string, edific
 }
 
 // metodo para obtener los edificios de un usuario
-export async function getBuildingsByUserId(idUser: string): Promise<any[]> {
-  try {
-      
-      
-      // Buscar todos los edificios creados por el usuario con el ID proporcionado
-      const buildings = await prisma.userEdificios.findMany({
-          where: {
-              userId:idUser, // Utilizar el `userId` proporcionado en la llamada
-          },
-          include: {
-              edificio: {
-                  select: {
-                      name: true,
-                      ancho: true,
-                      largo: true,
-                      costo: true,
-                      cantidad: true
-                  }
-              }
-          }
-      });
-      
-      console.log("buildings: ", buildings);
 
-      // Filtramos los resultados que tienen un edificio válido
-      const validBuildings = buildings.filter(building => building.edificio !== null);
-
-      // Mapeamos los resultados para que tengan el formato deseado
-      return validBuildings.map(building => ({
-          // Utilizar el id de la relación UserEdificios
-          id: building.id,
-          x: building.posicion_x,
-          y: building.posicion_y,
-          type: building.edificio.name, // Usar el nombre del edificio como tipo
-          costo: building.edificio.costo,
-          ancho: building.edificio.ancho,
-          largo: building.edificio.largo,
-          nivel: building.nivel,
-          cantidad: building.edificio.cantidad
-      }));
-  } catch (error) {
-      console.error("Error fetching buildings by user ID:", error);
-      throw error;
-  }
-}
 
 export async function updateUserBuildings(
   userId: string,
@@ -320,6 +276,7 @@ export async function updateUserBuildings(
   pans : number,
   maderas : number,
   piedras : number
+
 ) {
   try {
     // Buscar al usuario
@@ -337,7 +294,6 @@ export async function updateUserBuildings(
         },
         data: {
           // Actualizar los campos de edificios con las cantidades proporcionadas
-          muros: muro,
           bosque: bosque,
           herreria: herreria,
           cantera: cantera,
@@ -347,6 +303,7 @@ export async function updateUserBuildings(
           pan: pans,
           madera: maderas,
           piedra: piedras,
+          muros: muro,
         },
       });
       console.log('User buildings updated successfully.');

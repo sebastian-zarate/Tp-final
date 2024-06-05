@@ -130,6 +130,7 @@ export async function builtEdificio( usuarioId: string, edificioID: string, edif
 
 
 
+
 export async function getBuildingsByUserId(usuarioId: string): Promise<any[]> {
     console.log("usuarioId",usuarioId)
      let user = usuarioId
