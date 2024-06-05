@@ -2,23 +2,12 @@
 import React, { useState, useEffect, useRef, use } from 'react';
 import MenuDesplegable from './menuDesplegable';
 import MenuAsignar from './menuAsignar';
-<<<<<<< HEAD
 import Mensajeria from './menuChats';
 import { GuardarEdificio, getBuildingsByUserId, builtEdificio, getUEbyUserId, getUEById } from '../../services/userEdificios';
 import { getUserByCooki, getUser, getUserByHash} from '@/services/users';
 import {recolectarRecursos } from '@/services/recursos';
 import { getChats, getUsernameOther, getChatName } from '@/services/chats';
 import { getMensajes } from '@/services/mensajes';
-=======
-import { GuardarEdificio, getBuildingsByUserId, builtEdificio, getUEbyUserId } from '../../services/userEdificios';
-import { getUserByCooki, getUser, getUserByHash, updateUser} from '@/services/users';
-import { getEdificios } from '../../services/edificios';
-import {recolectarRecursos, calcularMadera, calcularPiedra, calcularPan} from '@/services/recursos';
-/* import { useCookies } from 'next-client-cookies'; */
-import { useCookies } from 'react-cookie';
-import { verifyJWT } from '@/helpers/jwt';
-import { Await } from 'react-router-dom';
->>>>>>> 42a04d10d3ee9c48b4e24b31ae3302a15d12e0be
 
 
 type Building = {
@@ -31,14 +20,10 @@ type Building = {
   nivel: number;
   costo: number;
 };
-<<<<<<< HEAD
 type datos = {
   edifId: string,
   userId: string
 }
-=======
-//#region  VARIBLES
->>>>>>> 42a04d10d3ee9c48b4e24b31ae3302a15d12e0be
 const DynamicBuildings: React.FC = () => {
 
   const [buildings, setBuildings] = useState<Building[]>([]);
@@ -50,12 +35,8 @@ const DynamicBuildings: React.FC = () => {
   const [pan, setPan] = useState(0);
   const[unidadesDisponibles, setUnidadesDisp] = useState(0)
   const [usuario, setUser] = useState('');
-<<<<<<< HEAD
   const [userId, setUserId] = useState('')
   //cuando se cliclea un botón se habilita 
-=======
-  const [usuarioId, setUserId] = useState('');
->>>>>>> 42a04d10d3ee9c48b4e24b31ae3302a15d12e0be
   const[menuButton, setMenBut] = useState(false);
   const[menuButton2, setMenBut2] = useState("");
   // para la mensajeria
@@ -64,7 +45,6 @@ const DynamicBuildings: React.FC = () => {
   const [chats, setChats] = useState<any[]>([]);
   const [chatnames, setChatNames] = useState<string[]>([]);
 
-<<<<<<< HEAD
 
   //este método obtiene el dato recibido del hijo menuAsignar, el cual será usado para setear cerrar el botón
   const recibirDatosDelHijo = (datos: any) => {
@@ -73,15 +53,6 @@ const DynamicBuildings: React.FC = () => {
   };
 
 
-=======
-  // VARIABLES PARA LA RECOLECCION DE RECURSOS AUTOMATICA
-  const [maderaPorSegundo, setMaderaPorSegundo] = useState(0);
-  const [piedraPorSegundo, setPiedraPorSegundo] = useState(0);
-  const [panPorSegundo, setPanPorSegundo] = useState(0);
-  const maderaRef = useRef(madera);
-  const piedraRef = useRef(piedra);
-  const panRef = useRef(pan);
->>>>>>> 42a04d10d3ee9c48b4e24b31ae3302a15d12e0be
 
   const mouseMoveRef = useRef<(e: MouseEvent) => void>(() => {});
   const mouseUpRef = useRef<() => void>(() => {});
@@ -89,7 +60,6 @@ const DynamicBuildings: React.FC = () => {
   //#region USEEFFECTS USUARIO
   //useffect para obetener el id de user 
   useEffect(() => {
-<<<<<<< HEAD
     async function fetchData() {
       try {
         let resultado = await getUserByCooki();
@@ -106,18 +76,6 @@ const DynamicBuildings: React.FC = () => {
           getBuildingsByUserId(usuarioId),
           getChats(usuarioId),
         ]);
-=======
-    async function fetchUserId() {
-      let resultado = await getUserByCooki();
-      let userId = resultado?.id;
-      console.log(userId);
-      setUserId(String(userId));
-    }
-    fetchUserId();
-    /*cargarUser();
-    getBuildingsByUserId(userId)
-      .then(fetchedBuildings => {
->>>>>>> 42a04d10d3ee9c48b4e24b31ae3302a15d12e0be
         setBuildings(fetchedBuildings);
         console.log("fetchedBuildings", fetchedBuildings);
         setChats(chats);
@@ -138,99 +96,10 @@ useEffect(() => {
         setChatNames(chatnames);
         console.log('Chat names:', chatnames);
       })
-<<<<<<< HEAD
       .catch(error => console.error('Error fetching chat names:', error));
   }
 }, [chats, userId]);
   
-=======
-      .catch(error => {
-        console.error("Error fetching buildings:", error);
-      });*/
-  }, [usuarioId]);
-
-
-  //#region USEEFFECTS RECURSOS
-  //useffect para cargar las cosas del user  (ESTE ESTA MAL CREO)
-  useEffect(() => {
-    cargarUser();
-    getBuildingsByUserId(usuarioId)
-      .then(fetchedBuildings => {
-        setBuildings(fetchedBuildings);
-        console.log("fetchedBuildings", fetchedBuildings);
-      })
-      .catch(error => {
-        console.error("Error fetching buildings:", error);
-      });
-  }, [usuarioId]);
-  
-  //useffect para recolectar recursos automaticamente
-  useEffect(() => {
-    const fetchMadera = async () => {
-      const result = await calcularMadera(usuarioId);
-      console.log("Madera por segundo: ", result);
-      setMaderaPorSegundo(result);
-    };
-    const fetchPiedra = async () => {
-      const result = await calcularPiedra(usuarioId);
-      console.log("Piedra por segundo: ", result);
-      setPiedraPorSegundo(result);
-      console.log("variable piedraPorSegundo", piedraPorSegundo)
-    };
-    const fetchPan = async () => {
-      const result = await calcularPan(usuarioId);
-      console.log("Pan por segundo: ", result);
-      setPanPorSegundo(result);
-      console.log("variable panPorSegunbdo", panPorSegundo);
-    };
-    
-    if(usuarioId.length > 5){
-      fetchMadera();
-      fetchPiedra();
-      fetchPan();
-    }    
-  }, [usuarioId]);
-
-  // UseEffect para actualizar recursos cada 2 segundos
-  useEffect(() => {
-    cargarUser();
-    const timer = setInterval(() => {
-      console.log('Setting up interval');
-      setMadera(madera => {
-        const newMadera = madera + maderaPorSegundo;
-        maderaRef.current = newMadera;
-        return newMadera;
-      });
-      setPiedra(piedra => {
-        const newPiedra = piedra + piedraPorSegundo;
-        piedraRef.current = newPiedra;
-        return newPiedra;
-      });
-      setPan(pan => {
-        const newPan = pan + panPorSegundo;
-        panRef.current = newPan;
-        return newPan;
-      });
-    }, 2000);
-  
-    return () => clearInterval(timer);
-  }, [maderaPorSegundo, piedraPorSegundo, panPorSegundo]);
-  
-  //actualizar en bdd cada 10 segundos
-  useEffect(() => {
-    const timer = setInterval(() => {
-      const update = async () => {
-        await updateUser(usuarioId, { madera: maderaRef.current, piedra: piedraRef.current, pan: panRef.current });
-      };
-      update();
-      console.log('recursos actualizados');
-    }, 10000);
-  
-    return () => clearInterval(timer);
-  }, [usuarioId]);
-
-//region METODOS VARIOS
->>>>>>> 42a04d10d3ee9c48b4e24b31ae3302a15d12e0be
   const handleBuildClick = async (id: string, x: number, y: number, buildingType: string, ancho: number, largo: number, nivel: number) => {
     const newBuilding = { id, x, y, type: buildingType, ancho, largo, nivel, costo: 0};
     const collisionIndex = getCollidedBuildingIndex(-1, x, y, ancho, largo);
@@ -372,7 +241,6 @@ useEffect(() => {
       setMenBut2(idUE)
     }
 
-<<<<<<< HEAD
 
   }
   function viajesuliChat(){
@@ -382,33 +250,15 @@ useEffect(() => {
     setMostrarMensajeria(!mostrarMensajeria);
   }
 
-=======
-  
-/*
-  const getUE = async () => {
-    const user = await getUserByCooki()
-    const h= await getUEbyUserId(user.id)
-    return h
-  }*/
-  
-  // #region RETURN 
-  
->>>>>>> 42a04d10d3ee9c48b4e24b31ae3302a15d12e0be
   return (
     <div className="hola flex flex-col items-center justify-center w-screen h-screen bg-gray-900">
       <div className="absolute top-0 left-0 p-4 bg-red-500 text-blue font-bold py-2 px-4 rounded">
         <h3>Usuario: {usuario}</h3>
-<<<<<<< HEAD
         <h3>Madera: {madera}</h3>
         <h3>Piedra: {piedra}</h3>
         <h3>Pan: {pan}</h3>
         <h3>Trabajadores disponibles: {unidadesDisponibles}</h3>
         <button onClick={() => recolectarRecursosUser()}> Recolectar Recursos</button>        
-=======
-        <h3>Madera: {madera} || PS: {maderaPorSegundo}  </h3>
-        <h3>Piedra: {piedra} || PS: {piedraPorSegundo}  </h3>
-        <h3>Pan:    {pan}    || PS: {panPorSegundo}     </h3>
->>>>>>> 42a04d10d3ee9c48b4e24b31ae3302a15d12e0be
       </div>
       <div className='absolute top-0 left-100 p-4 bg-red-500 hover:bg-blue-700 text-blue font-bold py-2 px-4 rounded'>
         <button onClick={() => handleMensajeria()}>Chat</button>

@@ -181,15 +181,9 @@ export async function getUserByCooki() {
   //obtengo el valor de la cookie user
   const cooki = cookies().get('user')?.value
   //se obtiene el hash de traducir el token
-<<<<<<< HEAD
   let hash = verifyJWT(String(cooki))
   //se obtiene el user por el hash
   const user = getUserByHash(String(hash))
-=======
-  let hash = verifyJWT(String(cooki || ''))
-  //se obtiene el user por el hash
-  const user = getUserByHash(String(hash || ''))
->>>>>>> 42a04d10d3ee9c48b4e24b31ae3302a15d12e0be
   return user
 }
 
