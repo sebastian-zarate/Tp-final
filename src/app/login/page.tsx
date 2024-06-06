@@ -1,9 +1,14 @@
 import { authenticateUser, getUserByemail } from "@/services/users"
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
+import backgroundImage from '../Images/Papyre.png';
+import imageLogin from '../Images/InputLogin.jpg';
+import containerImage from '../Images/Container.png';
+import VikingoShield from '../Images/VikingoShieldAxeSinFondo.png'
+import VikingoSword from '../Images/VikingoSwordSombreado.png'
+import Image from "next/image";
 
 async function Login(){
-    
     
     async function logUser(data:FormData) {
         'use server'
@@ -15,48 +20,88 @@ async function Login(){
         const validaU = await authenticateUser(user)  
 
         if(validaU) redirect('/principal')
-   
-
-
     }
-    return(  
-            <div className=" flex flex-col p-8 items-center justify-center bg-gray-400">
-              
-              <h1 className=" border-solid text-xl  text-white bg-gray-400">Login</h1>
-              
-              <form  action={logUser}>  
-                <label htmlFor="dataUser">Email o Username</label>
-                <p/>
-                <input className="border px-2" type="text" id="dataUser" name="dataUser" required></input>
-                <p/>
-                <label htmlFor="password">Password</label>
-                <p/>
-                <input className="border px-2" type="password" id="password" name="password" required></input>
-                <p/>        
+
+    return(
+      <div 
+        style={{
+          backgroundImage: `url(${backgroundImage.src})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          minHeight: '100vh',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          margin: 0,
+          padding: 0,
+          //position: 'relative',
+        }}
+      >
+        <div 
+          className="flex flex-col items-center bg-contain"
+          style={{
+            backgroundImage: `url(${containerImage.src})`,
+            backgroundSize: '100% 100%', // Asegura que la imagen cubra todo el contenedor
+            backgroundPosition: 'center',
+            //borderRadius: '1rem',
+            width: '400px', // ajusta el ancho del contenedor según sea necesario
+            padding: '100px',
+            boxSizing: 'border-box',
+            position: 'relative',
+            marginTop: '2rem'
+          }}
+        >
+          <h1 className="border-solid mb-4 text-4xl font-stoothgart text-yellow-400">Login</h1>
+          
+          <form className="w-full" action={logUser}>  
+            <label className="dataUser text-lg font-stoothgart text-yellow-400">Email o Username</label>
+            <input className="border px-2 mb-4 w-full rounded text-white" style={{ backgroundColor: 'rgba(172, 122, 27, 1)' }} type="text" id="dataUser" name="dataUser" required />
             
-                <button className=" ml-12 mt-5 bg-red-600 text-white px-2 py-1" type="submit">Iniciar Sesión</button>          
-              </form>     
+            <label className="password text-lg font-stoothgart text-yellow-400">Password</label>
+            <input className="border px-2 mb-4 w-full rounded text-white" style={{ backgroundColor: 'rgba(172, 122, 27, 1)' }} type="password" id="password" name="password" required />        
+            
+            <button 
+              type="submit"
+              style={{
+                background: 'none',
+                border: 'none',
+                padding: 5,
+                cursor: 'pointer'
+              }}
+            >
+              <Image src={imageLogin} alt="Iniciar Sesión" />
+            </button>         
+          </form>     
       
-               <a href="/signup" className=" mt-5 text-sm text-white">Tiene una cuenta creada?</a>   
-                    
-              
-      
-            </div>
-    )
-/*
-USOS DE ALGUNOS COMANDOS:
+          <a href="/signup" className="mt-5 text-lg font-stoothgart text-yellow-400">¿Tiene una cuenta creada?</a>   
+        </div>
+        <Image 
+          src={VikingoShield} 
+          alt="Vikingo Decorativo" 
+          style={{ 
+            position: 'absolute', 
+            bottom: '30%', // Ajusta la posición vertical según sea necesario
+            right: '80px', // Ajusta la posición horizontal según sea necesario
+            //zIndex: 9999, // Asegura que la imagen esté por encima de otros elementos
+            width: '25%', // Ajusta el tamaño según sea necesario
+            height: '45%' 
+          }} 
+        />
 
--max-w-xs: limita el ancho maximo del formulario para que no sea demasiado grande en pantallas de mayor tamaño
-
--mb-4: margin-bottom a cada input y boton para dar espacio entre ellos 
-
--w-full: Asegura que todos los botones y inputs ocupen todo el espacio disponible del contenedor del formulario
-
-
-*/
-
-
-
+        <Image 
+          src={VikingoSword} 
+          alt="Vikingo Decorativo" 
+          style={{ 
+            position: 'absolute', 
+            bottom: '30%', // Ajusta la posición vertical según sea necesario
+            left: '80px', // Ajusta la posición horizontal según sea necesario
+            //zIndex: 9999, // Asegura que la imagen esté por encima de otros elementos
+            width: '25%', // Ajusta el tamaño según sea necesario
+            height: '45%' 
+          }} 
+        />
+      </div>
+    );
 }
 
-export default Login
+export default Login;

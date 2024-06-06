@@ -13,14 +13,18 @@ function Principal() {
         //obtengo el valor de la cookie user
         const cok = await getCookie()
         setCooki(String(cok))
+/*         if(cooki == "") return redirect("login") */
+
         await getReturnByCooki(cooki,"principal") 
     }
 
-   useEffect(() => {    
+   useEffect(() => {  
+    verificarCooki()
     const intervalId = setInterval(() => {
         //cada 5 segundos se chequea la cookie
         verificarCooki()
         console.log("comprobando cookie")
+   
     }, 5000);
     return () => clearInterval(intervalId);
 }, [cooki]);
