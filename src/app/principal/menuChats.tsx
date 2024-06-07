@@ -2,13 +2,14 @@
 import React, { use } from 'react';
 import { useEffect, useState } from 'react';
 import { getUserByUserName, getUser } from '@/services/users';
-import { createChat } from '@/services/chats';
+import { createChat, type Chat } from '@/services/chats';
+import { getMensajesNoLeidos } from '@/services/mensajes';
 import { get } from 'http';
 interface MensajeriaProps {
   userId: string;
   mostrarMensajeria: boolean;
   userLoaded: boolean;
-  chats: any[];
+  chats: Chat[];
   chatnames: string[];
   handleMensajeria: () => void;
   getMensajes: (id: string) => void;
@@ -17,6 +18,29 @@ interface MensajeriaProps {
 const Mensajeria: React.FC<MensajeriaProps> = ({ userId, mostrarMensajeria, userLoaded, chats, chatnames, handleMensajeria, getMensajes }) => {
   const [username, setUsername] = useState("");
   const [chats2, setChats] = useState<any[]>([]);
+  const [unreadMessages, setUnreadMessages] = useState<{ [key: string]:  number}>({});
+
+  useEffect(() => {
+    const fetchUnreadMessages = async () => {
+      const unreadMessages = await getUnreadMessagesCount(chats);
+      setUnreadMessages(unreadMessages);
+      console.log("unreadMessages", unreadMessages);
+    };
+  
+    fetchUnreadMessages();
+  }, [chats]);
+
+  const getUnreadMessagesCount = async (chats: Chat[]) => {
+    const unreadMessages: {[key: string]: number} = {};
+    for(let chat of chats){
+      const count = await getMensajesNoLeidos(chat.id);
+      unreadMessages[String(chat.id || "")] = count;
+    }
+    return unreadMessages;
+  };
+
+  
+
 
   const handleUsernameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setUsername(event.target.value);
@@ -71,7 +95,7 @@ const Mensajeria: React.FC<MensajeriaProps> = ({ userId, mostrarMensajeria, user
           <ul className='flex flex-col items-center'>
             {chats.map((chat: any, index: number) => (
               <li key={chat.id} className='flex flex-row justify-around items-center space-x-4'>
-                <h2> ({chat.id}) Chat: {chatnames[index]}</h2>
+                <h2> ({chat.id}) Chat: {chatnames[index]} - No leidos: {unreadMessages[chat.id]} </h2>
                 <button onClick={() => handleRedirect(chat.id, userId)} className=' px-2 rounded-md bg-gray-400 hover:bg-gray-600'>abrir </button>
               </li>
             ))}

@@ -1,7 +1,7 @@
 'use client'
 import React from "react"
 import { useEffect, useState } from "react";
-import { createMensaje, getMensajes } from "@/services/mensajes";
+import { createMensaje, getMensajes, updateMensaje } from "@/services/mensajes";
 import { getCookie, getReturnByCooki, getUser, getUserByUserName, updateUserRecursos } from "@/services/users";
 import { getChatNameById } from "@/services/chats";
 
@@ -72,17 +72,34 @@ const Chats: React.FC = () => {
     //refrescar por si me mandaron mensajes*/
     useEffect(() => {
         if (chatId !== "") {
-            getMensajes(chatId).then(setMensajes);
+          getMensajes(chatId).then(mensajes => {
+            setMensajes(mensajes);
+            handleLeerMensajes(mensajes);
+          });
         }
-    
+      
         const intervalId = setInterval(() => {
-            if (chatId !== "") {
-                getMensajes(chatId).then(setMensajes);
-            }
+          if (chatId !== "") {
+            getMensajes(chatId).then(mensajes => {
+              setMensajes(mensajes);
+              handleLeerMensajes(mensajes);
+            });
+          }
         }, 5000);
+      
         return () => clearInterval(intervalId);
-    }, [chatId, userId]);
+      }, [chatId, userId]);
 
+    const handleLeerMensajes = async (mensajes: any) => {
+        console.log("Leyendo los Mensajes: ", mensajes)
+        for(let mensaje of mensajes){
+            //si el mensaje no fue leido y el emisor no soy yo
+            if(mensaje.leido === false && mensaje.emisor !== userId){
+                await updateMensaje(mensaje.id, {leido: true})
+                console.log("Mensaje leido: ", mensaje)
+            }
+        }
+    }
     const handleSubmit = async (event: any) => {
         event.preventDefault();
 
@@ -98,7 +115,8 @@ const Chats: React.FC = () => {
             pan: Number(data.get("pan")),
             piedra: Number(data.get("piedra")),
             texto: data.get("mensaje") as string,
-            fecha: new Date()
+            fecha: new Date(),
+            leido: false // nuevo atributo para saber si el mensaje fue leido
         }
 
         // create the message
