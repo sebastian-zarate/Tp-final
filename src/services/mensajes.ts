@@ -32,10 +32,14 @@ export const createMensaje = async (data: any) => {
     return m
 }
 // devuelve el numero de mensajes no leidos de un chat
-export const getMensajesNoLeidos = async (chatId: string) => {
+export const getMensajesNoLeidos = async (chatId: string, emisor: string) => {
     const count = await prisma.mensajes.count({
         where: {
             chatId: chatId,
+            //para que no sea mi propio mensaje
+            emisor: {
+                not: emisor
+            },
             leido: false
         }
     })
