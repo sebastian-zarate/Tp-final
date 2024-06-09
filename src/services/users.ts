@@ -209,7 +209,7 @@ export async function getUserByCooki() {
 //-----------------------------------------------------------------------------------------------------------
 //----------------------------------------------------SEBA---para abajo nuevo -------------------------------------------------
 
-// GUARDA EL EDIFICIO EN LA BASE DE DATOS CUANDO SE MUEVE
+/// GUARDA EL EDIFICIO EN LA BASE DE DATOS CUANDO SE MUEVE
 export async function GuardarEdificio(id: string, posX: number, posY: number, edificioNivel: number): Promise<void> {
   try {
     // Lógica para guardar/actualizar el edificio en la base de datos
@@ -262,22 +262,77 @@ export async function builtEdificio(usuarioId: string,edificioID: string, edific
 }
 
 // metodo para obtener los edificios de un usuario
+export async function getBuildingsByUserId(idUser: string): Promise<any[]> {
+  try {
+      
+      
+      // Buscar todos los edificios creados por el usuario con el ID proporcionado
+      const buildings = await prisma.userEdificios.findMany({
+          where: {
+              userId:idUser, // Utilizar el `userId` proporcionado en la llamada
+          },
+          include: {
+              edificio: {
+                  select: {
+                      name: true,
+                      ancho: true,
+                      largo: true,
+                      costo: true,
+                      cantidad: true
+                  }
+              }
+          }
+      });
+      
+      console.log("buildings: ", buildings);
 
+      // Filtramos los resultados que tienen un edificio válido
+      const validBuildings = buildings.filter(building => building.edificio !== null);
+
+      // Mapeamos los resultados para que tengan el formato deseado
+      return validBuildings.map(building => ({
+          // Utilizar el id de la relación UserEdificios
+          id: building.id,
+          x: building.posicion_x,
+          y: building.posicion_y,
+          type: building.edificio.name, // Usar el nombre del edificio como tipo
+          costo: building.edificio.costo,
+          ancho: building.edificio.ancho,
+          largo: building.edificio.largo,
+          nivel: building.nivel,
+          cantidad: building.edificio.cantidad
+      }));
+  } catch (error) {
+      console.error("Error fetching buildings by user ID:", error);
+      throw error;
+  }
+}
 
 export async function updateUserBuildings(
   userId: string,
   muro: number,
-  bosque: number,
-  herreria: number,
-  cantera: number,
-  maderera: number,
-  panaderia: number,
+  bosques: number,
+  herrerias: number,
+  canteras: number,
+  madereras: number,
+  panaderias: number,
   ayuntamientos: number,
-  pans : number,
-  maderas : number,
+  pans : number,maderas : number,
   piedras : number
-
 ) {
+
+  console.log("userId: ", userId);
+  console.log("muro: ", muro);
+  console.log("bosques: ", bosques);
+  console.log("herrerias: ", herrerias);
+  console.log("canteras: ", canteras);
+  console.log("madereras: ", madereras);
+  console.log("panaderias: ", panaderias);
+  console.log("ayuntamientos: ", ayuntamientos);
+  console.log("pans: ", pans);
+  console.log("maderas: ", maderas);
+  console.log("piedras: ", piedras);
+
   try {
     // Buscar al usuario
     const user = await prisma.users.findUnique({
@@ -293,17 +348,16 @@ export async function updateUserBuildings(
           id: userId,
         },
         data: {
-          // Actualizar los campos de edificios con las cantidades proporcionadas
-          bosque: bosque,
-          herreria: herreria,
-          cantera: cantera,
-          maderera: maderera,
-          panaderia: panaderia,
+          muros: muro,
+          bosque: bosques,
+          herreria: herrerias,
+          cantera: canteras,
+          maderera: madereras,
+          panaderia: panaderias,
           ayuntamiento: ayuntamientos,
           pan: pans,
           madera: maderas,
-          piedra: piedras,
-          muros: muro,
+          piedra: piedras
         },
       });
       console.log('User buildings updated successfully.');
@@ -315,5 +369,3 @@ export async function updateUserBuildings(
     throw error;
   }
 };
-
-
