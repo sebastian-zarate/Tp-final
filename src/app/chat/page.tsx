@@ -1,7 +1,7 @@
 'use client'
 import React from "react"
 import { useEffect, useState } from "react";
-import { createMensaje, getMensajes } from "@/services/mensajes";
+import { createMensaje, getMensajes, updateMensaje } from "@/services/mensajes";
 import { getCookie, getReturnByCooki, getUser, getUserByUserName, updateUserRecursos } from "@/services/users";
 import { getChatNameById } from "@/services/chats";
 
@@ -50,7 +50,7 @@ const Chats: React.FC = () => {
                 if (res) {
                     setUserId(res.id)
                     setUsername(res.username)
-                    console.log("username", res.username)
+                    console.log("--------------------------->username", res.username)
                 }
             })
         }
@@ -72,17 +72,34 @@ const Chats: React.FC = () => {
     //refrescar por si me mandaron mensajes*/
     useEffect(() => {
         if (chatId !== "") {
-            getMensajes(chatId).then(setMensajes);
+          getMensajes(chatId).then(mensajes => {
+            setMensajes(mensajes);
+          });
         }
-    
+      
         const intervalId = setInterval(() => {
-            if (chatId !== "") {
-                getMensajes(chatId).then(setMensajes);
-            }
+          if (chatId !== "" && username !== "") {
+            console.log(`Refrescando mensajes ${username}`)
+            getMensajes(chatId).then(mensajes => {
+              setMensajes(mensajes);
+              handleLeerMensajes(mensajes);
+            });
+          }
         }, 5000);
+      
         return () => clearInterval(intervalId);
-    }, [chatId, userId]);
+      }, [chatId, userId]);
 
+    const handleLeerMensajes = async (mensajes: any) => {
+        console.log("Leyendo los Mensajes: ", mensajes)
+        for(let mensaje of mensajes){
+            //si el mensaje no fue leido y el emisor no soy yo comparando usernames
+            if(mensaje.leido === false && mensaje.emisorUserName !== username){
+                await updateMensaje(mensaje.id, {leido: true})
+                console.log("--------------------->Mensaje leido: ", mensaje)
+            }
+        }
+    }
     const handleSubmit = async (event: any) => {
         event.preventDefault();
 
@@ -98,7 +115,8 @@ const Chats: React.FC = () => {
             pan: Number(data.get("pan")),
             piedra: Number(data.get("piedra")),
             texto: data.get("mensaje") as string,
-            fecha: new Date()
+            fecha: new Date(),
+            leido: false // nuevo atributo para saber si el mensaje fue leido
         }
 
         // create the message
@@ -116,11 +134,7 @@ const Chats: React.FC = () => {
         <main>
             <div className=" flex flex-col justify-center items-center mt-16 p-8  bg-gray-400">
                 <div className=" justify-between bg-white w-8/12 flex   p-5 border m-5">
-
-                    <h1>Chat: {usernameOther}</h1>
-
-                    <h1>Chat: {username}</h1>
-
+                    <h1>Chateando con {usernameOther}</h1>
                 </div>
 
                 <div className=" bg-white p-10 m-2 w-8/12 flex-col flex justify-between">

@@ -2,13 +2,14 @@
 import React, { use } from 'react';
 import { useEffect, useState } from 'react';
 import { getUserByUserName, getUser } from '@/services/users';
-import { createChat } from '@/services/chats';
+import { createChat, type Chat } from '@/services/chats';
+import { getMensajesNoLeidos } from '@/services/mensajes';
 import { get } from 'http';
 interface MensajeriaProps {
   userId: string;
   mostrarMensajeria: boolean;
   userLoaded: boolean;
-  chats: any[];
+  chats: Chat[];
   chatnames: string[];
   handleMensajeria: () => void;
   getMensajes: (id: string) => void;
@@ -17,6 +18,39 @@ interface MensajeriaProps {
 const Mensajeria: React.FC<MensajeriaProps> = ({ userId, mostrarMensajeria, userLoaded, chats, chatnames, handleMensajeria, getMensajes }) => {
   const [username, setUsername] = useState("");
   const [chats2, setChats] = useState<any[]>([]);
+  const [unreadMessages, setUnreadMessages] = useState<{ [key: string]:  string}>({});
+  const [notificacion , setNotificacion] = useState<boolean>(false);
+
+  useEffect(() => {
+    const fetchUnreadMessages = async () => {
+      const unreadMessages = await getUnreadMessagesCount(chats);
+      setUnreadMessages(unreadMessages);
+      console.log("unreadMessages", unreadMessages);
+    };
+  
+    fetchUnreadMessages();
+  }, [chats]);
+
+  //metodo para obtener los mensajes no leidos
+  const getUnreadMessagesCount = async (chats: Chat[]) => {
+
+    const unreadMessages: {[key: string]: string} = {};
+    for(let chat of chats){
+      const count = await getMensajesNoLeidos(chat.id, userId);
+      if(count > 0){
+        unreadMessages[chat.id] = `- No leidos: ${count}`;
+        //avisar que hay mensajes no leidos
+        setNotificacion(true);
+      }
+      else{
+        unreadMessages[chat.id] = "";
+      }
+    }
+    return unreadMessages;
+  };
+
+  
+
 
   const handleUsernameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setUsername(event.target.value);
@@ -47,9 +81,10 @@ const Mensajeria: React.FC<MensajeriaProps> = ({ userId, mostrarMensajeria, user
     // clear the username field
     setUsername("");
   };
+  /*
   if (!mostrarMensajeria || !userLoaded) {
     return null;
-  }
+  }*/
 
 
   const handleRedirect = (chatid: string, userid: string) => {
@@ -58,8 +93,14 @@ const Mensajeria: React.FC<MensajeriaProps> = ({ userId, mostrarMensajeria, user
     localStorage.setItem('chatId', chatid)
     localStorage.setItem('userId', userid)
   }
+   
   return (
-    <div className="fixed inset-0 w-full h-full z-50 bg-black bg-opacity-50 flex items-center justify-center">
+    <React.Fragment>
+    <div className='absolute top-0 left-100 p-4 bg-red-500 hover:bg-blue-700 text-blue font-bold py-2 px-4 rounded flex items-center justify-center flex-col'>
+        <button onClick={() => handleMensajeria()}>Chat</button>
+        <h3 className={notificacion ? '' : 'hidden'}> Hay Mensajes sin leer!</h3>
+      </div>
+    <div className={`fixed inset-0 w-full h-full z-50 bg-black bg-opacity-50 flex items-center justify-center ${mostrarMensajeria ? '' : 'hidden'}`} >
       <div className="relative w-1/2 h-1/2 bg-white rounded-lg">
         <button className="absolute top-2 right-2 text-lg font-bold" onClick={handleMensajeria}>X</button>
         <h1 className="text-1xl font-bold text-center">Mensajeria</h1>
@@ -71,7 +112,7 @@ const Mensajeria: React.FC<MensajeriaProps> = ({ userId, mostrarMensajeria, user
           <ul className='flex flex-col items-center'>
             {chats.map((chat: any, index: number) => (
               <li key={chat.id} className='flex flex-row justify-around items-center space-x-4'>
-                <h2> ({chat.id}) Chat: {chatnames[index]}</h2>
+                <h2> ({chat.id}) Chat: {chatnames[index]} {unreadMessages[chat.id]} </h2>
                 <button onClick={() => handleRedirect(chat.id, userId)} className=' px-2 rounded-md bg-gray-400 hover:bg-gray-600'>abrir </button>
               </li>
             ))}
@@ -79,6 +120,7 @@ const Mensajeria: React.FC<MensajeriaProps> = ({ userId, mostrarMensajeria, user
         </div>
       </div>
     </div>
+    </React.Fragment>
   );
 };
 

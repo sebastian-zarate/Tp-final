@@ -92,6 +92,7 @@ model Mensajes{
   pan Int
   texto String
   fecha DateTime
+  leido Boolean?
 }
 
 model Chats {

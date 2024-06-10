@@ -4,6 +4,13 @@ import { getUser } from "./users"
 
 const prisma = new PrismaClient()
 
+export type Chat = {
+    id: string
+    user1: string
+    user2: string
+    username1: string
+    username2: string
+}
 // GET todos los chats de un usuario
 export const getChats = async (Id: string) => {
     const c = await prisma.chats.findMany({
