@@ -39,8 +39,8 @@ const MenuDesplegable: React.FC<Props> = ({ onBuildClick }) => {
       // Aquí puedes definir las coordenadas x, y donde quieres construir el edificio
       const x = 100; // Por ejemplo, 100px desde el borde izquierdo del cuadro verde
       const y = 100; // Por ejemplo, 100px desde el borde superior del cuadro verde
-      const ancho = selectedEdificio.ancho || 20; // Usar ancho predeterminado si no está definido en la base de datos
-      const largo = selectedEdificio.largo || 20; // Usar largo predeterminado si no está definido en la base de datos
+      const ancho = selectedEdificio.ancho ; // Usar ancho predeterminado si no está definido en la base de datos
+      const largo = selectedEdificio.largo ; // Usar largo predeterminado si no está definido en la base de datos
       const costo = selectedEdificio.costo ; // Usar costo predeterminado si no está definido en la base de datos
       onBuildClick(selectedEdificio.id, x, y, buildingType, ancho, largo, costo);
     } else {

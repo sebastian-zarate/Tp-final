@@ -24,6 +24,7 @@ type datos = {
   edifId: string,
   userId: string
 }
+
 const DynamicBuildings: React.FC = () => {
 
   const [buildings, setBuildings] = useState<Building[]>([]);
@@ -197,7 +198,7 @@ const handleBuildClick = async (id_edi: string, x: number, y: number, buildingTy
       const { ancho: buildingWidth, largo: buildingHeight, id, nivel } = building;
   
       // Calcular nuevas coordenadas con restricciones
-      const clampedX = Math.min(Math.max(newX, 0) + 26, maxWidth - buildingWidth);
+      const clampedX = Math.min(Math.max(newX, 0)+26, maxWidth - buildingWidth);
       const clampedY = Math.min(Math.max(newY, 0), maxHeight - buildingHeight);
   
       // Verificar si hay colisión con otros edificios
@@ -235,14 +236,25 @@ const handleBuildClick = async (id_edi: string, x: number, y: number, buildingTy
   }
   
   const getCollidedBuildingIndex = (index: number, x: number, y: number, width: number, height: number) => {
-    return buildings.findIndex((building, i) =>
-      i !== index &&
-      x < building.x  + building.ancho &&
-      x + width > building.x &&
-      y < building.y + building.largo &&
-      y + height > building.y
-    );
-  };
+    const buildingCenterX = x + width/2+10;
+    const buildingCenterY = y + height/4-30 ;
+
+    return buildings.findIndex((building, i) => {
+        if (i !== index) {
+            const otherCenterX = building.x + building.ancho ;
+            const otherCenterY = building.y + building.largo ;
+
+            const dx = buildingCenterX - otherCenterX;
+            const dy = buildingCenterY - otherCenterY;
+
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            const minDistance = Math.sqrt((width / 2 + building.ancho / 2) ** 2 + (height / 2 + building.largo / 2) ** 2);
+
+            return distance < minDistance;
+        }
+        return false;
+    });
+};
 
 
   const guardarEdificioEnBD = (id: string, posX: number, posY: number, nivel : number) => {
@@ -479,6 +491,8 @@ const handleBuildClick = async (id_edi: string, x: number, y: number, buildingTy
 
     return countsMax;
 };
+
+
 return (
   <div className="hola flex flex-col items-center justify-center w-screen h-screen bg-gray-900">
     <div className="absolute top-0 left-0 p-4 bg-red-500 text-blue font-bold py-2 px-4 rounded">
