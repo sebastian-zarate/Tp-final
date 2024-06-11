@@ -60,7 +60,7 @@ export async function createUser(user: { email: string, password: string, userna
     //----------------------------------------------------------------
     //canon : 0,
     muros : 0,
-    bosque : 0,
+    //bosque : 0,
     herreria : 0,
     cantera : 0,
     maderera :0,
@@ -166,7 +166,8 @@ export async function updateUser(Id: string, data: any) {
   console.log(`User ${Id} updated: `, u)
   return u
 }
-//region cambios Nico
+//region cambios Nico 
+//MENSAJERIA
 export async function updateUserRecursos(idEmisor: string, usernameReceptor: string, madera: number, piedra: number, pan:number) {
   //consigo el id del usuario
   let u = await getUserById(idEmisor)
@@ -224,23 +225,16 @@ export async function getUserByCooki() {
   return user
 }
 //devuelve a una página en base de la cooki
-export async function getReturnByCooki(cooki:any, pagina:string) {
+export async function getReturnByCooki() {
+  let cooki = cookies().get('user')?.value
   //se obtiene el hash de traducir el token
-  if(!cooki) return('login')
-  let hash = verifyJWT(String(cooki))
+  if(!cooki) return redirect('login')
+  let hash = verifyJWT(cooki)
   //se obtiene el user por el hash
   const user = await getUserByHash(String(hash))
-  if (user) return redirect(`/${pagina}`)
-  else{return redirect('login')}
+  if (!user) return redirect('login')
+}
 
-}
-//obtengo el valor de la cookie
-export async function getCookie() {
-  //obtengo el valor de la cookie user
-  const cooki = cookies().get('user')?.value
-  if(!cooki) return redirect("/login")
-  return String(cooki)
-}
 //region hasta aca Nico
 
 
@@ -308,7 +302,7 @@ export async function builtEdificio(usuarioId: string,edificioID: string, edific
 export async function updateUserBuildings(
   userId: string,
   muro: number,
-  bosque: number,
+  //bosque: number,
   herreria: number,
   cantera: number,
   maderera: number,
@@ -335,7 +329,7 @@ export async function updateUserBuildings(
         },
         data: {
           // Actualizar los campos de edificios con las cantidades proporcionadas
-          bosque: bosque,
+         // bosque: bosque,
           herreria: herreria,
           cantera: cantera,
           maderera: maderera,

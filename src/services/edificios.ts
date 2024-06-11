@@ -44,9 +44,6 @@ export async function getEdificios(): Promise<any[]> {
 
 
 
-
-
-
 export const getEdificioById = async (Id: string) => {
     const edif = await prisma.edificios.findFirst({
         where:{

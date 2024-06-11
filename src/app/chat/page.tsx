@@ -2,7 +2,7 @@
 import React from "react"
 import { useEffect, useState } from "react";
 import { createMensaje, getMensajes, updateMensaje } from "@/services/mensajes";
-import { getCookie, getReturnByCooki, getUser, getUserByUserName, updateUserRecursos } from "@/services/users";
+import { getReturnByCooki, getUser, updateUserRecursos } from "@/services/users";
 import { getChatNameById } from "@/services/chats";
 
 
@@ -16,21 +16,24 @@ const Chats: React.FC = () => {
     const [usernameOther, setUsernameOther] = useState<string>("")
 
 //region verficar la cookie------------------
-   const [cooki, setCooki] = useState<string>("")
-   async function verificarCooki() {
-        //obtengo el valor de la cookie user
-        const cok = await getCookie()
-        setCooki(cok)
-        await getReturnByCooki(cooki,"chat") 
+let estado = false;
+
+useEffect(() => { 
+  async function verificarCooki() {
+    //obtengo el valor de la cookie user
+    if(!estado) {
+      await getReturnByCooki() 
+      estado = !estado
     }
-   useEffect(() => {    
-        verificarCooki()
-        //cada 5 segundos se chequea la cookie
-        const intervalId = setInterval(() => {
-            verificarCooki()
-        }, 5000);
-        return () => clearInterval(intervalId);
-    }, [cooki]);
+    
+  } 
+  verificarCooki()      
+    const intervalId = setInterval(() => {
+      estado = !estado
+        
+      }, 5000);
+      return () => clearInterval(intervalId);
+}, [estado]) 
 //------------------------------------------------
 
     useEffect(() => {

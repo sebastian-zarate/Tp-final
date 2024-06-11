@@ -4,11 +4,13 @@ import MenuDesplegable from './menuDesplegable';
 import MenuAsignar from './menuAsignar';
 import Mensajeria from './menuChats';
 import Recursos from './recursos';
-import { GuardarEdificio, getBuildingsByUserId, builtEdificio, getUEbyUserId, getUEById } from '../../services/userEdificios';
-import { getUserByCooki, getUser, getUserByHash, updateUserBuildings, updateUser} from '@/services/users';
+import { GuardarEdificio, getBuildingsByUserId, builtEdificio, getUEbyUserId, getUEById, getEdificionameByUE } from '../../services/userEdificios';
+import { getReturnByCooki, getUserByCooki, updateUserBuildings} from '@/services/users';
 import {recolectarRecursos, calcularMadera, calcularPiedra, calcularPan } from '@/services/recursos';
-import { getChats, getUsernameOther, getChatName } from '@/services/chats';
+import { getChats, getChatName } from '@/services/chats';
 import { getMensajes } from '@/services/mensajes';
+import { getEdificioById } from '@/services/edificios';
+import ButtonUser from './buttonUser';
 
 
 
@@ -21,6 +23,7 @@ type Building = {
   id: string;
   nivel: number;
   costo: number;
+  cantidad:number;
 };
 
 const DynamicBuildings: React.FC = () => {
@@ -36,10 +39,10 @@ const DynamicBuildings: React.FC = () => {
   const [usuario, setUser] = useState('');
   const [userId, setUserId] = useState('')
   
-  //cuando se cliclea un botón se habilita la compuerta que habre el formulario de asignar unidades
-  const[menuButton, setMenBut] = useState(false);
+  //NICO
+  const[menuButton, setMenBut] = useState(false);   //cuando se cliclea un botón se habilita la compuerta que habre el formulario de asignar unidades
   const[idUEClick, setIdUEClick] = useState("");    //id de userEdificios seleccionado ante un click
-  
+  const[userButton, setUserButton] = useState(false); //compuerta para el botón de usuario.
 ////-----------------------------------------------------------
 //---------------------seba--------------------------------------
 //-----------------------------------------------------------
@@ -47,7 +50,7 @@ const [canon, setCanon] = useState(0);
 const [maderera, setMaderera] = useState(0);
 const [cantera, setCantera] = useState(0);
 const [panaderia, setPanaderia] = useState(0);
-const [bosque, setBosque] = useState(0);
+/* const [bosque, setBosque] = useState(0); */
 const [muros, setMuros] = useState(0);
 const [ayuntamiento, setAyuntamiento] = useState(0);
 const [herreria, setHerreria] = useState(0);
@@ -66,7 +69,29 @@ const [message, setMessage] = useState('');
  
   const mouseMoveRef = useRef<(e: MouseEvent) => void>(() => {});
   const mouseUpRef = useRef<() => void>(() => {});
+
+  //----------------------------------------------------------
+  //region VERIFICAR COOKIE
   
+ /*  let estado = false;
+
+  useEffect(() => { 
+    async function verificarCooki() {
+      //obtengo el valor de la cookie user
+      if(!estado) {
+        await getReturnByCooki() 
+        estado = !estado
+      }
+      
+    } 
+    verificarCooki()      
+      const intervalId = setInterval(() => {
+        estado = !estado
+          
+        }, 5000);
+        return () => clearInterval(intervalId);
+  }, [estado])  */
+  //----------------------------------------------------------
   //#region USEEFFECTS USUARIO
   //useffect para obetener el id de user 
   useEffect(() => {
@@ -114,14 +139,14 @@ useEffect(() => {
   }
 }, [chats, userId]);
   
-const handleBuildClick = async (id: string, x: number, y: number, buildingType: string, ancho: number, largo: number, costos: number) => {
+const handleBuildClick = async (id: string, x: number, y: number, buildingType: string, ancho: number, largo: number, costos: number, cantidad:number) => {
   const existingBuilding = false //buildings.find(building => building.x === x && building.y === y && building.id === id);
     
    if (!existingBuilding) {
      
 
      // Actualizar el estado del usuario
-     const construir = await updateBuildingCount(id, costos); // devuelve 1 si se puede construir, 0 si no
+     const construir = await updateBuildingCount(cantidad,/* id,  */costos, id); // devuelve 1 si se puede construir, 0 si no
       // window.location.reload();
      // Llamar a la función para guardar el edificio en la base de datos
      if (construir === 1) {
@@ -217,18 +242,26 @@ const handleBuildClick = async (id: string, x: number, y: number, buildingType: 
       setMaderera(Number(user.maderera));
       setCantera(Number(user.cantera));
       setPanaderia(Number(user.panaderia));
-      setBosque(Number(user.bosque));
+/*       setBosque(Number(user.bosque)); */
       setMuros(Number(user.muros));
       setAyuntamiento(Number(user.ayuntamiento));
       setHerreria(Number(user.herreria));
     }
   }
+
+ /*    async function getNameEdificio(idUE:any) {
+      return await getEdificionameByUE(idUE)
+    } */
   //método para obtener el id del userEdificio seleccionado
-   function handleClick(event: any) {  
+    async function handleClick(event: any) {  
+      //si la compuerta ya esta abierta no ejecutar este código
+      if(menuButton) return
       const elementoClicado = event.target as HTMLElement;  
       const idUE = elementoClicado.id;
       console.log('id UE:', idUE);
-      if(!menuButton )    setMenBut(!menuButton);
+      const edificioName = await getEdificionameByUE(idUE)
+      console.log("edificiooooooooooooo:",edificioName)
+      if(!menuButton  && (edificioName == "Maderera" || edificioName == "Cantera" || edificioName == "panadería"))    setMenBut(true);
       if(elementoClicado.id){
         setIdUEClick(idUE)
       }
@@ -276,9 +309,84 @@ const handleBuildClick = async (id: string, x: number, y: number, buildingType: 
       return updatedBuildings;
   });
  };
-  const updateBuildingCount = async (id: string, costos: number) => {
-   /*  const userIdd = '665fd3b9b927599f41789278'; // Reemplazar con el ID de usuario actual */
-   
+
+ //region update nuevo
+ const updateBuildingCount = async (cantidad: number, costos: number, id: string) => {
+  // Reemplazar con el ID de usuario actual
+  let countsMax = 0;
+
+  const newCounts = {
+      maderera: maderera,
+      cantera: cantera,
+      panaderia: panaderia,
+     // bosque: bosque,
+      muros: muros,
+      ayuntamiento: ayuntamiento,
+      herreria: herreria,
+      pan: pan,
+      madera: madera,
+      piedra: piedra
+  };
+
+  let cantEdificio;
+  let nombreEdificio;
+  await getEdificioById(id).then((edificio) => {
+    nombreEdificio = String(edificio?.name);
+
+  }
+  );
+
+  for (let i in newCounts) {
+    if(nombreEdificio == i){
+      cantEdificio = newCounts[i];
+    }
+  }
+
+
+  if ( cantidad  > Number(cantEdificio) && madera >= costos && piedra >= costos) {
+    newCounts.maderera = maderera + 1;
+    newCounts.madera = madera - costos;
+    newCounts.piedra = piedra - costos;
+    setPiedra(newCounts.piedra);  
+    setMadera(newCounts.madera);
+
+    countsMax = 1;
+} else {
+  if (Number(cantEdificio) >= cantidad) 
+  {
+      setMessage("Debes tener ayuntamiento en nivel 5 para poder construir más " + nombreEdificio);
+  }
+  if (madera < costos) 
+   {
+      setMessage('No tienes suficiente medera para construir.');
+   }
+
+}
+ 
+  try {
+      await updateUserBuildings(
+        userId.toLowerCase(),
+          newCounts.muros,
+          //newCounts.bosque,
+          newCounts.herreria,
+          newCounts.cantera,
+          newCounts.maderera,
+          newCounts.panaderia,
+          newCounts.ayuntamiento,
+          newCounts.pan,
+          newCounts.madera,
+          newCounts.piedra
+      );
+      console.log('User buildings count updated successfully.');
+  } catch (error) {
+      console.error('Error updating user buildings count:', error);
+  }
+
+  return countsMax;
+};
+
+//region update viejo
+/*   const updateBuildingCount = async (id: string, costos: number) => {  
     let countsMax = 0;
     
     const newCounts = {
@@ -287,7 +395,7 @@ const handleBuildClick = async (id: string, x: number, y: number, buildingType: 
       maderera,
       cantera,
       panaderia,
-      bosque,
+//      bosque, 
       ayuntamiento,
       herreria,
       pan,
@@ -393,7 +501,7 @@ const handleBuildClick = async (id: string, x: number, y: number, buildingType: 
       await updateUserBuildings(
         userId,
         newCounts.muros,
-        newCounts.bosque,
+        //newCounts.bosque,
         newCounts.herreria,
         newCounts.cantera,
         newCounts.maderera,
@@ -409,7 +517,7 @@ const handleBuildClick = async (id: string, x: number, y: number, buildingType: 
     }
   
     return countsMax;
-  };
+  }; */
 
   //region hasta aca seba-------------------------
   return (
@@ -428,20 +536,14 @@ const handleBuildClick = async (id: string, x: number, y: number, buildingType: 
         cargarUser={cargarUser}
       />         
       </div>
-      <Mensajeria
-        userId= {userId}
-        mostrarMensajeria={mostrarMensajeria}
-        userLoaded={userLoaded}
-        chats={chats}
-        chatnames={chatnames}
-        handleMensajeria={handleMensajeria}
-        getMensajes={getMensajes}
-      />
+      
+      
       <div style={{ width: '1200px', height: '700px' }} className="bg-green-500 flex items-center justify-center relative">
         {buildings.map((building, index) => (
           <div
             key={index}
             id={building.id}
+            
             className={` bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded`}
             style={{
               left: `${building.x}px`,
@@ -459,20 +561,37 @@ const handleBuildClick = async (id: string, x: number, y: number, buildingType: 
           >
            
             <div>{building.type} - X: {building.x}, Y: {building.y}</div>
-              {( (idUEClick == building.id)&&menuButton ) ? <MenuAsignar  idUE= {building.id} cerrarCompuerta= {setMenBut} estadoCompuerta={menuButton}/> : null  }
+              {( (idUEClick == building.id)&& menuButton ) ? <MenuAsignar  idUE= {building.id} cerrarCompuerta= {setMenBut} estadoCompuerta={menuButton}/> : null  }
   
           </div>
 
         ))}
       </div>
       <button
-        className="absolute bottom-4 right-4 bg-green-500 hover:bg-white text-white font-bold py-2 px-4 rounded"
+        className="absolute bottom-4 right-4 bg-green-400 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
         onClick={handleMenuClick}
       >
-        Menú
+        Construir Edificios
       </button>
       {menuOpen && <MenuDesplegable onBuildClick={handleBuildClick} />}
+
+      <div className=" p-2 absolute top-4 right-4 bg-blue-500 text-white font-bold  rounded justify-center items-center" >
+            <button className='py-2 px-10' onClick={() => setUserButton(!userButton)}>User</button>
+
+            <div className=' text-black px-4'>
+                {userButton && <ButtonUser 
+                    userId= {userId}
+                    mostrarMensajeria={mostrarMensajeria}
+                    userLoaded={userLoaded}
+                    chats={chats}
+                    chatnames={chatnames}
+                    handleMensajeria={handleMensajeria}
+                    getMensajes={getMensajes}/>
+                }
+            </div>
+      </div>
     </div>
+    
   );
 };
 

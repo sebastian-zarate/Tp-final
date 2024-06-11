@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react';
 import { getUserByUserName, getUser } from '@/services/users';
 import { createChat, type Chat } from '@/services/chats';
 import { getMensajesNoLeidos } from '@/services/mensajes';
-import { get } from 'http';
+import ChatImage from '../Images/BackgroundChat4.jpg'
+import Image from 'next/image';
 interface MensajeriaProps {
   userId: string;
   mostrarMensajeria: boolean;
@@ -96,12 +97,20 @@ const Mensajeria: React.FC<MensajeriaProps> = ({ userId, mostrarMensajeria, user
    
   return (
     <React.Fragment>
-    <div className='absolute top-0 left-100 p-4 bg-red-500 hover:bg-blue-700 text-blue font-bold py-2 px-4 rounded flex items-center justify-center flex-col'>
+    <div className=' font-stoothgart left-100 p-4 bg-red-500 hover:bg-blue-700 text-blue font-bold py-2 px-4 rounded flex items-center justify-center flex-col'>
         <button onClick={() => handleMensajeria()}>Chat</button>
         <h3 className={notificacion ? '' : 'hidden'}> Hay Mensajes sin leer!</h3>
       </div>
-    <div className={`fixed inset-0 w-full h-full z-50 bg-black bg-opacity-50 flex items-center justify-center ${mostrarMensajeria ? '' : 'hidden'}`} >
-      <div className="relative w-1/2 h-1/2 bg-white rounded-lg">
+    <div className={`font-stoothgart fixed inset-0 w-full h-full z-50 bg-black bg-opacity-50 flex items-center justify-center ${mostrarMensajeria ? '' : 'hidden'}`} >
+      <div className="relative w-1/2 h-1/2  rounded-lg">
+      <Image
+          src={ChatImage}
+          alt="Background Image"
+          layout="fill"
+          objectFit="cover"
+          className="absolute inset-0 w-full h-full"
+          style={{ zIndex: -1, opacity: 100 }}
+        />
         <button className="absolute top-2 right-2 text-lg font-bold" onClick={handleMensajeria}>X</button>
         <h1 className="text-1xl font-bold text-center">Mensajeria</h1>
         <form onSubmit={handleCreateChat} className=" mx-auto pb-4 flex flex-col items-center justify-center">

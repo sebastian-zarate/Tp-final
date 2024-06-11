@@ -8,7 +8,7 @@ export default function MenuAsignar({idUE, cerrarCompuerta, estadoCompuerta}: {i
 
     let panXunidad = 10
     const [estado, setEstado] = useState<boolean>(false)
-    const [unidadesTot, setUnidadesTot] = useState<number>(0)
+
 
 
     // Función para manejar la admisión o substracción de unidades de un edificio  
@@ -24,9 +24,9 @@ export default function MenuAsignar({idUE, cerrarCompuerta, estadoCompuerta}: {i
         }
         //obtener unidades totales del usuario
         const unid = getUserByCooki().then(result =>result?.unidadesDeTrabajo)
-        setUnidadesTot(Number(unid))
+        
 
-        if(unidades >unidadesTot ){        //comparo que no se puedan asignar unidades por encima de las que ya tiene el usuario
+        if(unidades >Number(unid) ){        //comparo que no se puedan asignar unidades por encima de las que ya tiene el usuario
             event.target.reset();
             return alert("unidades exedidas")
             
@@ -38,7 +38,7 @@ export default function MenuAsignar({idUE, cerrarCompuerta, estadoCompuerta}: {i
         if(!estado) updateEdifUserSubtract(unidades)
         
         event.target.reset();
-        cerrarCompuerta(!estadoCompuerta)
+        cerrarCompuerta(false)
     }
     //método para añadir unidades al edificio
     async function updateEdifUserAdd(unidades:any) {      
@@ -72,7 +72,7 @@ export default function MenuAsignar({idUE, cerrarCompuerta, estadoCompuerta}: {i
             <button type="submit" className=" text-black bg-yellow-500 hover:bg-yellow-700 " onClick={()=>setEstado(true)} >Agregar</button>
             <button type="submit" className=" text-black bg-yellow-500 hover:bg-yellow-700 " onClick={()=>setEstado(false)}>Quitar</button>
         </form>       
-        <button type="button" className=" text-black bg-yellow-500 hover:bg-yellow-700 " onClick={() => cerrarCompuerta(!estadoCompuerta)}>Salir</button>
+        <button type="button" className=" text-black bg-yellow-500 hover:bg-yellow-700 " onClick={() => cerrarCompuerta(false)}>Salir</button>
     </div>
       )
 }
