@@ -179,7 +179,7 @@ export async function getBuildingsByUserId(usuarioId: string): Promise<any[]> {
              nivel: building.nivel,
              cantidad: building.edificio.cantidad
              //---------------------------
-                // ---------agrege ---------
+            // ---------agrege ---------
                 //cantidad: building.edificio.cantidad
         }));
     } catch (error) {
@@ -187,6 +187,8 @@ export async function getBuildingsByUserId(usuarioId: string): Promise<any[]> {
         throw error;
     }
 }
+
+
 
 
 

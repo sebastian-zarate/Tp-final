@@ -7,6 +7,7 @@ import { signJWT, verifyJWT } from "@/helpers/jwt";
 import { StyledString } from "next/dist/build/swc";
 import { redirect } from "next/dist/server/api-utils";
 import { error } from "console";
+import { Piedra } from "next/font/google";
 
 const prisma = new PrismaClient()
 let cantMadera = 500
@@ -307,31 +308,21 @@ export async function getBuildingsByUserId(idUser: string): Promise<any[]> {
       throw error;
   }
 }
-
+////---------------------------------------------------
+//--------------------------------------------------
+//---------------------------------------------------
 export async function updateUserBuildings(
   userId: string,
-  muro: number,
-  bosques: number,
-  herrerias: number,
-  canteras: number,
-  madereras: number,
-  panaderias: number,
-  ayuntamientos: number,
-  pans : number,maderas : number,
-  piedras : number
+  nombreEdificio: string,
+  newCantidad: number,
+  
+  piedras: number,
+  maderas: number
 ) {
 
   console.log("userId: ", userId);
-  console.log("muro: ", muro);
-  console.log("bosques: ", bosques);
-  console.log("herrerias: ", herrerias);
-  console.log("canteras: ", canteras);
-  console.log("madereras: ", madereras);
-  console.log("panaderias: ", panaderias);
-  console.log("ayuntamientos: ", ayuntamientos);
-  console.log("pans: ", pans);
-  console.log("maderas: ", maderas);
-  console.log("piedras: ", piedras);
+  console.log("newCantidad: ", newCantidad);
+  console.log("nombreEdificio: ", nombreEdificio);
 
   try {
     // Buscar al usuario
@@ -348,16 +339,9 @@ export async function updateUserBuildings(
           id: userId,
         },
         data: {
-          muros: muro,
-          bosque: bosques,
-          herreria: herrerias,
-          cantera: canteras,
-          maderera: madereras,
-          panaderia: panaderias,
-          ayuntamiento: ayuntamientos,
-          pan: pans,
-          madera: maderas,
-          piedra: piedras
+          [nombreEdificio]: newCantidad,
+          piedra: piedras,
+          madera: maderas
         },
       });
       console.log('User buildings updated successfully.');
@@ -369,3 +353,23 @@ export async function updateUserBuildings(
     throw error;
   }
 };
+
+// metodo para obtener los edificios de un usuario
+export async function getBuildingCount(idUser: string, idEdificio: string): Promise<any[]> {
+  try {
+      
+
+      
+      // Buscar todos los edificios creados por el usuario con el ID proporcionado
+      const buildings = await prisma.userEdificios.findMany({
+          where: {
+              userId:idUser, // Utilizar el `userId` proporcionado en la llamada
+              edificioId: idEdificio
+          }
+      });
+    
+      return buildings;
+  } catch (error) {
+      console.error("Error fetching buildings by user ID:", error);
+      throw error;
+  }}
