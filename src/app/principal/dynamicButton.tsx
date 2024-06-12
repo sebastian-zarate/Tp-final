@@ -9,6 +9,8 @@ import {recolectarRecursos } from '@/services/recursos';
 import { getChats, getUsernameOther, getChatName } from '@/services/chats';
 import { getMensajes } from '@/services/mensajes';
 import { updateUserBuildings } from '@/services/users';
+import { getEdificioById } from '@/services/edificios';
+import { Await } from 'react-router-dom';
 
 type Building = {
   x: number;
@@ -19,6 +21,7 @@ type Building = {
   id: string;
   nivel: number;
   costo: number;
+  cantidad: number;
 };
 type datos = {
   edifId: string,
@@ -121,14 +124,14 @@ useEffect(() => {
   }
 }, [chats, userId]);
   
-const handleBuildClick = async (id_edi: string, x: number, y: number, buildingType: string, ancho: number, largo: number, costos: number) => {
+const handleBuildClick = async (id_edi: string, x: number, y: number, buildingType: string, ancho: number, largo: number, costos: number, cantidad:number) => {
   const existingBuilding = false //buildings.find(building => building.x === x && building.y === y && building.id === id);
     
    if (!existingBuilding) {
      
 
      // Actualizar el estado del usuario
-     const construir = await updateBuildingCount(id_edi, costos); // devuelve 1 si se puede construir, 0 si no
+     const construir = await updateBuildingCount(cantidad, costos, id_edi); // devuelve 1 si se puede construir, 0 si no
        //window.location.reload();
      // Llamar a la función para guardar el edificio en la base de datos
     
@@ -313,10 +316,9 @@ const handleBuildClick = async (id_edi: string, x: number, y: number, buildingTy
     setMostrarMensajeria(!mostrarMensajeria);
   }
 
-  const updateBuildingCount = async (id: string, costos: number) => {
-    // Reemplazar con el ID de usuario actual
+ 
+  const updateBuildingCount = async (cantidad: number, costos: number, id: string) => {
     let countsMax = 0;
-
     const newCounts = {
         maderera: maderera,
         cantera: cantera,
@@ -329,165 +331,59 @@ const handleBuildClick = async (id_edi: string, x: number, y: number, buildingTy
         madera: madera,
         piedra: piedra
     };
+    
+    const getEdificioNameById = async (id: string): Promise<string | null> => {
+        const edificio = await getEdificioById(id);
+        return edificio ? edificio.name : null;
+    };
 
-    switch (id) {
-        case '663ac05f044ccf6167cf7041':
-            if (maderera < 3 && madera >= costos) {
-                newCounts.maderera = maderera + 1;
-                newCounts.madera = madera - costos;
-                setMaderera(newCounts.maderera);
-                setMadera(newCounts.madera);
-                countsMax = 1;
-            } else {
-              if (maderera >= 3) 
-              {
-                  setMessage('Debes tener ayuntamiento en nivel 5 para poder construir más madereras');
-              }
-              if (madera < costos) 
-               {
-                  setMessage('No tienes suficiente medera para construir.');
-               }
-            }
-            break;
+    const nombreEdificio = await getEdificioNameById(id); // Esperar a que se resuelva la promesa
+    const cantidadEdificio = newCounts[nombreEdificio];
+    if (costos <= newCounts.madera && costos <= newCounts.madera && cantidad > cantidadEdificio) {
 
-        case '663ac05f044ccf6167cf7040':
-            if (cantera < 3 && madera >= costos) {
-                newCounts.cantera = cantera + 1;
-                newCounts.madera = madera - costos;
-                setCantera(newCounts.cantera);
-                setMadera(newCounts.madera);
-                countsMax = 1;
-            } else {
-              if (cantera >= 3) 
-                {
-                    setMessage('Debes tener ayuntamiento en nivel 5 para poder construir más canteras');
-                }
-                if (madera < costos) 
-                 {
-                    setMessage('No tienes suficiente medera para construir.');
-                 }
-            }
-            break;
+        const nombreEdificioMinusculas = nombreEdificio ? nombreEdificio.toLowerCase() : '';
+        const searchString = nombreEdificio ? nombreEdificio.toLowerCase() : '';
 
-        case '663ac518044ccf6167cf7054':
-            if (panaderia < 4 && pan >= costos) {
-                newCounts.panaderia = panaderia + 1;
-                newCounts.pan = pan - costos;
-                setPanaderia(newCounts.panaderia);
-                setPan(newCounts.pan);
-                countsMax = 1;
-            } else {
-              if (panaderia >= 3) 
-                {
-                    setMessage('Debes tener ayuntamiento en nivel 5 para poder construir más panaderias');
-                }
-                if (pan < costos) 
-                 {
-                    setMessage('No tienes suficiente pan para construir.');
-                 }
-            }
-            break;
+        if (nombreEdificioMinusculas && nombreEdificioMinusculas.includes(searchString)) 
+          {
+            // Si la condición se cumple, incrementar la cantidad del edificio en 1
+            newCounts[nombreEdificio] += 1;
+            countsMax = 1;
+            newCounts.madera -= costos;
+            newCounts.piedra -= costos;
+            setMessage('Edificio encontrado para el ID: ' + nombreEdificio);
 
-        case '663ac060044ccf6167cf7042':
-            if (bosque < 3 && madera >= costos) {
-                newCounts.bosque = bosque + 1;
-                newCounts.madera = madera - costos;
-                setBosque(newCounts.bosque);
-                setMadera(newCounts.madera);
-                countsMax = 1;
-            } else {
-              if (bosque >= 3) 
-                {
-                    setMessage('Debes tener ayuntamiento en nivel 5 para poder construir más bosque');
-                }
-                if (madera < costos) 
-                 {
-                    setMessage('No tienes suficiente medera para construir.');
-                 }
+            try {
+                await updateUserBuildings(
+                    userId.toLowerCase(),
+                    newCounts.muros,
+                    newCounts.bosque,
+                    newCounts.herreria,
+                    newCounts.cantera,
+                    newCounts.maderera,
+                    newCounts.panaderia,
+                    newCounts.ayuntamiento,
+                    newCounts.pan,
+                    newCounts.madera,
+                    newCounts.piedra
+                );
+                console.log('User buildings count updated successfully.');
+            } catch (error) {
+                console.error('Error updating user buildings count:', error);
             }
-            break;
+        }else {
+          if (newCounts.madera < costos) {
+              setMessage('No tienes suficiente madera para construir.');
+          }
+          if (newCounts.piedra < costos) {
+              setMessage('No tienes suficiente piedra para construir.');
+          }
+      }
 
-        case '663ac05f044ccf6167cf703e':
-            if (muros < 12 && piedra >= costos) {
-                newCounts.muros = muros + 1;
-                newCounts.piedra = piedra - costos;
-                setMuros(newCounts.muros);
-                setPiedra(newCounts.piedra);
-                countsMax = 1;
-            } else {
-              if (muros >= 3) 
-                {
-                    setMessage('Debes tener ayuntamiento en nivel 5 para poder construir más muros');
-                }
-                if (madera < costos) 
-                 {
-                    setMessage('No tienes suficiente piedra para construir.');
-                 }
-            }
-            break;
-
-        case '663ac05f044ccf6167cf703d':
-            if (ayuntamiento < 1 && madera >= costos ) {
-                newCounts.ayuntamiento = ayuntamiento + 1;
-                newCounts.madera = madera - costos;
-                setAyuntamiento(newCounts.ayuntamiento);
-                setMadera(newCounts.madera);
-                countsMax = 1;
-            } else {
-              if (ayuntamiento >= 1) 
-                {
-                    setMessage('Ya tienes un ayuntamiento');
-                }
-                if (madera < costos) 
-                 {
-                    setMessage('No tienes suficiente madera para construir.');
-                 }
-            
-            }
-            break;
-
-        case '663ac05f044ccf6167cf703f':
-            if (herreria < 2 && piedra >= costos) {
-                newCounts.herreria = herreria + 1;
-                newCounts.piedra = piedra - costos;
-                setHerreria(newCounts.herreria);
-                setPiedra(newCounts.piedra);
-                countsMax = 1;
-            } else {
-              if (herreria >= 2) 
-                {
-                    setMessage('Debes tener ayuntamiento en nivel 5 para poder construir más herrerias');
-                }
-                if (madera < costos) 
-                 {
-                    setMessage('No tienes suficiente piedra para construir.');
-                 }
-            }
-            break;
-        
-        default:
-            console.log('ID de edificio no reconocido');
-            break;
+    }else{
+      setMessage(`Debes tener ayuntamiento en nivel 5 para poder construir más ${nombreEdificio}`);
     }
 
-    try {
-        await updateUserBuildings(
-          userId.toLowerCase(),
-            newCounts.muros,
-            newCounts.bosque,
-            newCounts.herreria,
-            newCounts.cantera,
-            newCounts.maderera,
-            newCounts.panaderia,
-            newCounts.ayuntamiento,
-            newCounts.pan,
-            newCounts.madera,
-            newCounts.piedra
-        );
-        console.log('User buildings count updated successfully.');
-    } catch (error) {
-        console.error('Error updating user buildings count:', error);
-    }
 
     return countsMax;
 };
@@ -500,6 +396,7 @@ return (
       <h3>Usuario: {usuario}</h3>
       <h3>Madera: {madera}</h3>
       <h3>Piedra: {piedra}</h3>
+
       <h3>Pan: {pan}</h3>
       <h3>Trabajadores disponibles: {unidadesDisponibles}</h3>
       <button onClick={() => recolectarRecursosUser()}>Recolectar Recursos</button>    

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { getEdificios } from '../../services/edificios';
 
 interface Props {
-  onBuildClick: (id: string, x: number, y: number, buildingType: string, ancho: number, largo: number, costo:number) => void;
+  onBuildClick: (id: string, x: number, y: number, buildingType: string, ancho: number, largo: number, costo:number, catidad: number) => void;
 }
 
 const MenuDesplegable: React.FC<Props> = ({ onBuildClick }) => {
@@ -42,7 +42,8 @@ const MenuDesplegable: React.FC<Props> = ({ onBuildClick }) => {
       const ancho = selectedEdificio.ancho ; // Usar ancho predeterminado si no está definido en la base de datos
       const largo = selectedEdificio.largo ; // Usar largo predeterminado si no está definido en la base de datos
       const costo = selectedEdificio.costo ; // Usar costo predeterminado si no está definido en la base de datos
-      onBuildClick(selectedEdificio.id, x, y, buildingType, ancho, largo, costo);
+      const catidad = selectedEdificio.cantidad;
+      onBuildClick(selectedEdificio.id, x, y, buildingType, ancho, largo, costo, catidad);
     } else {
       console.error(`No se encontró el edificio con el nombre "${buildingType}"`);
     }
