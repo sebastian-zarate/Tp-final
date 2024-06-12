@@ -5,7 +5,7 @@ import MenuAsignar from './menuAsignar';
 import Mensajeria from './menuChats';
 import Recursos from './recursos';
 import { GuardarEdificio, getBuildingsByUserId, builtEdificio, getUEbyUserId, getUEById, getEdificionameByUE } from '../../services/userEdificios';
-import { getReturnByCooki, getUserByCooki, updateUserBuildings} from '@/services/users';
+import { getAllUser, getReturnByCooki, getUserByCooki, updateUserBuildings} from '@/services/users';
 import {recolectarRecursos, calcularMadera, calcularPiedra, calcularPan } from '@/services/recursos';
 import { getChats, getChatName } from '@/services/chats';
 import { getMensajes } from '@/services/mensajes';
@@ -261,7 +261,7 @@ const handleBuildClick = async (id: string, x: number, y: number, buildingType: 
       console.log('id UE:', idUE);
       const edificioName = await getEdificionameByUE(idUE)
       console.log("edificiooooooooooooo:",edificioName)
-      if(!menuButton  && (edificioName == "Maderera" || edificioName == "Cantera" || edificioName == "panaderia"))    setMenBut(true);
+      if(!menuButton  && (edificioName == "maderera" || edificioName == "cantera" || edificioName == "panaderia"))    setMenBut(true);
       if(elementoClicado.id){
         setIdUEClick(idUE)
       }
@@ -513,6 +513,8 @@ const handleBuildClick = async (id: string, x: number, y: number, buildingType: 
   };  */
 
   //region hasta aca seba-------------------------
+
+
   return (
     <div className="hola flex flex-col items-center justify-center w-screen h-screen bg-gray-900">
       <div className="absolute top-0 left-0 p-4 bg-red-500 text-blue font-bold py-2 px-4 rounded">

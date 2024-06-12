@@ -28,7 +28,16 @@ export const getChats = async (Id: string) => {
     console.log(`User ${Id} Chats: `, c)
     return c
 }
-
+// GET todos los chats de un usuario
+export const getAllChats = async (Id: string) => {
+    const c = await prisma.chats.findMany({
+        where: {
+            id:Id
+        }
+    })
+    console.log(`User ${Id} Chats: `, c)
+    return c
+}
 export const getChat = async (Id: string) => {
     const c = await prisma.chats.findFirst({
         where: {
@@ -100,4 +109,14 @@ export const getChatNameById = async (chatId: string, userId: string) =>{
         }
     }
     else return "U"
+}
+export const deleteChatById = async (chatId: string) =>{
+    const chat = await prisma.chats.delete({
+        where:{
+            id:chatId
+        }
+    })
+    
+    console.log("se borro el chat:", chat)
+    return chat
 }

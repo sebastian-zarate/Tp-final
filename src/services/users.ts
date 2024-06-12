@@ -157,21 +157,8 @@ export async function getUser(Id: string) {
 
 //devuelve todos los username 
 export async function getAllUser() {
-  const users = await prisma.users.findMany({
-    select: {
-        username:true
-        // otros campos que necesites
-        
-    }})
-    return users
-/*   const u = await prisma.users.findMany()
-  let array = []
-  for(let i=0; i < u.length ; i++){
-      array.push(u[i].username)
-  }
-  console.log("listaaaaaaa",array)
-  return array */
-  
+  const users = await prisma.users.findMany({})    
+    return users 
 }
 
 //actualizo user

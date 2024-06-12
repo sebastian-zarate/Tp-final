@@ -66,7 +66,7 @@ export default function MenuAsignar({idUE, cerrarCompuerta, estadoCompuerta}: {i
     }
 
     return( 
-    <div id={idUE} className=" flex-col" style={{display:"flex", marginLeft: "20px",transform: "rotateX(-32deg) rotateZ(50deg)  scale(1.15)"}}  >               
+        <div id={idUE} className=" flex-col" style={{display:"flex", marginLeft: "20px", position: "relative",zIndex:"4"}}>               
         <form  onSubmit={formulario} >                       
             <input className="text-black" type="number" name="unidadesEdif" placeholder="Trabajadores" />            
             <button type="submit" className=" text-black bg-yellow-500 hover:bg-yellow-700 " onClick={()=>setEstado(true)} >Agregar</button>
