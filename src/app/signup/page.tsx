@@ -1,10 +1,10 @@
 import { createUser } from "@/services/users";
 import { redirect } from 'next/navigation';
-import backgroundImage from '../Images/Papyre.png'; // Importa la imagen
-import registerButton from '../Images/InputMod.jpg';
-import containerImage from '../Images/Container.png';
-import VikingoImage from '../Images/VikingoCadenasSombreado.png'
-import Vikingo2Image from '../Images/VikingoEspadaSombreado.png'
+import backgroundImage from '../../../public/Images/Papyre.png'; // Importa la imagen
+import registerButton from '../../../public/Images/InputMod.jpg';
+import containerImage from '../../../public/Images/Container.png';
+import VikingoImage from '../../../public/Images/VikingoCadenasSombreado.png'
+import Vikingo2Image from '../../../public/Images/VikingoEspadaSombreado.png'
 import Image from "next/image";
 
 async function Signup() {
