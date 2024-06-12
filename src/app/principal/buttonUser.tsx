@@ -15,10 +15,10 @@ export default function ButtonUser({userId,mostrarMensajeria, userLoaded, chats,
 
 
     return( 
-    <div className="flex flex-col  items-center text-blue font-bold  rounded" style={{height:"50vh"}}>  
+    <div className="px-8 py-6 my-2 items-center absolute top-6 right-0    flex flex-col bg-blue-500   font-bold  rounded" style={{height:"83vh"}}>  
         <div>
-        <h1>foto</h1>
-        <h2>Username</h2>
+        <h1 className="top-4 text-white ">foto</h1>
+        <h2 className="flex top-8 text-white ">Username</h2>
         </div>    
         {<Mensajeria 
               userId= {userId}
@@ -29,7 +29,7 @@ export default function ButtonUser({userId,mostrarMensajeria, userLoaded, chats,
               handleMensajeria={handleMensajeria}
               getMensajes={getMensajes}/>
         }         
-        <button className=" absolute bottom-6" onClick={()=> window.location.replace("/login")} >Cerrar Sesión</button>
+        <button className="text-white  absolute bottom-6" onClick={()=> window.location.replace("/login")} >Cerrar Sesión</button>
 
     </div>
       )

@@ -37,13 +37,13 @@ const MenuDesplegable: React.FC<Props> = ({ onBuildClick }) => {
   };
 
   return (
-    <div className=" flex bg-red-500 text-blue font-bold  px-4 rounded">
+    <div className=" flex absolute  justify-center items-center bg-red-500 text-blue font-bold  px-4 rounded">
 
       {/* Renderizar los botones para seleccionar el tipo de edificio */}
       {edificios.map((edificio, index) => (
-        <div className='flex flex-col items-center border' key={index}>
+        <div className=' py-6 flex flex-col items-center border' key={index}>
           <button key={index} className='x-2 p-4  hover:bg-blue-700 ' onClick={() => handleBuildSelection(edificio.name)}>{edificio.name}</button>
-          <span className=' text-sm text-black ' key={index}>Precio: {edificio.costo}</span>
+          <span className=' absolute text-sm text-black bottom-0' key={index}>Precio: {edificio.costo}</span>
         </div>
       ))}
     </div>

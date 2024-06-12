@@ -261,7 +261,7 @@ const handleBuildClick = async (id: string, x: number, y: number, buildingType: 
       console.log('id UE:', idUE);
       const edificioName = await getEdificionameByUE(idUE)
       console.log("edificiooooooooooooo:",edificioName)
-      if(!menuButton  && (edificioName == "Maderera" || edificioName == "Cantera" || edificioName == "panadería"))    setMenBut(true);
+      if(!menuButton  && (edificioName == "Maderera" || edificioName == "Cantera" || edificioName == "panaderia"))    setMenBut(true);
       if(elementoClicado.id){
         setIdUEClick(idUE)
       }
@@ -311,57 +311,64 @@ const handleBuildClick = async (id: string, x: number, y: number, buildingType: 
  };
 
  //region update nuevo
- const updateBuildingCount = async (cantidad: number, costos: number, id: string) => {
+  const updateBuildingCount = async (cantidad: number, costos: number, id: string) => {
   // Reemplazar con el ID de usuario actual
   let countsMax = 0;
-
+    
   const newCounts = {
-      maderera: maderera,
-      cantera: cantera,
-      panaderia: panaderia,
-     // bosque: bosque,
-      muros: muros,
-      ayuntamiento: ayuntamiento,
-      herreria: herreria,
-      pan: pan,
-      madera: madera,
-      piedra: piedra
+
+    muros,
+    maderera,
+    cantera,
+    panaderia,
+//      bosque, 
+    ayuntamiento,
+    herreria,
+    pan,
+    madera,
+    piedra,
   };
 
   let cantEdificio;
   let nombreEdificio;
+  let indexEdificio;
   await getEdificioById(id).then((edificio) => {
     nombreEdificio = String(edificio?.name);
+    console.log("----------------paso1, ",nombreEdificio)
 
   }
   );
 
   for (let i in newCounts) {
+    console.log("----------------paso2, i:",i, "nombreEdificio:",nombreEdificio)
     if(nombreEdificio == i){
       cantEdificio = newCounts[i];
+
+      console.log("----------------paso3, ",cantEdificio)
+
+      console.log("----------------paso4, cantidad: ",cantidad)
+      if ( cantidad  > Number(cantEdificio) && madera >= costos && piedra >= costos) {
+        newCounts.panaderia += 1;
+        newCounts.madera = madera - costos;
+        newCounts.piedra = piedra - costos;
+        setPiedra(newCounts.piedra);  
+        setMadera(newCounts.madera);
+    
+        countsMax = 1;
+        } else {
+        if (Number(cantEdificio) >= cantidad) 
+        {
+            setMessage("Debes tener ayuntamiento en nivel 5 para poder construir más " + nombreEdificio);
+        }
+        if (madera < costos) 
+        {
+            setMessage('No tienes suficiente medera para construir.');
+        }
+        }
     }
   }
 
 
-  if ( cantidad  > Number(cantEdificio) && madera >= costos && piedra >= costos) {
-    newCounts.maderera = maderera + 1;
-    newCounts.madera = madera - costos;
-    newCounts.piedra = piedra - costos;
-    setPiedra(newCounts.piedra);  
-    setMadera(newCounts.madera);
-
-    countsMax = 1;
-} else {
-  if (Number(cantEdificio) >= cantidad) 
-  {
-      setMessage("Debes tener ayuntamiento en nivel 5 para poder construir más " + nombreEdificio);
-  }
-  if (madera < costos) 
-   {
-      setMessage('No tienes suficiente medera para construir.');
-   }
-
-}
  
   try {
       await updateUserBuildings(
@@ -381,12 +388,12 @@ const handleBuildClick = async (id: string, x: number, y: number, buildingType: 
   } catch (error) {
       console.error('Error updating user buildings count:', error);
   }
-
+  console.log("----------------paso5, countMax ",countsMax)
   return countsMax;
-};
+}; 
 
 //region update viejo
-/*   const updateBuildingCount = async (id: string, costos: number) => {  
+  /*  const updateBuildingCount = async (id: string, costos: number) => {  
     let countsMax = 0;
     
     const newCounts = {
@@ -447,20 +454,6 @@ const handleBuildClick = async (id: string, x: number, y: number, buildingType: 
   
   
   
-      case '663ac060044ccf6167cf7042':
-        if (bosque < 3) {
-          newCounts.bosque += 1;
-          setBosque(newCounts.bosque);
-          newCounts.madera = (madera - costos);
-          setMadera(newCounts.madera);
-          countsMax = 1;
-        } else {
-          console.log('Condition for bosque not met');
-        }
-        break;
-  
-  
-  
       case '663ac05f044ccf6167cf703e':
         if (muros < 3) {
           newCounts.muros += 1;
@@ -517,7 +510,7 @@ const handleBuildClick = async (id: string, x: number, y: number, buildingType: 
     }
   
     return countsMax;
-  }; */
+  };  */
 
   //region hasta aca seba-------------------------
   return (
@@ -568,15 +561,15 @@ const handleBuildClick = async (id: string, x: number, y: number, buildingType: 
         ))}
       </div>
       <button
-        className="absolute bottom-4 right-4 bg-green-400 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+        className="absolute bottom-4 left-4 bg-green-400 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
         onClick={handleMenuClick}
       >
         Construir Edificios
       </button>
       {menuOpen && <MenuDesplegable onBuildClick={handleBuildClick} />}
 
-      <div className=" p-2 absolute top-4 right-4 bg-blue-500 text-white font-bold  rounded justify-center items-center" >
-            <button className='py-2 px-10' onClick={() => setUserButton(!userButton)}>User</button>
+      <div className=" text-black absolute top-4 right-0 " >
+            <button className='py-2 px-4 absolute top-0 right-2 bg-slate-400 rounded' onClick={() => setUserButton(!userButton)}>Hola</button>
 
             <div className=' text-black px-4'>
                 {userButton && <ButtonUser 

@@ -1,7 +1,7 @@
 "use client"
 import React, { use } from 'react';
 import { useEffect, useState } from 'react';
-import { getUserByUserName, getUser } from '@/services/users';
+import { getUserByUserName, getUser, getAllUser } from '@/services/users';
 import { createChat, type Chat } from '@/services/chats';
 import { getMensajesNoLeidos } from '@/services/mensajes';
 import ChatImage from '../Images/BackgroundChat4.jpg'
@@ -21,6 +21,7 @@ const Mensajeria: React.FC<MensajeriaProps> = ({ userId, mostrarMensajeria, user
   const [chats2, setChats] = useState<any[]>([]);
   const [unreadMessages, setUnreadMessages] = useState<{ [key: string]:  string}>({});
   const [notificacion , setNotificacion] = useState<boolean>(false);
+  const [list, setList] = useState([])
 
   useEffect(() => {
     const fetchUnreadMessages = async () => {
@@ -57,11 +58,15 @@ const Mensajeria: React.FC<MensajeriaProps> = ({ userId, mostrarMensajeria, user
     setUsername(event.target.value);
   };
 
+
   const handleCreateChat = async (event: React.FormEvent) => {
     event.preventDefault();
 
     const currentUser = await getUser(userId);
     const selectedUser = await getUserByUserName(username);
+    let l = await getAllUser()
+    //setList(l)
+    console.log("listaaaaaaaaaaaaa--", list)
     if (!selectedUser || !currentUser) {
       alert("User not found");
       return;
@@ -86,8 +91,10 @@ const Mensajeria: React.FC<MensajeriaProps> = ({ userId, mostrarMensajeria, user
   if (!mostrarMensajeria || !userLoaded) {
     return null;
   }*/
+/*   const list = getAllUser().then(res => res) */
+  
 
-
+console.log("listaaaaaaaaaaaaa--", list)
   const handleRedirect = (chatid: string, userid: string) => {
     window.location.href = `/chat`
     console.log("chatid", chatid)
@@ -113,8 +120,13 @@ const Mensajeria: React.FC<MensajeriaProps> = ({ userId, mostrarMensajeria, user
         />
         <button className="absolute top-2 right-2 text-lg font-bold" onClick={handleMensajeria}>X</button>
         <h1 className="text-1xl font-bold text-center">Mensajeria</h1>
-        <form onSubmit={handleCreateChat} className=" mx-auto pb-4 flex flex-col items-center justify-center">
-          <input type="text" value={username} onChange={handleUsernameChange} placeholder="Username" required className="text-center px-2 w-1/4 rounded-md bg-gray-200" />
+        <form onSubmit={handleCreateChat} className=" mx-auto pb-4 flex flex-col items-center justify-center">            
+                    <select name="usuarios" id="us" className="text-center" required aria-placeholder='Usernamee'>
+                       {list.map((x, index) => (
+                             <option key={index} value={x} >{index}.{x}</option>
+                        ))} 
+                       
+                    </select>  
           <button type="submit" className='  px-2 mt-1 w-1/4 rounded-md bg-gray-400 hover:bg-gray-600'>Create chat</button>
         </form>
         <div>
