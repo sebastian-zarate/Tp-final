@@ -7,6 +7,7 @@ import { signJWT, verifyJWT } from "@/helpers/jwt";
 import { StyledString } from "next/dist/build/swc";
 import { error } from "console";
 import { redirect } from "next/navigation";
+import { ContextExclusionPlugin } from "webpack";
 
 const prisma = new PrismaClient()
 let cantMadera = 500
@@ -240,7 +241,10 @@ export async function getReturnByCooki() {
   const user = await getUserByHash(String(hash))
   if (!user) return redirect('login')
 }
-
+export const removeCookie = async() => {
+  const cookie =cookies().delete('user'); // ctx es el contexto de la solicitud (por ejemplo, getServerSideProps)
+ return cookie
+};
 //region hasta aca Nico
 
 

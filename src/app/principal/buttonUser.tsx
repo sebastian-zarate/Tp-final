@@ -1,6 +1,6 @@
 
 import { updateUEunidadesAdd, updateUEunidadesSubstract } from "@/services/userEdificios";
-import { getUserByCooki } from "@/services/users";
+import { getUserByCooki, removeCookie } from "@/services/users";
 import { useState } from "react";
 import Mensajeria from "./menuChats";
 
@@ -8,12 +8,10 @@ import Mensajeria from "./menuChats";
 export default function ButtonUser({userId,mostrarMensajeria, userLoaded, chats,chatnames, handleMensajeria, getMensajes}:
     {userId:any,  mostrarMensajeria:any, userLoaded:any, chats:any, chatnames:any, handleMensajeria:any, getMensajes:any}){
 
-    const [estado, setEstado] = useState<boolean>(false)
-    const [unidadesTot, setUnidadesTot] = useState<number>(0)
 
-
-
-
+    async function deleteCook() {
+        await removeCookie();
+    }
     return( 
     <div className="px-8 py-6 my-2 items-center absolute top-6 right-0    flex flex-col bg-blue-500   font-bold  rounded" style={{height:"83vh"}}>  
         <div>
@@ -29,7 +27,7 @@ export default function ButtonUser({userId,mostrarMensajeria, userLoaded, chats,
               handleMensajeria={handleMensajeria}
               getMensajes={getMensajes}/>
         }         
-        <button className="text-white  absolute bottom-6" onClick={()=> window.location.replace("/login")} >Cerrar Sesión</button>
+        <button className="text-white  absolute bottom-6" onClick={()=> {window.location.replace("/login"); deleteCook()}} >Cerrar Sesión</button>
 
     </div>
       )
