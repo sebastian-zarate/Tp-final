@@ -169,7 +169,6 @@ export async function getBuildingsByUserId(usuarioId: string): Promise<any[]> {
          return validBuildings.map(building => ({
              // Utilizar el id de la relación UserEdificios
              id: building.id,
-             edificioId: building.edificioId, // LO AGREGUE PARA PODER TRAER LA URL DE LAS IMAGENES (SOLO ESTA LINEA :D)
              x: building.posicion_x,
              y: building.posicion_y,
              type: building.edificio.name, // Usar el nombre del edificio como tipo
