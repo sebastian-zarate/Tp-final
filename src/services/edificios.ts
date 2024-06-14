@@ -89,6 +89,16 @@ export const getOneEdificio = async (Id:string) => {
     })  
     return e
 }
+
+// devuelve la url de la imagen del edificio
+export const getImagenEdificio= async (Id:string) => {
+    const e = await prisma.edificios.findUnique({
+        where:{
+            id:Id
+        }
+    })  
+    return e?.imagen
+}
 //----------------------------------------------------------------------
 //----------------------------------------------------------------------
 // -----------------hacele control+c a todo  ---------------

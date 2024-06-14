@@ -176,10 +176,8 @@ export async function getBuildingsByUserId(usuarioId: string): Promise<any[]> {
              ancho: building.edificio.ancho,
              largo: building.edificio.largo,
              nivel: building.nivel,
-             cantidad: building.edificio.cantidad
-             //---------------------------
-                // ---------agrege ---------
-                //cantidad: building.edificio.cantidad
+             cantidad: building.edificio.cantidad,
+             edificioId: building.edificioId// para la imagen
         }));
     } catch (error) {
         console.error("Error fetching buildings by user ID:", error);

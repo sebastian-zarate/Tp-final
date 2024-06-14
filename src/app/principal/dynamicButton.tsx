@@ -9,9 +9,11 @@ import { getAllUser, getReturnByCooki, getUserByCooki, updateUserBuildings} from
 import {recolectarRecursos, calcularMadera, calcularPiedra, calcularPan } from '@/services/recursos';
 import { getChats, getChatName } from '@/services/chats';
 import { getMensajes } from '@/services/mensajes';
-import { getEdificioById } from '@/services/edificios';
+import { getEdificioById, getImagenEdificio} from '@/services/edificios';
 import ButtonUser from './buttonUser';
-
+import Image from 'next/image';
+import ImageFloor from '../../../public/Images/FloorImage.jpeg';
+import PantallaCarga from './pantallaCarga';
 
 
 type Building = {
@@ -24,6 +26,7 @@ type Building = {
   nivel: number;
   costo: number;
   cantidad:number;
+  edificioId: string;
 };
 
 const DynamicBuildings: React.FC = () => {
@@ -70,6 +73,15 @@ const [message, setMessage] = useState('');
   const mouseMoveRef = useRef<(e: MouseEvent) => void>(() => {});
   const mouseUpRef = useRef<() => void>(() => {});
 
+  //para las imagenes de los edificios
+  const [images, setImages] = useState<{ [key: string]: string }>({});
+
+  //para la pantalla de carga (deben ser todas falsas para que se oculte la pantalla de carga)	
+  const [cargandoPrincipal, setCargandoPrincipal] = useState(true)
+  const [cargandoChats, setCargandoChats] = useState(true)
+  const [cargandoImagenes, setCargandoImagenes] = useState(false) //por ahora lo dejo en false xq no anda
+  const [cantidadEdificios, setCantidadEdificios] = useState(0)
+  const [imagenesCargadas, setImagenesCargadas] = useState(0)
   //----------------------------------------------------------
   //region VERIFICAR COOKIE
   
@@ -115,8 +127,16 @@ const [message, setMessage] = useState('');
         console.log("fetchedBuildings", fetchedBuildings);
         setChats(chats);
         console.log('Chats:', chats);
+        //cargar imagenes
+        mapearImagenes(fetchedBuildings);
+        //para la pantalla de carga
+         setCantidadEdificios(fetchedBuildings.length)
       } catch (error) {
         console.error("Error fetching data:", error);
+      } finally{
+        //avisar que se cargaron los datos
+        setCargandoPrincipal(false)
+      
       }
     }
     fetchData();
@@ -135,10 +155,16 @@ useEffect(() => {
         setChatNames(chatnames);
         console.log('Chat names:', chatnames);
       })
-      .catch(error => console.error('Error fetching chat names:', error));
+      .catch(error => console.error('Error fetching chat names:', error))
+      .finally(() => {
+        // avisar que se cargaron los chats
+        setCargandoChats(false)
+      });
   }
 }, [chats, userId]);
   
+
+//#region METODOS HANDLE
 const handleBuildClick = async (id: string, x: number, y: number, buildingType: string, ancho: number, largo: number, costos: number, cantidad:number) => {
   const existingBuilding = false //buildings.find(building => building.x === x && building.y === y && building.id === id);
     
@@ -391,132 +417,39 @@ const handleBuildClick = async (id: string, x: number, y: number, buildingType: 
   console.log("----------------paso5, countMax ",countsMax)
   return countsMax;
 }; 
+//endregion
 
-//region update viejo
-  /*  const updateBuildingCount = async (id: string, costos: number) => {  
-    let countsMax = 0;
-    
-    const newCounts = {
-  
-      muros,
-      maderera,
-      cantera,
-      panaderia,
-//      bosque, 
-      ayuntamiento,
-      herreria,
-      pan,
-      madera,
-      piedra,
-    };
-    switch (id) {
-      
-      case '663ac05f044ccf6167cf7041':
-        if (maderera < 3 && madera >= costos) {
-          newCounts.maderera += 1;
-          setMaderera(newCounts.maderera);
-          newCounts.madera = (madera - costos);
-          setMadera(newCounts.madera);
-          countsMax = 1;
-        } else {
-          console.log('Condition for maderera not met');
-        }
-        break;
-  
-  
-  
-      case '663ac05f044ccf6167cf7040':
-        if (cantera < 3) {
-          newCounts.cantera += 1;
-          setCantera(newCounts.cantera);
-          newCounts.madera = (madera - costos);
-          setMadera(newCounts.madera);
-          countsMax = 1;
-        } else {
-          console.log('Condition for cantera not met');
-        }
-        break;
-  
-  
-  
-      case '663ac518044ccf6167cf7054':
-        if (panaderia < 3 && pan >= costos) {
-          newCounts.panaderia += 1;
-          newCounts.pan = (pan - costos);
-          setPanaderia(newCounts.panaderia);
-          setPan(newCounts.pan);
-          countsMax = 1;
-        } else {
-          console.log('Condition for panaderia not met');
-        }
-        break;
-  
-  
-  
-  
-      case '663ac05f044ccf6167cf703e':
-        if (muros < 3) {
-          newCounts.muros += 1;
-          setMuros(newCounts.muros);
-          newCounts.piedra = (piedra - costos);
-          setPiedra(newCounts.piedra);
-          countsMax = 1;
-        } else {
-          console.log('No puedes tener más de 3 muros');
-        }
-        break;
-      case '663ac05f044ccf6167cf703d': // ayuntamiento (changed ID)
-        if (ayuntamiento < 1) {
-          newCounts.ayuntamiento += 1;
-          setAyuntamiento(newCounts.ayuntamiento);
-          newCounts.madera = (madera - costos);
-          setMadera(newCounts.madera);
-          countsMax = 1;
-        } else {
-          console.log('Condition for ayuntamiento not met');
-        }
-        break;
-      case '663ac05f044ccf6167cf703f':
-        
-        if (herreria < 2) {
-          newCounts.herreria += 1;
-          setHerreria(newCounts.herreria);
-          newCounts.piedra = (piedra - costos);
-          setPiedra(newCounts.piedra);
-          countsMax = 1;
-        } else {
-          console.log('Condition for herreria not met');
-        }
-        break;
+//region IMAGENES DE LOS EDIFICIOS
+//metodos para las imagenes de los edificios
+const mapearImagenes = async (localbuildings: any) => {
+  const imagenes: { [key: string]: string } = {};
+  for (let edificio of localbuildings) {
+    if (edificio.edificioId) {
+      const imagen = await getImagenEdificio(edificio.edificioId);
+      if (imagen) {
+        imagenes[edificio.edificioId] = String(imagen);
+      }
     }
-  
-    try {
-      await updateUserBuildings(
-        userId,
-        newCounts.muros,
-        //newCounts.bosque,
-        newCounts.herreria,
-        newCounts.cantera,
-        newCounts.maderera,
-        newCounts.panaderia,
-        newCounts.ayuntamiento,
-        newCounts.pan,
-        newCounts.madera,
-        newCounts.piedra
-      );
-      console.log('User buildings count updated successfully.');
-    } catch (error) {
-      console.error('Error updating user buildings count:', error);
-    }
-  
-    return countsMax;
-  };  */
+  }
+  setImages(imagenes);
+  console.log('Imagenes:', imagenes);
+}
 
-  //region hasta aca seba-------------------------
+const handleCargaImagenes =  () => {
+  setImagenesCargadas(imagenesCargadas + 1)
+  if (imagenesCargadas == cantidadEdificios) {
+    setCargandoImagenes(false)
+    console.log("imagenes cargadas", imagenesCargadas, "de", cantidadEdificios)
+    console.log("ocultando pantalla de carga...")
+  }
+  console.log("imagenes cargadas", imagenesCargadas, "de", cantidadEdificios) 
+}
 
-
+//region RETURN 
   return (
     <div className="hola flex flex-col items-center justify-center w-screen h-screen bg-gray-900">
+      <PantallaCarga cargandoPrincipal={cargandoPrincipal} cargandoChats={cargandoChats} cargandoImagenes={cargandoImagenes}>  
+      </PantallaCarga>
       <div className="absolute top-0 left-0 p-4 bg-red-500 text-blue font-bold py-2 px-4 rounded">
       <Recursos 
         usuario={usuario}
@@ -533,7 +466,15 @@ const handleBuildClick = async (id: string, x: number, y: number, buildingType: 
       </div>
       
       
-      <div style={{ width: '1200px', height: '700px' }} className="bg-green-500 flex items-center justify-center relative">
+      <div style={{ 
+      width: '1200px', 
+      height: '700px',
+      backgroundImage: `url(${ImageFloor.src})`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      position: 'relative'
+       }} className="bg-green-500 flex items-center justify-center relative">
+
         {buildings.map((building, index) => (
           <div
             key={index}
@@ -545,17 +486,27 @@ const handleBuildClick = async (id: string, x: number, y: number, buildingType: 
               top: `${building.y}px`,
               width: `${building.ancho}px`,
               height: `${building.largo}px`,
-              transform: 'rotateX(45deg) rotateZ(-45deg)',
+              //transform: 'rotateX(45deg) rotateZ(-45deg)',
               transformOrigin: 'center center',
               position: 'absolute',
               cursor: 'pointer',
             }}
             onMouseDown={(e) => handleMouseDown(index, e)}
-            onClick={(e) => handleClick(e)}  
-               
+            onClick={(e) => handleClick(e)}       
           >
+            
+              <Image
+                src={`/Images/${images[building.edificioId] || 'default.png'}`}
+                alt={building.type}
+                layout="fill"
+                objectFit="cover"
+                className="absolute inset-0 w-full h-full"
+                style={{ pointerEvents: 'none' }}
+                onLoadingComplete={() => handleCargaImagenes()}
+              />
+
            
-            <div>{building.type} - X: {building.x}, Y: {building.y}</div>
+            {/*<div>{building.type} - X: {building.x}, Y: {building.y}</div>*/}
               {( (idUEClick == building.id)&& menuButton ) ? <MenuAsignar  idUE= {building.id} cerrarCompuerta= {setMenBut} estadoCompuerta={menuButton}/> : null  }
   
           </div>

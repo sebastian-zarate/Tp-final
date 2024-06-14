@@ -26,13 +26,8 @@ model Edificios {
   tipoRecurso String?
   ultimaInteraccion DateTime?
   userEdificios UserEdificios[]
-  //----------------------------------------------------------------------------------
-//---------------------------------------------------------------------------- SEBA ----------------
-
- cantidad  Int?// canatidad de capacidad de contruccion de unidades de este tipo de edificio        |
-
-///////////////////////////////////////////////////////////////////////////////////////////
-//-------------SOLO ESO  EN EDIFICIO----------------------
+  cantidad  Int?// canatidad de capacidad de contruccion de unidades de este tipo de edificio        |
+  imagen String?
 
  
 }
