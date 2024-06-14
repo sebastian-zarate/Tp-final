@@ -75,6 +75,8 @@ const [message, setMessage] = useState('');
 
   //para las imagenes de los edificios
   const [images, setImages] = useState<{ [key: string]: string }>({});
+  //para la foto de perfil
+  const [profileImage, setProfileImage] = useState<string>('');
 
   //para la pantalla de carga (deben ser todas falsas para que se oculte la pantalla de carga)	
   const [cargandoPrincipal, setCargandoPrincipal] = useState(true)
@@ -99,7 +101,6 @@ const [message, setMessage] = useState('');
     verificarCooki()      
       const intervalId = setInterval(() => {
         estado = !estado
-          
         }, 5000);
         return () => clearInterval(intervalId);
   }, [estado]) 
@@ -136,7 +137,6 @@ const [message, setMessage] = useState('');
       } finally{
         //avisar que se cargaron los datos
         setCargandoPrincipal(false)
-      
       }
     }
     fetchData();
@@ -160,6 +160,9 @@ useEffect(() => {
         // avisar que se cargaron los chats
         setCargandoChats(false)
       });
+  }
+  if(chats.length == 0 && userId){
+    setCargandoChats(false)
   }
 }, [chats, userId]);
   
@@ -259,6 +262,7 @@ const handleBuildClick = async (id: string, x: number, y: number, buildingType: 
     const user = await getUserByCooki()
 /* const user = await getUser(usoCooki().then(x =>x?.id)) */
     if(user != null){
+      //console.log('Usuario:', user)
       setMadera(user.madera);
       setPiedra(user.piedra);
       setPan(user.pan);
@@ -272,6 +276,8 @@ const handleBuildClick = async (id: string, x: number, y: number, buildingType: 
       setMuros(Number(user.muros));
       setAyuntamiento(Number(user.ayuntamiento));
       setHerreria(Number(user.herreria));
+      console.log("user.profileImage", user.profileImage)
+      setProfileImage(String(user.profileImage));
     }
   }
 
@@ -329,6 +335,7 @@ const handleBuildClick = async (id: string, x: number, y: number, buildingType: 
         timeoutId = setTimeout(() => {
           guardarEdificioEnBD( updatedBuildings[index].id, clampedX, clampedY, updatedBuildings[index].nivel);
           timeoutId = null;
+          
         }, 500);
       }
 
@@ -528,6 +535,8 @@ const handleCargaImagenes =  () => {
             <div className=' text-black px-4'>
                 {userButton && <ButtonUser 
                     userId= {userId}
+                    username = {usuario}
+                    profileImage={profileImage}
                     mostrarMensajeria={mostrarMensajeria}
                     userLoaded={userLoaded}
                     chats={chats}
