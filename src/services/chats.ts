@@ -1,6 +1,7 @@
 'use server'
 import { PrismaClient } from "@prisma/client"
 import { getUser } from "./users"
+import { getMensajes } from "./mensajes"
 
 const prisma = new PrismaClient()
 
@@ -110,13 +111,24 @@ export const getChatNameById = async (chatId: string, userId: string) =>{
     }
     else return "U"
 }
-export const deleteChatById = async (chatId: string) =>{
+export const deleteChatById = async (ChatId: string) =>{
+    //borrar mensajes del chat
+    const mensajes = await getMensajes(ChatId)
+    if(mensajes){
+            for(let i in mensajes){
+                await prisma.mensajes.delete({
+                    where:{
+                        id:mensajes[i].id
+                    }
+                })
+            }
+    }
     const chat = await prisma.chats.delete({
         where:{
-            id:chatId
+            id:ChatId
         }
     })
     
-    console.log("se borro el chat:", chat)
+    console.log("se borro el chat:", chat, "con ", mensajes.length, " mensajes")
     return chat
 }

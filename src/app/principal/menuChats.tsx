@@ -21,7 +21,7 @@ interface MensajeriaProps {
 const Mensajeria: React.FC<MensajeriaProps> = ({ userId, mostrarMensajeria, userLoaded, chats, chatnames, handleMensajeria, getMensajes }) => {
   const [chats2, setChats] = useState<any[]>([]);
   const[estadoChat, setEstadoChat] = useState(false)
-  const[estadoChat2, setEstadoChat2] = useState(false)
+  const[estadoChat2, setEstadoChat2] = useState(false)      //esto es para cada vez que se abre el chat por primera vez
   const [unreadMessages, setUnreadMessages] = useState<{ [key: string]:  string}>({});
   const [notificacion , setNotificacion] = useState<boolean>(false);
   const [list, setList] = useState<string[]>([""]);
@@ -201,7 +201,7 @@ const Mensajeria: React.FC<MensajeriaProps> = ({ userId, mostrarMensajeria, user
             {chats2.map((chat: any, index: number) => (
               <li key={chat.id} className='flex flex-row justify-around items-center space-x-4'>
                 <h2> ({chat.id}) Chat: {chatnames[index]} {unreadMessages[chat.id]} </h2>
-                <button onClick={() => handleRedirect(chat.id, userId)} className=' px-2 rounded-md bg-gray-400 hover:bg-gray-600'>abrir </button>
+                <button onClick={() =>{ handleRedirect(chat.id, userId); setEstadoChat2(false)}} className=' px-2 rounded-md bg-gray-400 hover:bg-gray-600'>abrir </button>
                 <button id={chat.id} onClick={(e) => handleDelete(e)} className=' p-2 hover:bg-slate-300' >X</button>
               </li>
             ))}
