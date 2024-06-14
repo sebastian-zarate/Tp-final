@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { getUserByUserName, getUser, getAllUser, getUserById } from '@/services/users';
 import { createChat, deleteChatById, getAllChats, getChats, type Chat } from '@/services/chats';
 import { getMensajesNoLeidos } from '@/services/mensajes';
-import ChatImage from '../Images/BackgroundChat4.jpg'
+import ChatImage from '../../../public/Images/BackgroundChat4.jpg'
 import Image from 'next/image';
 import Chats from '../chat/page';
 import { arrayBuffer } from 'stream/consumers';

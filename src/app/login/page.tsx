@@ -1,11 +1,11 @@
 import { authenticateUser, getUserByemail } from "@/services/users"
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
-import backgroundImage from '../Images/Papyre.png';
-import imageLogin from '../Images/InputLogin.jpg';
-import containerImage from '../Images/Container.png';
-import VikingoShield from '../Images/VikingoShieldAxeSinFondo.png'
-import VikingoSword from '../Images/VikingoSwordSombreado.png'
+import backgroundImage from '../../../public/Images/Papyre.png';
+import imageLogin from '../../../public/Images/InputLogin.jpg';
+import containerImage from '../../../public/Images/Container.png';
+import VikingoShield from '../../../public/Images/VikingoShieldAxeSinFondo.png'
+import VikingoSword from '../../../public/Images/VikingoSwordSombreado.png'
 import Image from "next/image";
 
 async function Login(){

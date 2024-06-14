@@ -89,80 +89,14 @@ export const getOneEdificio = async (Id:string) => {
     })  
     return e
 }
-//----------------------------------------------------------------------
-//----------------------------------------------------------------------
-// -----------------hacele control+c a todo  ---------------
 
-
-/* export const getRecursos = async () => {
-    const muchos = await prisma.recursos.findMany()  
-    console.log(muchos)        
-    return muchos
-}
-export const addRecurso = async (recurso:any) => {
-    const ed = await prisma.recursos.create({
-        data: recurso
-    })  
-    return ed
-}
-export const deleteRecur = async (Id:string) => {
-    await prisma.recursos.delete({
+// devuelve la url de la imagen del edificio
+export const getImagenEdificio= async (Id:string) => {
+    const e = await prisma.edificios.findUnique({
         where:{
             id:Id
         }
-    })    
-    return true
-}
- */
-
-
-  /* async function crearE() {
-
-    //aca se crean las colecciones para la base de datos
-     const torretas = await prisma.edificios.create({
-        data:{
-            name: 'Cañon',
-            nivel: 0
-        },
-    })
-    const ayunta = await prisma.edificios.create({
-        data:{
-            name: 'Ayuntamiento',
-            nivel: 0
-        }
-    })
-    const muros = await prisma.edificios.create({
-        data:{
-            name: 'Muros',
-            nivel: 0
-        }
-    })
-    const herreria = await prisma.edificios.create({
-        data:{
-            name: 'Herrería',
-            nivel: 0
-        }
-    })
-    const cantera = await prisma.edificios.create({
-        data:{
-            name: 'Cantera',
-            nivel: 0
-        }
-    })
-    const maderera = await prisma.edificios.create({
-        data:{
-            name: 'Maderera',
-            nivel: 0
-        }
-    })
-    const bosque = await prisma.edificios.create({
-        data:{
-            name: 'Bosque',
-            nivel: 0
-        }
-    })
-    const arr = [torretas, ayunta,muros, herreria, cantera, maderera, bosque] 
-    return arr
+    })  
+    return e?.imagen
 }
 
-export default crearE()    */
