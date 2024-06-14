@@ -19,24 +19,13 @@ interface MensajeriaProps {
 }
 
 const Mensajeria: React.FC<MensajeriaProps> = ({ userId, mostrarMensajeria, userLoaded, chats, chatnames, handleMensajeria, getMensajes }) => {
-  //const [username, setUsername] = useState("");
   const [chats2, setChats] = useState<any[]>([]);
+  const[estadoChat, setEstadoChat] = useState(false)
+  const[estadoChat2, setEstadoChat2] = useState(false)
   const [unreadMessages, setUnreadMessages] = useState<{ [key: string]:  string}>({});
   const [notificacion , setNotificacion] = useState<boolean>(false);
   const [list, setList] = useState<string[]>([""]);
 
-/*  useEffect(()=> {
-
-  const intervalId = setInterval(() => {
-    if(chats2.length != 0 && userId){
-      getAllChats(userId).then(c => {
-        setChats(c)
-      })
-    }
-  }, 5000);
-  
-  return () => clearInterval(intervalId);
- },[chats2, userId]) */
 
    /* if (chats2.length == 0)obtenerChats(); */
   useEffect(() => {
@@ -47,62 +36,48 @@ const Mensajeria: React.FC<MensajeriaProps> = ({ userId, mostrarMensajeria, user
     };      
     fetchUnreadMessages();
 
-  }, [chats2]);
+  }, [chats]);
   
-  //USEEFFECT PARA ELIMINAR DE LA LISTA A LOS USUARIOS QUE YA LOS TENGO COMO AMIGOS
-  useEffect(() => {
+
   //OBTENER TODOS LOS USERS 
-    async function fetchUsers() {
-      const currentUser = await getUserById(userId)
-      if(list[0] == ""){
-        setChats(chats)
-        try {
-          const array= []
-          const users = await getAllUser()  //obtengo todos los usuarios
-
-          for (let index = 0; index < users.length; index++) {
-
-            if(users[index].username != currentUser?.username) {
-                array.push(String(users[index].username))                     //pusheo los usernames en un array                  
-            }               
-          }
-          //seteo la lista de usernames
-          setList(array)
-          console.log("listaaaaaaaaaaaaa--", list)
-        } catch (error) {
-            console.error('Error al obtener la lista de usuarios:', error);
-        }
-      }
+  async function fetchUsers() {
+    const currentUser = await getUserById(userId)
+    try {
+      let array= []
+      const users = await getAllUser()  //obtengo todos los usuarios
+      for (let index = 0; index < users.length; index++) {
+          if(users[index].username != currentUser?.username){
+            if(!chatnames.includes(users[index].username)) {
+              array.push(String(users[index].username))                  //pusheo los usernames en un array    
+            }  
+          }             
+      }          
+      //seteo la lista de usernames
+      setList(array)
+      setChats(chats)
+      setEstadoChat2(true)
+      console.log("listaaaaaaaaaaaaa--", list)
+    } catch (error) {
+        console.error('Error al obtener la lista de usuarios:', error);
     }
-    fetchUsers(); 
-    setChats(chats)
-  }, [chats])
-
-  useEffect(() => {
-
-        //Método para eliminar un elemento de la lista
-        const removeElementByValue = (valueToRemove:any) => {
-          const newList = list.filter((item) => item !== valueToRemove);
-          setList(newList);
-        };
-          async function deleteUsersList() {
-            const currentUser = await getUserById(userId)
-      
-            for (let index = 0; index < list.length; index++) {
-      
-              if(list[index] != currentUser?.username) {
-      
-                for(let i=0; i< chatnames.length; i++){
-                  if(list[index] == chatnames[i]){
-                    removeElementByValue(list[index])      // Elimina 1 elemento del array que ya existe en la lista de chats                            
-                  } 
-                }               
-              }               
-            }
-          }
-      deleteUsersList()
-      //setChats(chats)
-    }, [list])
+  }
+    useEffect(()=>{
+      if(!estadoChat2) fetchUsers()
+    },[list])
+    useEffect(() => {
+      /* if(list[0] == "") fetchUsers() */
+      const intervalId = setInterval(() => {
+       
+        if(estadoChat){
+          setChats(chats)
+          fetchUsers()
+          setEstadoChat(false)
+          
+        }
+      }, 5000);  
+      return () => {clearInterval(intervalId);};
+            
+    },[estadoChat])
 
   //metodo para obtener los mensajes no leidos
   const getUnreadMessagesCount = async (chats: Chat[]) => {
@@ -145,7 +120,12 @@ const Mensajeria: React.FC<MensajeriaProps> = ({ userId, mostrarMensajeria, user
     );
     chatnames.push(chat.username2)
     // add the new chat to the list
-    setChats(prevChats => [...prevChats, chat]);
+    console.log(`chat antes del push:${chats.length}`)
+    chats.push(chat)
+    
+    setEstadoChat(true)
+    console.log(`chat después del push:${chats.length}`)
+    //setChats(chats);
     //window.location.reload()
 
     event.target.reset();
@@ -167,24 +147,24 @@ const Mensajeria: React.FC<MensajeriaProps> = ({ userId, mostrarMensajeria, user
 
     const chatDelted = await deleteChatById(idChat) 
     console.log("Se borro el chat:",idChat)
+    
+
    // window.location.reload()
+   console.log(`chat antes del deleted:${chats.length}`)
     chatDelted
-    for (let i = 0; i < chatnames.length; i++) {
-      if(chatnames[i]== chatDelted.username2){  
-        chatnames.splice(i, 1); // Elimina 1 elemento a
-      }      
-    }
-/*     for (let i = 0; i < chats2.length; i++) {
-      if(chats2[i].id== idChat){  
-        chats2.splice(i, 1); // Elimina 1 elemento a
-      }      
-    } */
+    setEstadoChat(true)
+
+
     for (let i = 0; i < chats.length; i++) {
       if(chats[i].id== idChat){  
+        console.log("Comparo chatnames para eliminar: chatnames:",chatnames[i], "-", chatDelted.username2)    
+        setList(prevMensajes => [...prevMensajes, chatnames[i]])    
+        chatnames.splice(i, 1); // Elimina 1 elemento a
         chats.splice(i, 1); // Elimina 1 elemento a
+        console.log(`chat después del deleted:${chats.length}`)
       }      
     }
-    setChats(chats)
+    
 
     
 

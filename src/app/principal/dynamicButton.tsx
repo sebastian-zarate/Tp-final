@@ -73,7 +73,7 @@ const [message, setMessage] = useState('');
   //----------------------------------------------------------
   //region VERIFICAR COOKIE
   
- /*  let estado = false;
+  let estado = false;
 
   useEffect(() => { 
     async function verificarCooki() {
@@ -90,7 +90,7 @@ const [message, setMessage] = useState('');
           
         }, 5000);
         return () => clearInterval(intervalId);
-  }, [estado])  */
+  }, [estado]) 
   //----------------------------------------------------------
   //#region USEEFFECTS USUARIO
   //useffect para obetener el id de user 
