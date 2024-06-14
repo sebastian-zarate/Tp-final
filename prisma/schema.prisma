@@ -29,6 +29,7 @@ model Edificios {
   cantidad  Int?// canatidad de capacidad de contruccion de unidades de este tipo de edificio        |
   imagen String?
 
+  //----------------------------------------------------------------------------------
  
 }
 

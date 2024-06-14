@@ -150,8 +150,8 @@ export async function getBuildingsByUserId(usuarioId: string): Promise<any[]> {
                         costo: true,
                         //---------------------------
                         // ---------agrege ---------
-                        cantidad: true
-
+                        cantidad: true,
+                        
 
                         //---------------------------
                     }
@@ -169,6 +169,7 @@ export async function getBuildingsByUserId(usuarioId: string): Promise<any[]> {
          return validBuildings.map(building => ({
              // Utilizar el id de la relación UserEdificios
              id: building.id,
+             edificioId: building.edificioId, // LO AGREGUE PARA PODER TRAER LA URL DE LAS IMAGENES (SOLO ESTA LINEA :D)
              x: building.posicion_x,
              y: building.posicion_y,
              type: building.edificio.name, // Usar el nombre del edificio como tipo
@@ -316,3 +317,8 @@ export const updateUEunidadesSubstract = async(Id: string, unidades: any, panXun
     console.log(`User: ${usuario?.id}- trabajadores: ${usuario?.unidadesDeTrabajo} `)
     return e
 }
+
+//endregion
+
+//region TRAER URL IMAGENES
+

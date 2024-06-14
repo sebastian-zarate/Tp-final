@@ -487,6 +487,7 @@ const handleCargaImagenes =  () => {
               width: `${building.ancho}px`,
               height: `${building.largo}px`,
               //transform: 'rotateX(45deg) rotateZ(-45deg)',
+              //transform: 'rotateX(45deg) rotateZ(-45deg)',
               transformOrigin: 'center center',
               position: 'absolute',
               cursor: 'pointer',

@@ -66,7 +66,11 @@ export default function MenuAsignar({idUE, cerrarCompuerta, estadoCompuerta}: {i
     }
 
     return( 
+<<<<<<< HEAD
         <div id={idUE} className=" flex-col" style={{display:"flex", marginLeft: "20px", position: "relative",zIndex:"4"}}>               
+=======
+    <div id={idUE} className=" flex-col" style={{display:"flex", marginLeft: "20px", position: "relative", zIndex: "4"}} >               
+>>>>>>> 88c303180d657a167ccd7d943b5c48c411196d49
         <form  onSubmit={formulario} >                       
             <input className="text-black" type="number" name="unidadesEdif" placeholder="Trabajadores" />            
             <button type="submit" className=" text-black bg-yellow-500 hover:bg-yellow-700 " onClick={()=>setEstado(true)} >Agregar</button>
