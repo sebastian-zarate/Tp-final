@@ -131,7 +131,10 @@ const [message, setMessage] = useState('');
         //cargar imagenes
         mapearImagenes(fetchedBuildings);
         //para la pantalla de carga
+        //por si no tiene edificios construidos
         if(fetchedBuildings.length === 0){ setCargandoImagenes(false)}
+        //por si nunca chateo
+        if(chats.length === 0){setCargandoChats(false)}
         setCantidadEdificios(fetchedBuildings.length)
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -161,9 +164,6 @@ useEffect(() => {
         // avisar que se cargaron los chats
         setCargandoChats(false)
       });
-  }
-  if(chats.length == 0 && userId){
-    setCargandoChats(false)
   }
 }, [chats, userId]);
   
