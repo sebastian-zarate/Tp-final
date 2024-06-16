@@ -23,7 +23,7 @@ const PantallaCarga: React.FC<pantallaCargaProps> = ({ cargandoPrincipal, cargan
 
     if (cargandoPrincipal || cargandoChats || cargandoImagenes) {
         return (
-            <div className="flex flex-col items-center justify-center fixed inset-0 w-full h-full z-50 opacity-80" style={{
+            <div className="flex flex-col items-center justify-center fixed inset-0 w-full h-full z-50 opacity-100" style={{
                 backgroundImage: `url(${backgroundImage.src})`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center'
