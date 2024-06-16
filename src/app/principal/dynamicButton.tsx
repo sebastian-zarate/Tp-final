@@ -4,8 +4,9 @@ import MenuDesplegable from './menuDesplegable';
 import MenuAsignar from './menuAsignar';
 import Mensajeria from './menuChats';
 import Recursos from './recursos';
-import { GuardarEdificio, getBuildingsByUserId, builtEdificio, getUEbyUserId, getUEById, getEdificionameByUE } from '../../services/userEdificios';
-import { getAllUser, getReturnByCooki, getUserByCooki, updateUserBuildings} from '@/services/users';
+import { GuardarEdificio, getBuildingsByUserId, builtEdificio, getEdificionameByUE, getBuildingCount } from '../../services/userEdificios'
+import { getUserById, updateUserRecursosPropios } from '@/services/users';
+import { getAllUser, getReturnByCooki, getUserByCooki, } from '@/services/users';
 import {recolectarRecursos, calcularMadera, calcularPiedra, calcularPan } from '@/services/recursos';
 import { getChats, getChatName } from '@/services/chats';
 import { getMensajes } from '@/services/mensajes';
@@ -14,7 +15,7 @@ import ButtonUser from './buttonUser';
 import Image from 'next/image';
 import ImageFloor from '../../../public/Images/FloorImage.jpeg';
 import PantallaCarga from './pantallaCarga';
-
+import { g } from '@/services/edificios';
 
 type Building = {
   x: number;
@@ -49,16 +50,7 @@ const DynamicBuildings: React.FC = () => {
 ////-----------------------------------------------------------
 //---------------------seba--------------------------------------
 //-----------------------------------------------------------
-const [canon, setCanon] = useState(0);
-const [maderera, setMaderera] = useState(0);
-const [cantera, setCantera] = useState(0);
-const [panaderia, setPanaderia] = useState(0);
-/* const [bosque, setBosque] = useState(0); */
-const [muros, setMuros] = useState(0);
-const [ayuntamiento, setAyuntamiento] = useState(0);
-const [herreria, setHerreria] = useState(0);
-//const [UserId, setUserId] = useState('');
-const [message, setMessage] = useState('');
+
 //-----------------------------------------------------------
 //-----------------------------------------------------------
 
@@ -86,6 +78,17 @@ const [message, setMessage] = useState('');
   //region VERIFICAR COOKIE
   
   let estado = false;
+  const [message, setMessage] = useState('');
+
+useEffect(() => {
+  if (message) {
+    const timer = setTimeout(() => setMessage(''), 10000);
+    return () => clearTimeout(timer);
+  }
+}, [message]);
+const messageDivStyle = {
+  display: message ? 'block' : 'none', // Mostrar el mensaje solo cuando hay un mensaje para mostrar
+};
 
   useEffect(() => { 
     async function verificarCooki() {
@@ -165,25 +168,26 @@ useEffect(() => {
   
 
 //#region METODOS HANDLE
-const handleBuildClick = async (id: string, x: number, y: number, buildingType: string, ancho: number, largo: number, costos: number, cantidad:number) => {
+const handleBuildClick = async (id_edi: string, x: number, y: number, buildingType: string, ancho: number, largo: number, costos: number, cantidad:number) => {
   const existingBuilding = false //buildings.find(building => building.x === x && building.y === y && building.id === id);
     
    if (!existingBuilding) {
      
 
      // Actualizar el estado del usuario
-     const construir = await updateBuildingCount(cantidad,/* id,  */costos, id); // devuelve 1 si se puede construir, 0 si no
-      // window.location.reload();
+     const construir = await updateBuildingCount( cantidad, costos, id_edi); // devuelve 1 si se puede construir, 0 si no
+       //window.location.reload();
      // Llamar a la función para guardar el edificio en la base de datos
+    
      if (construir === 1) {
-       buildings.find(building => building.x === x && building.y === y && building.id === id);
+       buildings.find(building => building.x === x && building.y === y && building.id === id_edi);
        
-       const newBuilding = { id, x, y, type: buildingType, ancho, largo, cantidad: 1 };
+       const newBuilding = { id_edi, x, y, type: buildingType, ancho, largo, cantidad: 1 };
        //setBuildings([...buildings, newBuilding]);
-       window.location.reload();
+        window.location.reload();
        try {
          // Evita recargar la página, en su lugar actualiza el estado
-         await builtEdificio(userId, id, x, y, 1);
+         await builtEdificio(userId, id_edi, x, y, 1);
          console.log('Edificio guardado exitosamente en la base de datos.');
         
        } catch (error) {
@@ -236,15 +240,9 @@ const handleBuildClick = async (id: string, x: number, y: number, buildingType: 
   };
 
 
-  const guardarEdificioEnBD = (id: string, posX: number, posY: number, nivel : number) => {
-    GuardarEdificio(userId, id, posX, posY, nivel);
-  };
+  
 
-  const guardarAldea = () => {
-    buildings.forEach(building => {
-      guardarEdificioEnBD(building.id, building.x, building.y, building.nivel);
-    });
-  };
+
   const recolectarRecursosUser = async () => {
 /*     "use server" */
     const user = await getUserByCooki()
@@ -265,13 +263,7 @@ const handleBuildClick = async (id: string, x: number, y: number, buildingType: 
       setUser(String (user.username));
       setUnidadesDisp(user.unidadesDeTrabajo)
       setUserId(user.id);
-      setMaderera(Number(user.maderera));
-      setCantera(Number(user.cantera));
-      setPanaderia(Number(user.panaderia));
-/*       setBosque(Number(user.bosque)); */
-      setMuros(Number(user.muros));
-      setAyuntamiento(Number(user.ayuntamiento));
-      setHerreria(Number(user.herreria));
+      
     }
   }
 
@@ -327,7 +319,7 @@ const handleBuildClick = async (id: string, x: number, y: number, buildingType: 
         }
 
         timeoutId = setTimeout(() => {
-          guardarEdificioEnBD( updatedBuildings[index].id, clampedX, clampedY, updatedBuildings[index].nivel);
+          GuardarEdificio( userId, updatedBuildings[index].id, clampedX, clampedY, updatedBuildings[index].nivel);
           timeoutId = null;
         }, 500);
       }
@@ -336,114 +328,46 @@ const handleBuildClick = async (id: string, x: number, y: number, buildingType: 
   });
  };
 
- //region update nuevo
-  const updateBuildingCount = async (cantidad: number, costos: number, id: string) => {
-  // Reemplazar con el ID de usuario actual
+ const updateBuildingCount = async ( cantidad: number, costos: number, id: string) => {
   let countsMax = 0;
-    
-  const newCounts = {
 
-    muros,
-    maderera,
-    cantera,
-    panaderia,
-//      bosque, 
-    ayuntamiento,
-    herreria,
-    pan,
-    madera,
-    piedra,
-  };
-
-  let cantEdificio;
-  let nombreEdificio;
-  let indexEdificio;
-  await getEdificioById(id).then((edificio) => {
-    nombreEdificio = String(edificio?.name);
-    console.log("----------------paso1, ",nombreEdificio)
-
-  }
-  );
-
-  for (let i in newCounts) {
-    console.log("----------------paso2, i:",i, "nombreEdificio:",nombreEdificio)
-    if(nombreEdificio == i){
-      cantEdificio = newCounts[i];
-
-      console.log("----------------paso3, ",cantEdificio)
-
-      console.log("----------------paso4, cantidad: ",cantidad)
-      if ( cantidad  > Number(cantEdificio) && madera >= costos && piedra >= costos) {
-        newCounts.panaderia += 1;
-        newCounts.madera = madera - costos;
-        newCounts.piedra = piedra - costos;
-        setPiedra(newCounts.piedra);  
-        setMadera(newCounts.madera);
-    
-        countsMax = 1;
-        } else {
-        if (Number(cantEdificio) >= cantidad) 
-        {
-            setMessage("Debes tener ayuntamiento en nivel 5 para poder construir más " + nombreEdificio);
-        }
-        if (madera < costos) 
-        {
-            setMessage('No tienes suficiente medera para construir.');
-        }
-        }
-    }
-  }
-
-
- 
-  try {
-      await updateUserBuildings(
-        userId.toLowerCase(),
-          newCounts.muros,
-          //newCounts.bosque,
-          newCounts.herreria,
-          newCounts.cantera,
-          newCounts.maderera,
-          newCounts.panaderia,
-          newCounts.ayuntamiento,
-          newCounts.pan,
-          newCounts.madera,
-          newCounts.piedra
-      );
-      console.log('User buildings count updated successfully.');
-  } catch (error) {
-      console.error('Error updating user buildings count:', error);
-  }
-  console.log("----------------paso5, countMax ",countsMax)
-  return countsMax;
-}; 
-//endregion
-
-//region IMAGENES DE LOS EDIFICIOS
-//metodos para las imagenes de los edificios
-const mapearImagenes = async (localbuildings: any) => {
-  const imagenes: { [key: string]: string } = {};
-  for (let edificio of localbuildings) {
-    if (edificio.edificioId) {
-      const imagen = await getImagenEdificio(edificio.edificioId);
-      if (imagen) {
-        imagenes[edificio.edificioId] = String(imagen);
+      const count =  (await getBuildingCount(userId, id)).length;
+      const user = await getUserById(userId);
+      let madera = Number(user?.madera);
+      let piedra = Number(user?.piedra);
+      let pan = Number(user?.pan);
+        
+      if (costos <= madera && costos <= piedra && cantidad >= count) {
+          countsMax = 1;
+          madera -= costos;
+          piedra -= costos;
+          // Update user resources
+          await updateUserRecursosPropios(userId, madera, piedra, pan);
+          setMessage('Edificio construido exitosamente.');
+      } else {
+        if (madera < costos && piedra < costos) {
+          setMessage('No tienes suficiente madera y piedra para construir.');
+      } else if (madera < costos) {
+          setMessage('No tienes suficiente madera para construir.');
+      } else if (piedra < costos) { // Corrected condition to piedra < costos
+          setMessage('No tienes suficiente piedra para construir.');
+      } else if (cantidad <= count) {
+          setMessage('Ya tienes el máximo de este edificio.');
       }
-    }
-  }
-  setImages(imagenes);
-  console.log('Imagenes:', imagenes);
-}
+        
+      }
+  
 
-const handleCargaImagenes =  () => {
-  setImagenesCargadas(imagenesCargadas + 1)
-  if (imagenesCargadas == cantidadEdificios) {
-    setCargandoImagenes(false)
-    console.log("imagenes cargadas", imagenesCargadas, "de", cantidadEdificios)
-    console.log("ocultando pantalla de carga...")
-  }
-  console.log("imagenes cargadas", imagenesCargadas, "de", cantidadEdificios) 
-}
+  return countsMax;
+};
+
+
+
+
+
+
+
+
 
 //region RETURN 
   return (
@@ -513,6 +437,9 @@ const handleCargaImagenes =  () => {
           </div>
 
         ))}
+          <div id="messageDiv" style={messageDivStyle}  className="absolute top-0 left-1/2 transform -translate-x-1/2 p-4 bg-yellow-500 text-black font-bold py-2 px-4 rounded z-50">
+        {message}
+      </div>
       </div>
       <button
         className="absolute bottom-4 left-4 bg-green-400 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"

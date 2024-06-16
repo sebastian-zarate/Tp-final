@@ -56,20 +56,6 @@ export async function createUser(user: { email: string, password: string, userna
     nivel:1, 
     salt,
     unidadesDeTrabajo: unidadesDeTrabajo,
-        // otros campos que necesites----------------------------------------------------------------------
-    //--------------------------------------------------------------------------------
-    //----------------------------------------------------------------
-    //canon : 0,
-    muros : 0,
-    //bosque : 0,
-    herreria : 0,
-    cantera : 0,
-    maderera :0,
-    panaderia : 0,
-    ayuntamiento : 0
-
-    //---------------------------------------------
-//-----------------------------esto---------------------------------------------------------------
 
 }
 
@@ -254,128 +240,33 @@ export const removeCookie = async() => {
 //-----------------------------------------------------------------------------------------------------------
 //----------------------------------------------------SEBA---para abajo nuevo -------------------------------------------------
 
-// GUARDA EL EDIFICIO EN LA BASE DE DATOS CUANDO SE MUEVE
-export async function GuardarEdificio(id: string, posX: number, posY: number, edificioNivel: number): Promise<void> {
-  try {
-    // Lógica para guardar/actualizar el edificio en la base de datos
-    await prisma.userEdificios.updateMany({
-      where: { id },
-      data: {
-      
-        posicion_x: posX,
-        posicion_y: posY,
-        nivel : edificioNivel
-       
-      },
-     
-    });
-  } catch (error) {
-    console.error("Error saving building:", error);
-    throw error;
-  }
-  console.log("id ", id)
-  console.log(" posx", posX)
-  console.log(posY)
-
-}
-
-// metodo para construir un edificio
-export async function builtEdificio(usuarioId: string,edificioID: string, edificioX: number,edificioY: number, edificioNivel: number) {
-  try {
-      // Obtener el ID del usuario
-      //const usuarioId = '6645239328fab0b97120439e';
-     
-      // Crear el edificio en la base de datos utilizando Prisma
-      const nuevoEdificio = await prisma.userEdificios.create({
-          data: {
-              edificioId: edificioID, // Asegúrate de que este es un string válido
-              posicion_x: edificioX,
-              posicion_y: edificioY,
-              userId: usuarioId,
-              ultimaInteraccion: new Date(),
-              nivel: edificioNivel // Establecer un valor por defecto para 'nivel'
-              
-          }
-      });
-
-      // Devolver el ID del usuario y el edificio creado
-      return { usuarioId: usuarioId, edificio: nuevoEdificio };
-  } catch (error) {
-      console.error("Error al guardar el edificio en la base de datos:", error);
-      throw error; // Relanzar el error para que sea manejado por el código que llama a esta función
-  }
-}
-
-// metodo para obtener los edificios de un usuario
 
 
-export async function updateUserBuildings(
-  userId: string,
-  muro: number,
-  //bosque: number,
-  herreria: number,
-  cantera: number,
-  maderera: number,
-  panaderia: number,
-  ayuntamientos: number,
-  pans : number,
-  maderas : number,
-  piedras : number
-
-) {
-  try {
-    // Buscar al usuario
-    const user = await prisma.users.findUnique({
-      where: {
-        id: userId,
-      },
-    });
-
-    if (user) {
-      // Actualizar los campos de edificios con las cantidades proporcionadas
-      await prisma.users.update({
-        where: {
-          id: userId,
-        },
-        data: {
-          // Actualizar los campos de edificios con las cantidades proporcionadas
-         // bosque: bosque,
-          herreria: herreria,
-          cantera: cantera,
-          maderera: maderera,
-          panaderia: panaderia,
-          ayuntamiento: ayuntamientos,
-          pan: pans,
-          madera: maderas,
-          piedra: piedras,
-          muros: muro,
-        },
-      });
-      console.log('User buildings updated successfully.');
-    } else {
-      console.log(`User with ID ${userId} not found.`);
+// Saque los atribuos(ayuntamiento, entre otros) que se creaban al crear un usuario en createUser()
+// me lleve los metodos getBuildingCount(),updateUserBuildings()   a edificio.ts 
+// redirigirse a edificio.ts para ver los cambios
+// agregu 
+export async function updateUserRecursosPropios(Id: string, madera: number, piedra: number, pan:number) {
+  const u = await getUserById(Id)
+  if((Number(u?.madera) < madera) || (Number(u?.piedra) < piedra) 
+    || (Number(u?.pan) < pan)) { 
+      throw error("Insuficientes recursos")
     }
-  } catch (error) {
-    console.error('Error updating user buildings:', error);
-    throw error;
-  }
-};
+  let maderaUpdated = Number(u?.madera) - madera
+  let piedraUpdated = Number(u?.piedra) - piedra
+  let panUpdated = Number(u?.pan) - pan
 
-
-export async function getChatIdByCooki(){
-  const chatId = cookies().get('chatId')?.value
-  return chatId
-}
-
-export async function getOtherUsers(userId: string){
-  const users = await prisma.users.findMany({
+  const userUpdated = await prisma.users.update({
     where: {
-      NOT: {
-        id: userId
-      }
+      id: Id
+    },
+    data: {
+      madera: maderaUpdated,
+      piedra:piedraUpdated,
+      pan:panUpdated
     }
   })
-  return users
+
+  console.log(`User ${Id} updated: `, userUpdated)
+  return userUpdated
 }
-
-

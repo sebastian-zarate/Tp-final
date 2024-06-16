@@ -22,11 +22,12 @@ model Edificios {
   nivel Int?
   costo Int?
   descripcion String?
+  cantidad  Int?
   recursoPorMinuto Int?
   tipoRecurso String?
   ultimaInteraccion DateTime?
   userEdificios UserEdificios[]
-  cantidad  Int?// canatidad de capacidad de contruccion de unidades de este tipo de edificio        |
+  
   imagen String?
 
   //----------------------------------------------------------------------------------
@@ -44,17 +45,6 @@ model Users{
   madera Int
   piedra Int
   pan Int
-  ///------------------------------------------------------------------------------------------------
-  ///------------------------------------SEBA-------------------------------------------------------
-  maderera Int?
-  panaderia Int?
-  ayuntamiento Int?
-  cantera Int?
-  muros Int?
-  //bosque Int?
-  herreria Int?
-  //------------------------------------------------------------------------------------------------
-  //--------------------------------SOLO ESO----------------------------------------------------------------
 
   unidadesDeTrabajo Int
   userEdificios UserEdificios[]
@@ -101,3 +91,6 @@ model Chats {
   user2ref Users @relation("User2Chats", fields: [user2], references: [id])
   mensajes Mensajes[]
 }
+
+// SOLO SACAQUE LOS ATRIBUTOS DE USER PANADERIA, AYNTAMIENTO, ETC Y DE CANTIDAD EN EDIFICIOS
+// REDERIGIRSE A USER.TS
