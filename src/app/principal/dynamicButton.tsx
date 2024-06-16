@@ -81,7 +81,7 @@ const [message, setMessage] = useState('');
   //para la pantalla de carga (deben ser todas falsas para que se oculte la pantalla de carga)	
   const [cargandoPrincipal, setCargandoPrincipal] = useState(true)
   const [cargandoChats, setCargandoChats] = useState(true)
-  const [cargandoImagenes, setCargandoImagenes] = useState(false) //por ahora lo dejo en false xq no anda
+  const [cargandoImagenes, setCargandoImagenes] = useState(true) //por ahora lo dejo en false xq no anda
   const [cantidadEdificios, setCantidadEdificios] = useState(0)
   const [imagenesCargadas, setImagenesCargadas] = useState(0)
   //----------------------------------------------------------
@@ -131,7 +131,8 @@ const [message, setMessage] = useState('');
         //cargar imagenes
         mapearImagenes(fetchedBuildings);
         //para la pantalla de carga
-         setCantidadEdificios(fetchedBuildings.length)
+        if(fetchedBuildings.length === 0){ setCargandoImagenes(false)}
+        setCantidadEdificios(fetchedBuildings.length)
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally{
@@ -443,13 +444,16 @@ const mapearImagenes = async (localbuildings: any) => {
 }
 
 const handleCargaImagenes =  () => {
-  setImagenesCargadas(imagenesCargadas + 1)
-  if (imagenesCargadas == cantidadEdificios) {
-    setCargandoImagenes(false)
-    console.log("imagenes cargadas", imagenesCargadas, "de", cantidadEdificios)
-    console.log("ocultando pantalla de carga...")
-  }
-  console.log("imagenes cargadas", imagenesCargadas, "de", cantidadEdificios) 
+  setImagenesCargadas(prevImagenesCargadas => {
+    const newImagenesCargadas = prevImagenesCargadas + 1;
+    if (newImagenesCargadas == cantidadEdificios) {
+      setCargandoImagenes(false)
+      console.log("imagenes cargadas", newImagenesCargadas, "de", cantidadEdificios)
+      console.log("ocultando pantalla de carga...")
+    }
+    console.log("imagenes cargadas", newImagenesCargadas, "de", cantidadEdificios)
+    return newImagenesCargadas;
+  });
 }
 
 //region RETURN 
@@ -487,7 +491,7 @@ const handleCargaImagenes =  () => {
             key={index}
             id={building.id}
             
-            className={` bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded`}
+            className={` text-white font-bold py-2 px-4 rounded`}
             style={{
               left: `${building.x}px`,
               top: `${building.y}px`,
@@ -504,7 +508,7 @@ const handleCargaImagenes =  () => {
           >
             
               <Image
-                src={`/Images/${images[building.edificioId] || 'default.png'}`}
+                src={`/Images/edificios/${images[building.edificioId]}`}
                 alt={building.type}
                 layout="fill"
                 objectFit="cover"
