@@ -30,9 +30,7 @@ export async function getEdificios(): Promise<any[]> {
                 largo: true,
                 costo: true,
                 cantidad: true,
-                descripcion: true,
-                // otros campos que necesites
-                
+                descripcion: true,     
             },
         });
         return edificios;
@@ -99,4 +97,66 @@ export const getImagenEdificio= async (Id:string) => {
     })  
     return e?.imagen
 }
+
+export async function updateUserBuildings(
+    userId: string,
+    nombreEdificio: string,
+    newCantidad: number,
+    piedras: number,
+    maderas: number
+  ) {
+
+    console.log("userId: ", userId);
+    console.log("newCantidad: ", newCantidad);
+    console.log("nombreEdificio: ", nombreEdificio);
+
+    try {
+      // Buscar al usuario
+      const user = await prisma.users.findUnique({
+        where: {
+          id: userId,
+        },
+      });
+
+      if (user) {
+        // Actualizar los campos de edificios con las cantidades proporcionadas
+        await prisma.users.update({
+          where: {
+            id: userId,
+          },
+          data: {
+            [nombreEdificio]: newCantidad,
+            piedra: piedras,
+            madera: maderas
+          },
+        });
+        console.log('User buildings updated successfully.');
+      } else {
+        console.log(`User with ID ${userId} not found.`);
+      }
+    } catch (error) {
+      console.error('Error updating user buildings:', error);
+      throw error;
+    }
+  };
+
+  // metodo para obtener los edificios de un usuario
+  export async function getBuildingCount(idUser: string, idEdificio: string): Promise<any[]> {
+    try {
+
+
+
+        // Buscar todos los edificios creados por el usuario con el ID proporcionado
+        const buildings = await prisma.userEdificios.findMany({
+            where: {
+                userId:idUser, // Utilizar el `userId` proporcionado en la llamada
+                edificioId: idEdificio
+            }
+        });
+
+        return buildings;
+    } catch (error) {
+        console.error("Error fetching buildings by user ID:", error);
+        throw error;
+    }}
 
