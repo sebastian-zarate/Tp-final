@@ -44,10 +44,11 @@ const DynamicBuildings: React.FC = () => {
   const [userId, setUserId] = useState('')
 
   //NICO
-  const [menuButton, setMenBut] = useState(false);   //cuando se cliclea un botón se habilita la compuerta que habre el formulario de asignar unidades
-  const [idUEClick, setIdUEClick] = useState("");    //id de userEdificios seleccionado ante un click
-  const [userButton, setUserButton] = useState(false); //compuerta para el botón de usuario.
-
+  const[menuButton, setMenBut] = useState(false);   //cuando se cliclea un botón se habilita la compuerta que habre el formulario de asignar unidades
+  const[idUEClick, setIdUEClick] = useState("");    //id de userEdificios seleccionado ante un click
+  const[userButton, setUserButton] = useState(false); //compuerta para el botón de usuario.
+  const [boxError, setBoxError] = useState(false)
+  const [error, setError] = useState("")
   // para la mensajeria
   const [userLoaded, setUserLoaded] = useState(false);
   const [mostrarMensajeria, setMostrarMensajeria] = useState(false);
@@ -65,7 +66,7 @@ const DynamicBuildings: React.FC = () => {
   //para la pantalla de carga (deben ser todas falsas para que se oculte la pantalla de carga)	
   const [cargandoPrincipal, setCargandoPrincipal] = useState(true)
   const [cargandoChats, setCargandoChats] = useState(true)
-  const [cargandoImagenes, setCargandoImagenes] = useState(true) //por ahora lo dejo en false xq no anda
+  const [cargandoImagenes, setCargandoImagenes] = useState(false) //por ahora lo dejo en false xq no anda
   const [cantidadEdificios, setCantidadEdificios] = useState(0)
   const [imagenesCargadas, setImagenesCargadas] = useState(0)
   //----------------------------------------------------------
@@ -258,24 +259,29 @@ const DynamicBuildings: React.FC = () => {
     }
   }
 
-  /*    async function getNameEdificio(idUE:any) {
-       return await getEdificionameByUE(idUE)
-     } */
+//region Nico
   //método para obtener el id del userEdificio seleccionado
-  async function handleClick(event: any) {
+  async function handleClick(event: any) {  
     //si la compuerta ya esta abierta no ejecutar este código
-    if (menuButton) return
-    const elementoClicado = event.target as HTMLElement;
+    if(menuButton) return
+    const elementoClicado = event.target as HTMLElement;  
     const idUE = elementoClicado.id;
     console.log('id UE:', idUE);
     const edificioName = await getEdificionameByUE(idUE)
-    console.log("edificiooooooooooooo:", edificioName)
-    if (!menuButton && (edificioName == "maderera" || edificioName == "cantera" || edificioName == "panaderia")) setMenBut(true);
-    if (elementoClicado.id) {
+    console.log("edificiooooooooooooo:",edificioName)
+    if(!menuButton  && (edificioName == "maderera" || edificioName == "cantera" || edificioName == "panaderia"))    setMenBut(true);
+    if(elementoClicado.id){
       setIdUEClick(idUE)
     }
+}
+useEffect(() => {
+  if(boxError){
+    const intervalId = setInterval(() => {
+      setBoxError(false)
+      }, 3000);
+      return () => clearInterval(intervalId);
   }
-
+}, [boxError])
   function handleMensajeria() {
     setMostrarMensajeria(!mostrarMensajeria);
   }
@@ -399,7 +405,11 @@ const DynamicBuildings: React.FC = () => {
           cargarUser={cargarUser}
         />
       </div>
-
+      {boxError && 
+              <div className=" text-white rounded w-80 py-4 px-8 absolute top-0 bg-red-400 bg-opacity-80">
+                    <h1 className=" flex justify-center items-center font-stoothgart text-black-400 ">{error}</h1>                
+              </div>
+      }
 
       <div style={{
         width: '1200px',
@@ -428,7 +438,7 @@ const DynamicBuildings: React.FC = () => {
               cursor: 'pointer',
             }}
             onMouseDown={(e) => handleMouseDown(index, e)}
-            onClick={(e) => handleClick(e)}
+            onDoubleClick={(e) => handleClick(e)}
           >
 
             <Image
@@ -443,7 +453,7 @@ const DynamicBuildings: React.FC = () => {
 
 
             {/*<div>{building.type} - X: {building.x}, Y: {building.y}</div>*/}
-            {((idUEClick == building.id) && menuButton) ? <MenuAsignar idUE={building.id} cerrarCompuerta={setMenBut} estadoCompuerta={menuButton} /> : null}
+            {((idUEClick == building.id) && menuButton) ? <MenuAsignar idUE={building.id} cerrarCompuerta={setMenBut} setError = {setError} setBoxError = {setBoxError}/> : null}
 
           </div>
 

@@ -18,11 +18,31 @@ const Signup: React.FC = () => {
   const [mostrar, setMostrar] = React.useState<boolean>(false)
   const [imagenSeleccionada, setImagenSeleccionada] = React.useState<string>("Seleccionar")
 
+  const [boxError, setBoxError] = useState(false)
+  const [error, setError] = useState("")
+
+  useEffect(() => {
+    if(boxError){
+      const intervalId = setInterval(() => {
+        setBoxError(false)
+        }, 3000);
+        return () => clearInterval(intervalId);
+    }
+  }, [boxError])
   //para mostrar el componente para seleccionar imagenes
   const handleMostar = () => {
     setMostrar(!mostrar)
   }
 
+  const createU = async(data:any) =>{
+    try{
+      await createUser(data)
+      window.location.href = "/login"
+    }catch(e){
+      setError(String(e))
+      setBoxError(true)
+    }
+  }
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     let fotoPerfil = ""
@@ -40,8 +60,8 @@ const Signup: React.FC = () => {
       profileImage: fotoPerfil
 
     }
-    createUser(data)
-    window.location.href = "/login"
+    createU(data)
+
   }
 
   const handleImagenSeleccionada = (imagen: string) => {
@@ -67,7 +87,12 @@ const Signup: React.FC = () => {
           padding: 0,
         }}
       >
-
+        {boxError && 
+            <div className=" text-white rounded w-80 py-4 px-8 absolute top-20 bg-red-400 bg-opacity-80">
+                {/* <button className="absolute top-0 right-1 " onClick={()=> {setBoxError(false); setError("")}}>X</button> */}
+                <h1 className=" flex justify-center items-center font-stoothgart text-black-400 ">{error}</h1>                
+            </div>
+        }
         <div
           className="flex flex-col mt-16 p-16 items-center"
           style={{
@@ -87,7 +112,7 @@ const Signup: React.FC = () => {
             <label htmlFor="password" className="self-start text-lg font-stoothgart text-yellow-400">Password</label>
             <input className="border px-2 mb-4 w-full rounded text-white" style={{ backgroundColor: 'rgba(172, 122, 27, 1)' }} type="password" id="password" name="password" required />
             <label htmlFor="profileImage" className="self-start text-lg font-stoothgart text-yellow-400">Profile Image: {imagenSeleccionada}</label>
-            <button type="button" onClick={() => handleMostar()} className="bg-white pb-2"> seleccionar Imagen</button>
+            <button type="button" onClick={() => handleMostar()} className="border px-2 mb-4 w-full font-stoothgart rounded text-white" style={{ backgroundColor: 'rgba(172, 122, 27, 1)' }}> seleccionar Imagen</button>
             <ImagenPerfil mostrar={mostrar} handleMostrar={handleMostar} handleImagenSeleccionada={handleImagenSeleccionada}/>
             <button
               type="submit"

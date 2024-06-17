@@ -1,25 +1,40 @@
+"use client"
 import { authenticateUser, getUserByemail } from "@/services/users"
-import { cookies } from "next/headers"
-import { redirect } from "next/navigation"
 import backgroundImage from '../../../public/Images/Papyre.png';
 import imageLogin from '../../../public/Images/InputLogin.jpg';
 import containerImage from '../../../public/Images/Container.png';
 import VikingoShield from '../../../public/Images/VikingoShieldAxeSinFondo.png'
 import VikingoSword from '../../../public/Images/VikingoSwordSombreado.png'
 import Image from "next/image";
+import { useEffect, useState } from "react";
 
-async function Login(){
-    
+function Login(){
+    const [boxError, setBoxError] = useState(false)
+    const [error, setError] = useState("")
+
+    useEffect(() => {
+      if(boxError){
+        const intervalId = setInterval(() => {
+          setBoxError(false)
+          }, 3000);
+          return () => clearInterval(intervalId);
+      }
+    }, [boxError])
     async function logUser(data:FormData) {
-        'use server'
+        //'use server'
         const user = {
           /* username: data.get('username') as string, */
           dataUser: data.get('dataUser') as string,
           password: data.get('password') as string
         }
-        const validaU = await authenticateUser(user)  
-
-        if(validaU) redirect('/principal')
+        
+        try{
+          await authenticateUser(user)  
+          window.location.replace('/principal')
+        } catch(e){
+          setError(String(e))
+          setBoxError(true)
+        }        
     }
 
     return(
@@ -36,8 +51,15 @@ async function Login(){
           padding: 0,
           //position: 'relative',
         }}
-      >
+    >
+            {boxError && 
+              <div className=" text-white rounded w-80 py-4 px-8 absolute top-20 bg-red-400 bg-opacity-80">
+                  {/* <button className="absolute top-0 right-1 " onClick={()=> {setBoxError(false); setError("")}}>X</button> */}
+                    <h1 className=" flex justify-center items-center font-stoothgart text-black-400 ">{error}</h1>                
+              </div>
+            }
         <div 
+        
           className="flex flex-col items-center bg-contain"
           style={{
             backgroundImage: `url(${containerImage.src})`,
@@ -50,7 +72,7 @@ async function Login(){
             position: 'relative',
             marginTop: '2rem'
           }}
-        >
+        >          
           <h1 className="border-solid mb-4 text-4xl font-stoothgart text-yellow-400">Login</h1>
           
           <form className="w-full" action={logUser}>  
@@ -99,8 +121,9 @@ async function Login(){
             width: '25%', // Ajusta el tamaño según sea necesario
             height: '45%' 
           }} 
-        />
+        />        
       </div>
+
     );
 }
 

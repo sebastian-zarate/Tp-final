@@ -7,7 +7,7 @@ import { signJWT, verifyJWT } from "@/helpers/jwt";
 import { StyledString } from "next/dist/build/swc";
 import { error } from "console";
 import { redirect } from "next/navigation";
-import { ContextExclusionPlugin } from "webpack";
+import { emailExist, emailShort, passwordInvalid, passwordShort, recurNegat, userExist, usernameExist, usernamelLong, usernameShort, userSinMad, userSinPan, userSinPied } from "@/helpers/error";
 
 const prisma = new PrismaClient()
 let cantMadera = 500
@@ -16,11 +16,14 @@ let cantPiedra= 600
 let unidadesDeTrabajo = 100
 
 export async function createUser(user: { email: string, password: string, username: string, profileImage: string}) {
-  if (!user.email || user.email.length < 5 || !user.email.includes('@') ) {
-    throw new Error('Invalid email');
+  if (user.email.length < 5 ) {
+    throw new Error(emailShort);
   }
-  if (!user.username || user.username.length < 3){
-    throw new Error('Invalid username');
+  if (user.username.length < 3){
+    throw new Error(usernameShort);
+  }
+  if (user.username.length > 30){
+    throw new Error(usernamelLong);
   }
   const existing = await prisma.users.findFirst({
     where: {
@@ -28,7 +31,7 @@ export async function createUser(user: { email: string, password: string, userna
     }
   })
   if (existing) {
-    throw new Error('User already exists');
+    throw new Error(emailExist);
   }
   const existingUsername = await prisma.users.findFirst({
     where: {
@@ -36,12 +39,13 @@ export async function createUser(user: { email: string, password: string, userna
       }
   })
   if (existingUsername) {
-    throw new Error('Username already exists');
+    throw new Error(usernameExist);
   }
 
-  if (!user.password || user.password.length < 8) {
-    throw new Error('Password too short');
+  if (user.password.length < 8) {
+    throw new Error(passwordShort);
   }
+
 
   const salt = getSalt();
 
@@ -80,15 +84,16 @@ export async function authenticateUser(user: { dataUser: string, password: strin
     })
     if(existing2) userTemp = existing2
     if (!existing2 ) {
-      throw new Error('User not found');
+      throw new Error(userExist);
     }
   }
   
   const hash = hashPassword(userTemp?.salt + user.password);
   console.log(`hash nuevo: ${hash} - signJWT: ${signJWT(hash)}`)
   console.log(`hash existente: ${userTemp?.hash} - signJWT: ${signJWT(userTemp?.hash)}`)
+
   if (hash !== userTemp?.hash) {
-    throw new Error('Invalid password');
+    throw new Error(passwordInvalid);
   }
   
   cookies().set("user" , signJWT(hash) , { httpOnly: true, sameSite: 'strict' })
@@ -105,6 +110,7 @@ export const getUserByUserName = async (userName:string) => {
   })        
   return users
 }
+
 export const getUserByemail = async (email:string) => {
   const users = await prisma.users.findFirst({
     where: {
@@ -159,20 +165,35 @@ export async function updateUser(Id: string, data: any) {
   return u
 }
 //region cambios Nico 
-
+//MENSAJERIA
 export async function updateUserRecursos(idEmisor: string, usernameReceptor: string, madera: number, piedra: number, pan:number) {
   //consigo el id del usuario
   let u = await getUserById(idEmisor)
   //si la madera o la piedra o el pan que se quieran regalar son mayores en cantidad a los que posee el usuario, negar la acción
-  if((Number(u?.madera) < madera) || (Number(u?.piedra) < piedra) 
-    || (Number(u?.pan) < pan)) { 
-      throw new Error("Insuficientes recursos")
-    }
+  if((Number(u?.madera) < madera) ) { 
+    throw new Error(userSinMad)
+  }
+  if(Number(u?.piedra) < piedra) { 
+    throw new Error(userSinPied)
+  }
+  if(Number(u?.pan) < pan) { 
+    throw new Error(userSinPan)
+  }
 
   //lógica para restar recursos al emisor
   let maderaUpdated = Number(u?.madera) - madera
   let piedraUpdated = Number(u?.piedra) - piedra
   let panUpdated = Number(u?.pan) - pan
+  //si el usuariio quiere donar más recuros de los que puede
+  if(maderaUpdated < 0) { 
+    throw new Error(userSinMad)
+  }
+  if(piedraUpdated < 0) { 
+    throw new Error(userSinPied)
+  }
+  if(panUpdated < 0) { 
+    throw new Error(userSinPan)
+  }
     //actualizo al emisor del mensaje
   const emisorUpdated = await prisma.users.update({
     where: {
@@ -205,6 +226,7 @@ export async function updateUserRecursos(idEmisor: string, usernameReceptor: str
   console.log(`se actualizoooooo a ${u?.username} `, receptorUpdated)
   return receptorUpdated
 }
+
 
 // Devuelve el user en base a la cookie
 export async function getUserByCooki() {

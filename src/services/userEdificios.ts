@@ -1,8 +1,8 @@
 'use server'
 import { PrismaClient } from "@prisma/client"
-import { getUserById } from "./users"
+import { getUserByCooki, getUserById } from "./users"
 import { getEdificioById } from "./edificios"
-import { error } from "console"
+import { edifSinUnid, panIns, unidExed, unidIns, unidNegat } from "@/helpers/error"
 
 const prisma = new PrismaClient()
 
@@ -225,6 +225,17 @@ export const getEdificionameByUE = async (Id:string) => {
     return edificioName;
 }
 export const updateUEunidadesAdd = async (Id: string, unidades: any, panXunidad: any) => {
+            
+    if(unidades < 0){       //comparo que no se puedan asignar unidades negativas
+        throw new Error(unidNegat)
+    }
+    //obtener unidades totales del usuario
+    const unid = await getUserByCooki()
+    
+
+    if(unidades >Number(unid?.unidadesDeTrabajo) ){        //comparo que no se puedan asignar unidades por encima de las que ya tiene el usuario        
+        throw new Error(unidExed)       
+    }
     //obtengo el doc userEdificio
     const ue = await prisma.userEdificios.findFirst({
         where: {
@@ -237,14 +248,13 @@ export const updateUEunidadesAdd = async (Id: string, unidades: any, panXunidad:
     //cantidad de unidades de trabajo que le quedan al user
     let resultadoUnidades = (Number(usuario?.unidadesDeTrabajo)) - unidades
 
-    if (resultadoUnidades < 0) throw Error("Unidades insuficientes")
+    if (resultadoUnidades < 0) throw Error(unidIns)
 
     let panUser = Number(usuario?.pan) - (panXunidad * unidades)
 
-    if (panUser < 0) throw Error("Pan insuficiente para alimentar a las unidades")
+    if (panUser < 0) throw Error(panIns)
 
-    let unidadesEdif = unidades + Number(ue?.trabajadores)
-
+    let unidadesEdif = Number(ue?.trabajadores) + unidades 
     //actualizo el documento userEdificio
     const e = await prisma.userEdificios.update({
         where: {
@@ -272,24 +282,26 @@ export const updateUEunidadesAdd = async (Id: string, unidades: any, panXunidad:
 }
 //método para restar unidades de un edificio
 export const updateUEunidadesSubstract = async(Id: string, unidades: any, panXunidad: any) => {
+    if(unidades < 0){       //comparo que no se puedan asignar unidades negativas
+        throw new Error(unidNegat)
+    }
     //obtengo el doc userEdificio
     const ue = await prisma.userEdificios.findFirst({
         where: {
             id: Id
         }
     })
-    if(Number(ue?.trabajadores) <= 0)throw new Error("No se puede quitar más unidades a este edificio")
+    if(Number(ue?.trabajadores) <= 0)throw new Error(edifSinUnid)
     //obtengo el id del user que se encuentra en el documento userEdificio
     const us_id = ue?.userId
     const usuario = await getUserById(String(us_id))
     //cantidad de unidades de trabajo que le quedan al user
     let resultadoUnidades = (Number(usuario?.unidadesDeTrabajo)) + unidades
-
+    //cantidad de pan que le quedan al user
     let panUser = Number(usuario?.pan) + (panXunidad * unidades)
-
-    if (panUser < 0) throw Error("Pan insuficiente para alimentar a las unidades")
    
-    let unidadesEdif = unidades - Number(ue?.trabajadores)
+    let unidadesEdif = Number(ue?.trabajadores) -  unidades
+    if (unidadesEdif < 0) throw Error(edifSinUnid)
 
     //actualizo el documento userEdificio
     const e = await prisma.userEdificios.update({

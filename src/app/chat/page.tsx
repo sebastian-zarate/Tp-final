@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { createMensaje, getMensajes, updateMensaje } from "@/services/mensajes";
 import { getReturnByCooki, getUser, updateUserRecursos } from "@/services/users";
 import { getChatNameById } from "@/services/chats";
+import { recurNegat } from "@/helpers/error";
 
 
 
@@ -14,6 +15,9 @@ const Chats: React.FC = () => {
     const [username, setUsername] = useState<string>("")
     const [userId, setUserId] = useState<string>("")
     const [usernameOther, setUsernameOther] = useState<string>("")
+    const [boxError, setBoxError] = useState(false)
+    const [error, setError] = useState("")
+
 
 //region verficar la cookie------------------
 let estado = false;
@@ -35,6 +39,17 @@ useEffect(() => {
       return () => clearInterval(intervalId);
 }, [estado]) 
 //------------------------------------------------
+
+//region Uso de errores
+useEffect(() => {
+  if(boxError){
+    const intervalId = setInterval(() => {
+      setBoxError(false)
+      }, 3000);
+      return () => clearInterval(intervalId);
+  }
+}, [boxError])
+
 
     useEffect(() => {
         const chatLocalStorage = localStorage.getItem('chatId')     //obtengo el id del chat del localStorage
@@ -122,16 +137,25 @@ useEffect(() => {
             leido: false // nuevo atributo para saber si el mensaje fue leido
         }
 
-        // create the message
-        if(mensaje.madera >= 0 && mensaje.piedra >=0 && mensaje.pan >=0){
+        if(mensaje.madera < 0 || mensaje.piedra < 0 || mensaje.pan < 0){
+            setError(recurNegat)
+            setBoxError(true)
+            return event.target.reset();
+        }        
+
+        try{            
+            //se actualizan los recursos del emisor y receptor   
+            await updateUserRecursos(userId, usernameOther,mensaje.madera, mensaje.piedra, mensaje.pan)      
+            // create the message
             const m = await createMensaje(mensaje);
             console.log("El mensaje creado: ", m);
-            setMensajes(prevMensajes => [...prevMensajes, m]);
-            //se actualizan los recursos del emisor y receptor
-            const emis = updateUserRecursos(userId, usernameOther,mensaje.madera, mensaje.piedra, mensaje.pan)        
-            console.log("emisorrrrrrr:",emis)
-        }else alert("No se pueden enviar recursos negativos")
-        event.target.reset();
+            setMensajes(prevMensajes => [...prevMensajes, m]);  
+            //console.log("emisorrrrrrr:",emis)         
+        }catch(e){
+            setError(String(e))
+            setBoxError(true)
+            event.target.reset();
+        }
     }
     return (
         <main>
@@ -139,15 +163,23 @@ useEffect(() => {
                 <div className=" justify-between bg-white w-8/12 flex   p-5 border m-5">
                     <h1>Chateando con {usernameOther}</h1>
                 </div>
-
                 <div className=" bg-white p-10 m-2 w-8/12 flex-col flex justify-between">
+                    {boxError && 
+                                <div className="absolute left-1/3 ml-40 text-white rounded  w-1/4 py-4 px-8   bg-red-400 bg-opacity-80">                    
+                                    <h1 className=" flex justify-center items-center font-stoothgart text-black-400 ">{error}</h1>                
+                                </div>
+                    }
                     <div className="p-5 flex flex-col font-bold text-sm bg-slate-300 overflow-auto max-h-[500px]">
+
                         {mensajes.map((mensaje, index) => (
                             <div key={index} className=" m-2" >
                                 <span key={index} className=" text-slate-500 text-xs"> - {mensaje.emisorUserName} - {mensaje.fecha.toLocaleDateString()} -{mensaje.fecha.toLocaleTimeString()}</span>
                                 <div className=" w-2/6 border p-3 rounded-sm border-white">
                                     <span key={index}>{mensaje.texto}</span>
                                 </div>
+                               {(mensaje.madera > 0) && <span key={index} className=" text-slate-500 text-xs"> - Madera:{mensaje.madera}</span>}
+                               {(mensaje.piedra > 0) && <span key={index} className=" text-slate-500 text-xs"> - Piedra:{mensaje.piedra}</span>}
+                               {(mensaje.pan > 0) && <span key={index} className=" text-slate-500 text-xs"> - Pan:{mensaje.pan}</span>}
 
                             </div>
 
