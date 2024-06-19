@@ -10,6 +10,7 @@ import VikingoImage from '../../../public/Images/VikingoCadenasSombreado.png'
 import Vikingo2Image from '../../../public/Images/VikingoEspadaSombreado.png'
 import Image from "next/image";
 import ImagenPerfil from "./imagenPerfil";
+import InputProfileImage from '../../../public/Images/InputSeleccionarImagen.jpg'
 
 
 
@@ -112,14 +113,14 @@ const Signup: React.FC = () => {
             <label htmlFor="password" className="self-start text-lg font-stoothgart text-yellow-400">Password</label>
             <input className="border px-2 mb-4 w-full rounded text-white" style={{ backgroundColor: 'rgba(172, 122, 27, 1)' }} type="password" id="password" name="password" required />
             <label htmlFor="profileImage" className="self-start text-lg font-stoothgart text-yellow-400">Profile Image: {imagenSeleccionada}</label>
-            <button type="button" onClick={() => handleMostar()} className="border px-2 mb-4 w-full font-stoothgart rounded text-white" style={{ backgroundColor: 'rgba(172, 122, 27, 1)' }}> seleccionar Imagen</button>
+            <button type="button" onClick={() => handleMostar()} style={{background:'none', border:'none', padding:10, cursor:'pointer'}}><Image src ={InputProfileImage} alt="Seleccionar Imagen"/></button>
             <ImagenPerfil mostrar={mostrar} handleMostrar={handleMostar} handleImagenSeleccionada={handleImagenSeleccionada}/>
             <button
               type="submit"
               style={{
                 background: 'none',
                 border: 'none',
-                padding: 0,
+                padding: 10,
                 cursor: 'pointer'
               }}
             >

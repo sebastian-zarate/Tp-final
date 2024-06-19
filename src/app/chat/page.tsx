@@ -5,7 +5,8 @@ import { createMensaje, getMensajes, updateMensaje } from "@/services/mensajes";
 import { getReturnByCooki, getUser, updateUserRecursos } from "@/services/users";
 import { getChatNameById } from "@/services/chats";
 import { recurNegat } from "@/helpers/error";
-
+import Image from "next/image";
+import BackgroundImage from '../../../public/Images/BackgroundChat4.jpg';
 
 
 const Chats: React.FC = () => {
@@ -158,61 +159,91 @@ useEffect(() => {
         }
     }
     return (
-        <main>
-            <div className=" flex flex-col justify-center items-center mt-16 p-8  bg-gray-400">
-                <div className=" justify-between bg-white w-8/12 flex   p-5 border m-5">
+        <main style={{ 
+            backgroundImage: `url(${BackgroundImage.src})`,
+            backgroundSize: 'cover',
+            backgroundRepeat: 'no-repeat',
+            backgroundPosition: 'center',
+            minHeight: '100vh',
+            width: '100vw',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+        }}>
+            <div className="flex flex-col justify-center items-center mt-16 p-8 w-full">
+                <div style={{ 
+                    backgroundColor: 'rgba(25, 38, 47, 255)', 
+                    border: '2mm ridge rgba(82, 47, 1, .9)' 
+                }} className="w-8/12 flex justify-between p-5 border m-5 font-stoothgart text-lg text-yellow-400">
                     <h1>Chateando con {usernameOther}</h1>
                 </div>
-                <div className=" bg-white p-10 m-2 w-8/12 flex-col flex justify-between">
-                    {boxError && 
-                                <div className="absolute left-1/3 ml-40 text-white rounded  w-1/4 py-4 px-8   bg-red-400 bg-opacity-80">                    
-                                    <h1 className=" flex justify-center items-center font-stoothgart text-black-400 ">{error}</h1>                
-                                </div>
-                    }
-                    <div className="p-5 flex flex-col font-bold text-sm bg-slate-300 overflow-auto max-h-[500px]">
-
+    
+                <div style={{ 
+                    backgroundColor: 'rgba(25, 38, 47, 255)', 
+                    border: '2mm ridge rgba(82, 47, 1, .9)' 
+                }} className="bg-white p-10 m-2 w-8/12 flex-col flex justify-between font-stoothgart">
+                    <div style={{ 
+                        backgroundColor: 'rgba(249,235,198)', 
+                        border: '2mm ridge rgba(0, 0, 0, .7)' 
+                    }} className="p-5 flex flex-col text-sm bg-slate-300 overflow-auto max-h-[500px]">
                         {mensajes.map((mensaje, index) => (
-                            <div key={index} className=" m-2" >
-                                <span key={index} className=" text-slate-500 text-xs"> - {mensaje.emisorUserName} - {mensaje.fecha.toLocaleDateString()} -{mensaje.fecha.toLocaleTimeString()}</span>
-                                <div className=" w-2/6 border p-3 rounded-sm border-white">
-                                    <span key={index}>{mensaje.texto}</span>
+                            <div key={index} className="m-2">
+                                <span className="text-slate-900 text-s">- {mensaje.emisorUserName} - {mensaje.fecha.toLocaleDateString()} -{mensaje.fecha.toLocaleTimeString()}</span>
+                                <div style={{ 
+                                    backgroundColor: 'rgba(86,30,8,255)', 
+                                    border: '2mm ridge rgba(0, 0, 0, .7)' 
+                                }} className="w-2/6 border p-3 rounded-xs text-base text-white">
+                                    <span>{mensaje.texto}</span>
                                 </div>
-                               {(mensaje.madera > 0) && <span key={index} className=" text-slate-500 text-xs"> - Madera:{mensaje.madera}</span>}
-                               {(mensaje.piedra > 0) && <span key={index} className=" text-slate-500 text-xs"> - Piedra:{mensaje.piedra}</span>}
-                               {(mensaje.pan > 0) && <span key={index} className=" text-slate-500 text-xs"> - Pan:{mensaje.pan}</span>}
-
+                                {mensaje.madera > 0 && <span className="text-slate-500 text-xs">- Madera: {mensaje.madera}</span>}
+                                {mensaje.piedra > 0 && <span className="text-slate-500 text-xs">- Piedra: {mensaje.piedra}</span>}
+                                {mensaje.pan > 0 && <span className="text-slate-500 text-xs">- Pan: {mensaje.pan}</span>}
                             </div>
-
                         ))}
                     </div>
-
-                    <form className=" flex pt-5 flex-col" onSubmit={handleSubmit}>
-                        <label htmlFor="mensaje">Mensaje</label>
-                        <textarea className=" h-20 w-full resize-none" name="mensaje" placeholder="Límite de caractéres: 300"></textarea>
-
-                        <h3 className="flex justify-center items-center">Desea donar algún recurso?</h3>
-                        <div className=" border">
+    
+                    <form className="flex pt-5 flex-col font-stoothgart" onSubmit={handleSubmit}>
+                        <label style={{ fontSize: 18 }} htmlFor="mensaje" className="text-yellow-400">Mensaje</label>
+                        <textarea style={{ 
+                            backgroundColor: 'rgb(172, 122, 27, 1)', 
+                            border: '2mm ridge rgba(0, 0, 0, .7)' 
+                        }} className="h-20 w-full resize-none text-white" name="mensaje" placeholder="Límite de caractéres: 300"></textarea>
+    
+                        <h3 style={{ fontSize: 18 }} className="flex justify-center items-center text-yellow-400">Desea donar algún recurso?</h3>
+                        <div style={{ 
+                            backgroundColor: 'rgba(172, 122, 27, 1)', 
+                            border: '2mm ridge rgba(0, 0, 0, .7)' 
+                        }} className="border">
                             <div>
                                 <label htmlFor="madera">Madera:</label>
-                                <input id="madera" type="number" name="madera" />
+                                <input style={{ border: '2mm ridge rgba(0, 0, 0, .7)' }} id="madera" type="number" name="madera" />
                             </div>
                             <div>
                                 <label htmlFor="piedra">Piedra</label>
-                                <input id="piedra" type="number" name="piedra" />
+                                <input style={{ border: '2mm ridge rgba(0, 0, 0, .7)' }} id="piedra" type="number" name="piedra" />
                             </div>
                             <div>
                                 <label htmlFor="pan">Pan</label>
-                                <input id="pan" type="number" name="pan" />
+                                <input style={{ border: '2mm ridge rgba(0, 0, 0, .7)' }} id="pan" type="number" name="pan" />
                             </div>
                         </div>
-
-                        <button type="submit" className=" mt-5 bg-blue-500 hover:bg-blue-700 " >Enviar</button>
-                        {/*  <button  className=" mt-5 bg-blue-500 hover:bg-blue-700 ">Cancelar</button>                    */}
+    
+                        <button type="submit" style={{ 
+                            backgroundColor: 'rgba(131, 1, 21, 255)', 
+                            border: '2mm ridge rgba(0, 0, 0, .7)', 
+                            fontSize: 20 
+                        }} className="mt-5 bg-blue-500 hover:bg-blue-700 text-yellow-400">Enviar</button>
+                        {/* <button className="mt-5 bg-blue-500 hover:bg-blue-700">Cancelar</button> */}
                     </form>
-                    <a href="/principal" className="flex justify-center mt-5 bg-blue-400 hover:bg-blue-700 ">Principal</a>
+                    <a href="/principal" style={{ 
+                        backgroundColor: 'rgba(131, 1, 21, 255)', 
+                        border: '2mm ridge rgba(0, 0, 0, .7)', 
+                        fontSize: 20 
+                    }} className="flex justify-center mt-5 hover:bg-blue-700 font-stoothgart text-yellow-400">Principal</a>
                 </div>
             </div>
         </main>
-    )
+    );
+    
 }
 export default Chats;

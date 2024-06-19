@@ -25,11 +25,11 @@ class ButtonUser extends React.Component<ButtonUserProps> {
     const {userId, username, profileImage, mostrarMensajeria, userLoaded, chats, chatnames, handleMensajeria, getMensajes} = this.props;
 
     return (
-      <div className="px-8 py-6 my-2 items-center absolute top-6 right-0 flex flex-col bg-blue-500 font-bold rounded" style={{height:"83vh"}}>  
+      <div className="px-8 py-6 my-2 items-center absolute top-16 right-3 flex flex-col rounded" style={{ backgroundColor: 'rgba(172, 122, 27, 1)', border: '2mm ridge rgba(0, 0, 0, .7)',height:"83vh"}}>  
         <div>
-          <h1 className="top-4 text-white ">foto</h1>
+          <h1 style = {{fontSize:18}} className="top-4 text-black font-stoothgart ">Foto</h1>
           <Image src={`/Images/profileImg/${profileImage}`} alt="profile" width={100} height={100} />
-          <h2 className="flex top-8 text-white ">{username}</h2>
+          <h2 style = {{fontSize:18}} className="flex top-8 text-black font-stoothgart ">{username}</h2>
         </div>    
         <Mensajeria 
           userId= {userId}
@@ -40,7 +40,7 @@ class ButtonUser extends React.Component<ButtonUserProps> {
           handleMensajeria={handleMensajeria}
           getMensajes={getMensajes}
         />         
-        <button className="text-white absolute bottom-6" onClick={()=> {window.location.replace("/login"); this.deleteCook()}} >Cerrar Sesión</button>
+        <button style ={{fontSize:18}} className="font-stoothgart text-red-950 absolute bottom-6" onClick={()=> {window.location.replace("/login"); this.deleteCook()}} >Cerrar Sesión</button>
       </div>
     );
   }
