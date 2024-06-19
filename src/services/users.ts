@@ -7,7 +7,7 @@ import { signJWT, verifyJWT } from "@/helpers/jwt";
 import { StyledString } from "next/dist/build/swc";
 import { error } from "console";
 import { redirect } from "next/navigation";
-import { emailExist, emailShort, passwordInvalid, passwordShort, recurNegat, userExist, usernameExist, usernamelLong, usernameShort, userSinMad, userSinPan, userSinPied } from "@/helpers/error";
+import { emailExist, emailShort, passwordInvalid, passwordShort, recurInsuf, recurNegat, userExist, usernameExist, usernamelLong, usernameShort, userSinMad, userSinPan, userSinPied } from "@/helpers/error";
 
 const prisma = new PrismaClient()
 let cantMadera = 500
@@ -253,6 +253,79 @@ export const removeCookie = async() => {
   const cookie =cookies().delete('user'); // ctx es el contexto de la solicitud (por ejemplo, getServerSideProps)
  return cookie
 };
+
+export async function updateLevelUser(userId:string,madera:number, piedra:number, pan:number) {
+  const U= await getUserById(userId)
+  
+  
+
+  const costoNivel1 = 5000
+  const costoNivel2 = 8000
+  const costoNivel3 = 12000
+
+  const levelUser = Number(U?.nivel);
+  let levelUpdated = levelUser + 1
+  let maderaUser = Number(U?.madera);
+  let piedraUser = Number(U?.piedra);
+  let panUser = Number(U?.pan);
+
+  let userUpdated;
+  if((levelUser == 1)&& (maderaUser >= costoNivel1 && piedraUser >= costoNivel1 && panUser >= costoNivel1) ){
+      //actualizo recuros de user
+      maderaUser -= costoNivel1
+      piedraUser -= costoNivel1
+      panUser -= costoNivel1 
+       console.log("madera actualizada:",maderaUser)
+
+      await prisma.users.update({
+        where:{
+            id: userId
+        },
+        data:{
+            nivel: levelUpdated,
+            madera: maderaUser,
+            piedra:piedraUser,
+            pan:panUser
+        }
+      })
+      return costoNivel1
+  } 
+  else if( (levelUser == 2) && ( (maderaUser && piedraUser && panUser) >= costoNivel2) ){
+    //actualizo recuros de user
+    maderaUser -= costoNivel2
+    piedraUser -= costoNivel2
+    panUser -= costoNivel2
+    
+    await prisma.users.update({
+      where:{
+          id: String(userId)
+      },
+      data:{
+          nivel: levelUpdated
+      }
+    })
+    return costoNivel2
+
+  } else if( (levelUser == 3) && ( (maderaUser && piedraUser && panUser) >= costoNivel3) ){
+    //actualizo recuros de user
+    maderaUser -= costoNivel3
+    piedraUser -= costoNivel3
+    panUser -= costoNivel3
+    userUpdated = await prisma.users.update({
+      where:{
+          id: String(userId)
+      },
+      data:{
+          nivel: levelUpdated
+      }
+    })
+    return costoNivel3
+
+  }else{
+    throw new Error(recurInsuf)
+  }
+ 
+}
 //region hasta aca Nico
 
 

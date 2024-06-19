@@ -1,6 +1,5 @@
 import React from 'react';
-import { updateUEunidadesAdd, updateUEunidadesSubstract } from "@/services/userEdificios";
-import { getUserByCooki, removeCookie, getUserById } from "@/services/users";
+import { removeCookie } from "@/services/users";
 import Mensajeria from "./menuChats";
 import Image from "next/image";
 
@@ -14,6 +13,7 @@ interface ButtonUserProps {
   chatnames: any;
   handleMensajeria: any;
   getMensajes: any;
+  subirNivel: any;
 }
 
 class ButtonUser extends React.Component<ButtonUserProps> {
@@ -21,9 +21,10 @@ class ButtonUser extends React.Component<ButtonUserProps> {
     await removeCookie();
   }
 
-  render() {
-    const {userId, username, profileImage, mostrarMensajeria, userLoaded, chats, chatnames, handleMensajeria, getMensajes} = this.props;
 
+  render() {
+    const {userId, username, profileImage, mostrarMensajeria, userLoaded, chats, chatnames, handleMensajeria, getMensajes, subirNivel} = this.props;
+    
     return (
       <div className="px-8 py-6 my-2 items-center absolute top-16 right-3 flex flex-col rounded" style={{ backgroundColor: 'rgba(172, 122, 27, 1)', border: '2mm ridge rgba(0, 0, 0, .7)',height:"83vh"}}>  
         <div>
@@ -39,7 +40,8 @@ class ButtonUser extends React.Component<ButtonUserProps> {
           chatnames={chatnames}
           handleMensajeria={handleMensajeria}
           getMensajes={getMensajes}
-        />         
+        /> 
+        <button style ={{fontSize:18}} className="font-stoothgart text-red-950 flex" onClick={() =>subirNivel()}>Subir de nivel</button>        
         <button style ={{fontSize:18}} className="font-stoothgart text-red-950 absolute bottom-6" onClick={()=> {window.location.replace("/login"); this.deleteCook()}} >Cerrar Sesión</button>
       </div>
     );

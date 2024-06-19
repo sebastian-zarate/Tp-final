@@ -5,6 +5,8 @@ import { updateUser } from '@/services/users';
 
 interface RecursosProps {
     usuario: string;
+    setNivelUser: React.Dispatch<React.SetStateAction<number>>;
+    nivelUser: number;
     userId: string;
     madera: number;
     setMadera: React.Dispatch<React.SetStateAction<number>>;
@@ -16,11 +18,13 @@ interface RecursosProps {
     cargarUser: () => void;
 }
 
-const Recursos: React.FC<RecursosProps> = ({ usuario, userId,madera, setMadera, piedra, setPiedra, pan, setPan, unidadesDisponibles, cargarUser}) => {
+const Recursos: React.FC<RecursosProps> = ({ usuario, userId,madera, setMadera, piedra, setPiedra, pan, setPan, unidadesDisponibles, cargarUser, nivelUser}) => {
 
     const maderaRef = useRef(madera);
     const piedraRef = useRef(piedra);
     const panRef = useRef(pan);
+    const nivelUserRef = useRef(nivelUser)
+    const unidadesDisponiblesRef = useRef(unidadesDisponibles)
     const [maderaPorSegundo, setMaderaPorSegundo] = useState(0);
     const [piedraPorSegundo, setPiedraPorSegundo] = useState(0);
     const [panPorSegundo, setPanPorSegundo] = useState(0);
@@ -69,6 +73,13 @@ const Recursos: React.FC<RecursosProps> = ({ usuario, userId,madera, setMadera, 
     }, [pan]);
 
     useEffect(() => {
+        nivelUserRef.current = nivelUser;
+    }, [nivelUser]);
+    useEffect(() => {
+        unidadesDisponiblesRef.current = unidadesDisponibles;
+    }, [unidadesDisponibles]);
+
+    useEffect(() => {
         const timer = setInterval(async () => {
             try {
                 await updateUser(userId, { madera: maderaRef.current, piedra: piedraRef.current, pan: panRef.current });
@@ -84,6 +95,7 @@ const Recursos: React.FC<RecursosProps> = ({ usuario, userId,madera, setMadera, 
     return (
         <div>
             <h3>Usuario: {usuario}</h3>
+            <h3>Nivel: {nivelUser}</h3>
             <h3>Madera: {madera} || PS: {maderaPorSegundo}</h3>
             <h3>Piedra: {piedra} || PS: {piedraPorSegundo}</h3>
             <h3>Pan: {pan} || PS: {panPorSegundo}</h3>

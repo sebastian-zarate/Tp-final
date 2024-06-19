@@ -4,7 +4,14 @@ import { getUserByCooki } from "@/services/users";
 import { useState } from "react";
 
 
-export default function MenuAsignar({idUE, cerrarCompuerta, setError, setBoxError}: {idUE: any, cerrarCompuerta:any, setError:any, setBoxError:any}){
+export default function MenuAsignar({idUE, cerrarCompuerta, setError, setBoxError, setPan, setUnidadesDisp, unidadesTrabajando}:{
+    idUE: any,
+    cerrarCompuerta:any,
+    setError:any,
+    setBoxError:any,
+    setPan:any,
+    setUnidadesDisp:any,
+    unidadesTrabajando:any}){
 
     let panXunidad = 10
     const [estado, setEstado] = useState<boolean>(false)
@@ -33,6 +40,8 @@ export default function MenuAsignar({idUE, cerrarCompuerta, setError, setBoxErro
           console.log("acualizo doc------")
           try{
               await updateUEunidadesAdd(idUE, unidades, panXunidad)     //método que actualiza unidades al edificio y al usuario
+              setPan((prev:any)=> prev -  (unidades * panXunidad))
+              setUnidadesDisp((prev:any)=> prev - unidades)
           }catch(e){
             setError(String(e))
             setBoxError(true)
@@ -46,6 +55,8 @@ export default function MenuAsignar({idUE, cerrarCompuerta, setError, setBoxErro
           console.log("acualizo doc------")
           try{
               await updateUEunidadesSubstract(idUE, Number(unidades), panXunidad) //método que actualiza unidades al edificio y al usuario
+              setPan((prev:any)=> prev + (unidades * panXunidad))
+              setUnidadesDisp((prev:any)=> prev + unidades)
           }catch(e){
             setError(String(e))
             setBoxError(true)
@@ -59,7 +70,7 @@ export default function MenuAsignar({idUE, cerrarCompuerta, setError, setBoxErro
             <input className="text-black" type="number" name="unidadesEdif" placeholder="Trabajadores" />            
             <button type="submit" className=" text-black bg-yellow-500 hover:bg-yellow-700 " onClick={()=>setEstado(true)} >Agregar</button>
             <button type="submit" className=" text-black bg-yellow-500 hover:bg-yellow-700 " onClick={()=>setEstado(false)}>Quitar</button>
-        </form>       
+        </form>     
         <button type="button" className=" text-black bg-yellow-500 hover:bg-yellow-700 " onClick={() => cerrarCompuerta(false)}>Salir</button>
     </div>
       )

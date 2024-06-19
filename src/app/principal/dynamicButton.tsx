@@ -4,13 +4,13 @@ import MenuDesplegable from './menuDesplegable';
 import MenuAsignar from './menuAsignar';
 import Mensajeria from './menuChats';
 import Recursos from './recursos';
-import { GuardarEdificio, getBuildingsByUserId, builtEdificio, getEdificionameByUE, getBuildingCount } from '../../services/userEdificios'
-import { getUserById, updateUserRecursosPropios } from '@/services/users';
+import { GuardarEdificio, getBuildingsByUserId, builtEdificio, getEdificionameByUE, getBuildingCount, getUEbyUserId, getUEById } from '../../services/userEdificios'
+import { getUserById, updateUserRecursosPropios, updateLevelUser } from '@/services/users';
 import { getAllUser, getReturnByCooki, getUserByCooki, } from '@/services/users';
 import { recolectarRecursos, calcularMadera, calcularPiedra, calcularPan } from '@/services/recursos';
 import { getChats, getChatName } from '@/services/chats';
 import { getMensajes } from '@/services/mensajes';
-import { getEdificioById, getImagenEdificio } from '@/services/edificios';
+import { getEdificioById, getEdificios, getImagenEdificio } from '@/services/edificios';
 import ButtonUser from './buttonUser';
 import Image from 'next/image';
 import ImageFloor from '../../../public/Images/FloorImage.jpeg';
@@ -47,8 +47,10 @@ const DynamicBuildings: React.FC = () => {
   const[menuButton, setMenBut] = useState(false);   //cuando se cliclea un botón se habilita la compuerta que habre el formulario de asignar unidades
   const[idUEClick, setIdUEClick] = useState("");    //id de userEdificios seleccionado ante un click
   const[userButton, setUserButton] = useState(false); //compuerta para el botón de usuario.
-  const [boxError, setBoxError] = useState(false)
-  const [error, setError] = useState("")
+  const [boxError, setBoxError] = useState(false);
+  const [error, setError] = useState("");
+  const [nivelUser, setNivelUser] = useState(1);
+  const [unidadesTrabajando, setUnidadesTrabajando] = useState(1);
   // para la mensajeria
   const [userLoaded, setUserLoaded] = useState(false);
   const [mostrarMensajeria, setMostrarMensajeria] = useState(false);
@@ -254,6 +256,7 @@ const DynamicBuildings: React.FC = () => {
       setUser(String(user.username));
       setUnidadesDisp(user.unidadesDeTrabajo)
       setUserId(user.id);
+      setNivelUser(user.nivel)
       console.log("user.profileImage", user.profileImage)
       setProfileImage(String(user.profileImage));
     }
@@ -285,9 +288,26 @@ useEffect(() => {
   function handleMensajeria() {
     setMostrarMensajeria(!mostrarMensajeria);
   }
+async function subirNivel() {
+  try{
+   const valorNivel = await updateLevelUser(userId, madera, piedra, pan)
+   setMadera(prev => prev - valorNivel)
+   setPiedra(prev => prev - valorNivel)
+   setPan(prev => prev - valorNivel)
+   setNivelUser(prev => prev + 1)
+    console.log("El usuario subió de nivel")
+  }catch(e){
+    setError(String(e))
+    setBoxError(true)
+  }
+}
+const mostrarUnidTrab = async(id:string) => {
+  const UE = await getUEById(id)
+  setUnidadesTrabajando(prev => prev + Number(UE?.trabajadores))
+  
+}
 
   //region seba
-
   let timeoutId: ReturnType<typeof setTimeout> | null = null;
 
   const handleBuildingMove = (index: number, newX: number, newY: number) => {
@@ -386,6 +406,7 @@ useEffect(() => {
     });
   }
 
+
   //region RETURN 
   return (
     <div className="hola flex flex-col items-center justify-center w-screen h-screen bg-gray-900">
@@ -394,6 +415,8 @@ useEffect(() => {
       <div style = {{backgroundColor: 'rgba(131, 1, 21, 255)', border: '2mm ridge rgba(0, 0, 0, .7)', fontSize:18}} className="absolute top-0 left-0 p-4 bg-red-500 text-yellow-500 font-stoothgart py-2 px-4 rounded">
         <Recursos
           usuario={usuario}
+          setNivelUser = {setNivelUser}
+          nivelUser = {nivelUser}
           userId={userId}
           madera={madera}
           setMadera={setMadera}
@@ -438,9 +461,8 @@ useEffect(() => {
               cursor: 'pointer',
             }}
             onMouseDown={(e) => handleMouseDown(index, e)}
-            onDoubleClick={(e) => handleClick(e)}
+            onDoubleClick={(e) => {handleClick(e); mostrarUnidTrab}}
           >
-
             <Image
               src={`/Images/edificios/${images[building.edificioId]}`}
               alt={building.type}
@@ -451,9 +473,19 @@ useEffect(() => {
               onLoad={() => handleCargaImagenes()}
             />
 
+            
+                     {/*    <h3 className='absolute left-10'>Unidades:{unidadesTrabajando}</h3>   */}
 
-            {/*<div>{building.type} - X: {building.x}, Y: {building.y}</div>*/}
-            {((idUEClick == building.id) && menuButton) ? <MenuAsignar idUE={building.id} cerrarCompuerta={setMenBut} setError = {setError} setBoxError = {setBoxError}/> : null}
+
+
+            {((idUEClick == building.id) && menuButton) ? <MenuAsignar 
+            idUE={building.id}
+            cerrarCompuerta={setMenBut} 
+            setError = {setError} 
+            setBoxError = {setBoxError}
+            setPan= {setPan}
+            setUnidadesDisp = {setUnidadesDisp}
+            unidadesTrabajando = {unidadesTrabajando}/> : null}
 
           </div>
 
@@ -477,6 +509,7 @@ useEffect(() => {
         <div className=' text-black px-4'>
           {userButton && <ButtonUser
             userId={userId}
+            subirNivel={subirNivel}
             username={usuario}
             profileImage={profileImage}
             mostrarMensajeria={mostrarMensajeria}

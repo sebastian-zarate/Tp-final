@@ -329,7 +329,6 @@ export const updateUEunidadesSubstract = async(Id: string, unidades: any, panXun
     return e
 }
 
-
 // metodo para obtener los edificios de un usuario
 
   export async function updateUserBuildings(
