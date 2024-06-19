@@ -171,22 +171,22 @@ const Mensajeria: React.FC<MensajeriaProps> = ({ userId, mostrarMensajeria, user
   } 
   return (
     <React.Fragment>
-    <div className=' font-stoothgart left-100 p-4 bg-red-500 hover:bg-blue-700 text-blue font-bold py-2 px-4 rounded flex items-center justify-center flex-col'>
+    <div style = {{backgroundColor: 'rgba(131, 1, 21, 255)', border: '2mm ridge rgba(0, 0, 0, .7)', fontSize:16}} className=' font-stoothgart left-100 p-4 text-yellow-500  py-2 px-4 rounded flex items-center justify-center flex-col'>
         <button onClick={() => handleMensajeria()}>Chat</button>
         <h3 className={notificacion ? '' : 'hidden'}> Hay Mensajes sin leer!</h3>
       </div>
     <div className={`font-stoothgart fixed inset-0 w-full h-full z-50 bg-black bg-opacity-50 flex items-center justify-center ${mostrarMensajeria ? '' : 'hidden'}`} >
       <div className="relative w-1/2 h-1/2  rounded-lg">
       <Image
-          src={ChatImage}
+          src={ChatImage} 
           alt="Background Image"
           layout="fill"
           objectFit="cover"
           className="absolute inset-0 w-full h-full"
-          style={{ zIndex: -1, opacity: 100 }}
+          style={{ zIndex: -1, opacity: 100, border:'1.8mm ridge rgba(0, 0, 0, .8)'}}
         />
-        <button className="absolute top-2 right-2 text-lg font-bold" onClick={handleMensajeria}>X</button>
-        <h1 className="text-1xl font-bold text-center">Mensajeria</h1>
+        <button className="absolute top-2 right-2 text-2xl " onClick={handleMensajeria}>X</button>
+        <h1 className="text-1xl  text-center">Mensajeria</h1>
         <form onSubmit={handleCreateChat} className=" mx-auto pb-4 flex flex-col items-center justify-center">            
                     <select name="usuarios" id="us" className="text-center" >
                        {list.map((user, index) => (
@@ -194,15 +194,15 @@ const Mensajeria: React.FC<MensajeriaProps> = ({ userId, mostrarMensajeria, user
                         ))} 
                        
                     </select>  
-          <button type="submit" className='  px-2 mt-1 w-1/4 rounded-md bg-gray-400 hover:bg-gray-600' >Create chat</button>
+          <button style={{ backgroundColor: 'rgba(25, 38, 47, 255)',border: '2mm ridge rgba(0, 0, 0, .7)',fontSize:18}} type="submit" className='  px-2 mt-1 w-1/4 rounded-md text-yellow-500' >Create chat</button>
         </form>
         <div>
           <ul className='flex flex-col items-center'>
             {chats2.map((chat: any, index: number) => (
-              <li key={chat.id} className='flex flex-row justify-around items-center space-x-4'>
-                <h2> ({chat.id}) Chat: {chatnames[index]} {unreadMessages[chat.id]} </h2>
-                <button onClick={() =>{ handleRedirect(chat.id, userId); setEstadoChat2(false)}} className=' px-2 rounded-md bg-gray-400 hover:bg-gray-600'>abrir </button>
-                <button id={chat.id} onClick={(e) => handleDelete(e)} className=' p-2 hover:bg-slate-300' >X</button>
+              <li style={{fontSize:20}} key={chat.id} className='flex flex-row justify-around items-center space-x-4'>
+                <h2> {/*({chat.id})*/} Chat: {chatnames[index]} {unreadMessages[chat.id]} </h2>
+                <button style={{ backgroundColor: 'rgba(25, 38, 47, 255)',border: '2mm ridge rgba(0, 0, 0, .7)',fontSize:18}} onClick={() =>{ handleRedirect(chat.id, userId); setEstadoChat2(false)}} className=' px-2 rounded-md text-yellow-500'>abrir </button>
+                <button id={chat.id} onClick={(e) => handleDelete(e)} className=' p-2' >X</button>
               </li>
             ))}
           </ul>

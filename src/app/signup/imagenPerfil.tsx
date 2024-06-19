@@ -34,7 +34,7 @@ const ImagenPerfil: React.FC<ImagenPerfilProps>= ({mostrar, handleMostrar, handl
     if (mostrar) {
         return (
 
-            <div className="flex flex-wrap justify-around absolute z-9999 bg-white w-1500 h-1500">
+            <div style ={{backgroundColor: 'rgba(131, 1, 21, 255)', border: '2mm ridge rgba(0, 0, 0, .7)'}} className="flex flex-wrap justify-around absolute z-9999 bg-white w-1500 h-1500">
                 {imagenes.map((imagen, index) => (
                     <div key={index} className="w-1/3 p-1" onClick={() => handleSeleccionarImagen(index)}>
                         <Image src={imagen} alt={`Profile ${index}`} width={120} height={120} />

@@ -391,7 +391,7 @@ useEffect(() => {
     <div className="hola flex flex-col items-center justify-center w-screen h-screen bg-gray-900">
       <PantallaCarga cargandoPrincipal={cargandoPrincipal} cargandoChats={cargandoChats} cargandoImagenes={cargandoImagenes}>
       </PantallaCarga>
-      <div className="absolute top-0 left-0 p-4 bg-red-500 text-blue font-bold py-2 px-4 rounded">
+      <div style = {{backgroundColor: 'rgba(131, 1, 21, 255)', border: '2mm ridge rgba(0, 0, 0, .7)', fontSize:18}} className="absolute top-0 left-0 p-4 bg-red-500 text-yellow-500 font-stoothgart py-2 px-4 rounded">
         <Recursos
           usuario={usuario}
           userId={userId}
@@ -463,7 +463,8 @@ useEffect(() => {
         </div>
       </div>
       <button
-        className="absolute bottom-4 left-4 bg-green-400 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+        style={{backgroundColor: 'rgba(131, 1, 21, 255)', border: '2mm ridge rgba(0, 0, 0, .7)', fontSize:18}}
+        className="absolute bottom-4 left-4 bg-green-400 hover:bg-green-700 text-yellow-500 font-stoothgart py-2 px-4 rounded"
         onClick={handleMenuClick}
       >
         Construir Edificios
@@ -471,7 +472,7 @@ useEffect(() => {
       {menuOpen && <MenuDesplegable onBuildClick={handleBuildClick} />}
 
       <div className=" text-black absolute top-4 right-0 " >
-        <button className='py-2 px-4 absolute top-0 right-2 bg-slate-400 rounded' onClick={() => setUserButton(!userButton)}>Hola</button>
+        <button style = {{backgroundColor: 'rgba(131, 1, 21, 255)', border: '2mm ridge rgba(0, 0, 0, .7)', fontSize:18}} className='py-2 px-4 absolute top-0 right-10 rounded font-stoothgart text-yellow-400' onClick={() => setUserButton(!userButton)}>Perfil</button>
 
         <div className=' text-black px-4'>
           {userButton && <ButtonUser
