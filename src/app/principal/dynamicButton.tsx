@@ -436,6 +436,7 @@ useEffect(() => {
               transformOrigin: 'center center',
               position: 'absolute',
               cursor: 'pointer',
+              userSelect: 'none'
             }}
             onMouseDown={(e) => handleMouseDown(index, e)}
             onDoubleClick={(e) => handleClick(e)}
@@ -447,8 +448,10 @@ useEffect(() => {
               className="absolute inset-0 w-full h-full"
               width={building.ancho}
               height={building.largo}
-              style={{ pointerEvents: 'none' }}
+              style={{ pointerEvents: 'none',  userSelect: 'none'}}
               onLoad={() => handleCargaImagenes()}
+              onDoubleClick={(event) => event.preventDefault()}
+              onContextMenu={(event) => event.preventDefault()}
             />
 
 
