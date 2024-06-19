@@ -66,7 +66,7 @@ const DynamicBuildings: React.FC = () => {
   //para la pantalla de carga (deben ser todas falsas para que se oculte la pantalla de carga)	
   const [cargandoPrincipal, setCargandoPrincipal] = useState(true)
   const [cargandoChats, setCargandoChats] = useState(true)
-  const [cargandoImagenes, setCargandoImagenes] = useState(false) //por ahora lo dejo en false xq no anda
+  const [cargandoImagenes, setCargandoImagenes] = useState(true) //funciona ahora
   const [cantidadEdificios, setCantidadEdificios] = useState(0)
   const [imagenesCargadas, setImagenesCargadas] = useState(0)
   //----------------------------------------------------------
