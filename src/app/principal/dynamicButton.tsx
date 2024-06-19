@@ -4,7 +4,7 @@ import MenuDesplegable from './menuDesplegable';
 import MenuAsignar from './menuAsignar';
 import Mensajeria from './menuChats';
 import Recursos from './recursos';
-import { GuardarEdificio, getBuildingsByUserId, builtEdificio, getEdificionameByUE, getBuildingCount } from '../../services/userEdificios'
+import { GuardarEdificio, getBuildingsByUserId, builtEdificio, getEdificionameByUE,updateBuildingCount} from '../../services/userEdificios'
 import { getUserById, updateUserRecursosPropios } from '@/services/users';
 import { getAllUser, getReturnByCooki, getUserByCooki, } from '@/services/users';
 import { recolectarRecursos, calcularMadera, calcularPiedra, calcularPan } from '@/services/recursos';
@@ -164,14 +164,14 @@ const DynamicBuildings: React.FC = () => {
 
 
   //#region METODOS HANDLE
-  const handleBuildClick = async (id_edi: string, x: number, y: number, buildingType: string, ancho: number, largo: number, costos: number, cantidad: number) => {
+  const handleBuildClick = async (id_edi: string, x: number, y: number, buildingType: string, ancho: number, largo: number, costos: number, cantidad: number, rec: number) => {
     const existingBuilding = false //buildings.find(building => building.x === x && building.y === y && building.id === id);
 
     if (!existingBuilding) {
 
 
       // Actualizar el estado del usuario
-      const construir = await updateBuildingCount(cantidad, costos, id_edi); // devuelve 1 si se puede construir, 0 si no
+      const construir = await updateBuildingCount(userId, cantidad, costos, id_edi, rec); // devuelve 1 si se puede construir, 0 si no
       //window.location.reload();
       // Llamar a la función para guardar el edificio en la base de datos
 
@@ -322,39 +322,11 @@ useEffect(() => {
     });
   };
 
-  //region update nuevo
-  const updateBuildingCount = async (cantidad: number, costos: number, id: string) => {
-    let countsMax = 0;
-
-    const count = (await getBuildingCount(userId, id)).length;
-    const user = await getUserById(userId);
-    let madera = Number(user?.madera);
-    let piedra = Number(user?.piedra);
-    let pan = Number(user?.pan);
-
-    if (costos <= madera && costos <= piedra && cantidad >= count) {
-      countsMax = 1;
-      madera -= costos;
-      piedra -= costos;
-      // Update user resources
-      await updateUserRecursosPropios(userId, madera, piedra, pan);
-      setMessage('Edificio construido exitosamente.');
-    } else {
-      if (madera < costos && piedra < costos) {
-        setMessage('No tienes suficiente madera y piedra para construir.');
-      } else if (madera < costos) {
-        setMessage('No tienes suficiente madera para construir.');
-      } else if (piedra < costos) { // Corrected condition to piedra < costos
-        setMessage('No tienes suficiente piedra para construir.');
-      } else if (cantidad <= count) {
-        setMessage('Ya tienes el máximo de este edificio.');
-      }
-
-    }
+ 
 
 
-    return countsMax;
-  };
+
+
   //endregion
 
   //region IMAGENES DE LOS EDIFICIOS

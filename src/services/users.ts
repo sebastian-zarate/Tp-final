@@ -10,9 +10,9 @@ import { redirect } from "next/navigation";
 import { emailExist, emailShort, passwordInvalid, passwordShort, recurNegat, userExist, usernameExist, usernamelLong, usernameShort, userSinMad, userSinPan, userSinPied } from "@/helpers/error";
 
 const prisma = new PrismaClient()
-let cantMadera = 500
-let cantPan = 800
-let cantPiedra= 600
+let cantMadera = 8000
+let cantPan = 5000
+let cantPiedra= 6000
 let unidadesDeTrabajo = 100
 
 export async function createUser(user: { email: string, password: string, username: string, profileImage: string}) {
@@ -62,7 +62,27 @@ export async function createUser(user: { email: string, password: string, userna
     unidadesDeTrabajo: unidadesDeTrabajo,
 }
 
-  await prisma.users.create({ data: userWithHash });
+ // await prisma.users.create({ data: userWithHash });
+// metodo para crear el ayuntamiento de la aldea 
+
+const createdUser = await prisma.users.create({ data: userWithHash });
+
+// Crear el edificio para el usuario
+await prisma.userEdificios.create({
+  data: {
+    
+    // Agrega otros campos necesarios para el edificio aquí
+    edificioId: '663ac05f044ccf6167cf703d', // Asegúrate de que este es un string válido
+                posicion_x: 400,
+                posicion_y: 400,
+                userId: createdUser.id,
+                ultimaInteraccion: new Date(),
+                nivel: 1,
+  }
+});
+
+
+
 }
 
 export async function authenticateUser(user: { dataUser: string, password: string }) {

@@ -23,3 +23,6 @@ export const userSinMad = "El usuario no posee suficiente madera."
 export const userSinPied = "El usuario no posee suficiente piedra."
 export const userSinPan = "El usuario no posee suficiente pan."
 export const recurNegat = 'No se admiten recursos negativos.'
+
+
+//-----------------------comparar edificios ---------------------

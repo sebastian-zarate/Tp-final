@@ -1,6 +1,6 @@
 'use server'
 import { PrismaClient } from "@prisma/client"
-import { getUserByCooki, getUserById } from "./users"
+import { getUserByCooki, getUserById, updateUserRecursosPropios } from "./users"
 import { getEdificioById } from "./edificios"
 import { edifSinUnid, panIns, unidExed, unidIns, unidNegat } from "@/helpers/error"
 
@@ -150,7 +150,6 @@ export async function getBuildingsByUserId(usuarioId: string): Promise<any[]> {
                         costo: true,
                         //---------------------------
                         // ---------agrege ---------
-                        cantidad: true,
                         
 
                         //---------------------------
@@ -166,7 +165,7 @@ export async function getBuildingsByUserId(usuarioId: string): Promise<any[]> {
          const validBuildings = buildings.filter(building => building.edificio !== null);
 
          // Mapeamos los resultados para que tengan el formato deseado
-         return validBuildings.map(building => ({
+         return validBuildings.map( building => ({
              // Utilizar el id de la relación UserEdificios
              id: building.id,
              x: building.posicion_x,
@@ -176,7 +175,7 @@ export async function getBuildingsByUserId(usuarioId: string): Promise<any[]> {
              ancho: building.edificio.ancho,
              largo: building.edificio.largo,
              nivel: building.nivel,
-             cantidad: building.edificio.cantidad,
+        
              edificioId: building.edificioId// para la imagen
         }));
     } catch (error) {
@@ -379,8 +378,6 @@ export const updateUEunidadesSubstract = async(Id: string, unidades: any, panXun
   export async function getBuildingCount(idUser: string, idEdificio: string): Promise<any[]> {
     try {
 
-
-
         // Buscar todos los edificios creados por el usuario con el ID proporcionado
         const buildings = await prisma.userEdificios.findMany({
             where: {
@@ -396,3 +393,90 @@ export const updateUEunidadesSubstract = async(Id: string, unidades: any, panXun
     }
 };
   // agrege los metodo  getBuildingCount() y  updateUserBuildings(
+
+
+
+  /*export async function getAyuntamiento(userId: string): Promise<any> {
+    try {
+      const ayuntamiento = await prisma.userEdificios.findFirst({
+        where: {
+          userId: userId,
+          edificioId: "663ac05f044ccf6167cf703d",
+        },
+        select: {
+          nivel: true,
+        },
+      });
+      return ayuntamiento?.nivel;
+    } catch (error) {
+      console.error("Error fetching Ayuntamiento by user ID:", error);
+      throw error;
+    }
+  }*/
+  
+
+   //region update nuevo
+   export const updateBuildingCount = async ( userId: string, cantidad: number, costos: number, id: string, recurso: number) => {
+    let countsMax = 0;
+
+    const count = (await getBuildingCount(userId, id)).length;
+    //const ayunta = await getAyuntamiento(userId);
+    const user = await getUserById(userId);
+
+  
+    let maderass = Number(user?.madera);
+    let piedrass = Number(user?.piedra);
+    let panns = Number(user?.pan);
+    let niveles = Number(user?.nivel);
+   
+    const newCount = cantidad * niveles;
+
+   const costo = costos * niveles;
+
+  //setMessage('ayuna' + newCount);
+
+// para los recursos 
+// madera es 1
+// piedra es 2
+
+switch (recurso) {
+  case 1:
+    if (costo <= maderass && newCount >= count) {
+      countsMax = 1;
+      const ma = costo;  // Corrected the typo here
+
+      // Update user resources
+      await updateUserRecursosPropios(userId, ma, 0,0);
+    } else {
+      if (maderass < costo) {
+        //setMessage('No tienes suficiente madera para construir.');
+      } else if (newCount <= count) {
+        //setMessage('Ya tienes el máximo de este edificio.');
+      }
+    }
+    break;
+
+  case 2:
+    if (costo <= piedrass && newCount >= count) {
+      countsMax = 1;
+      const pi = costo;  // Corrected the typo here
+
+      // Update user resources
+      await updateUserRecursosPropios(userId, 0 , pi, 0);
+    } else {
+      if (piedrass < costo) {
+        //setMessage('No tienes suficiente piedra para construir.');
+      } else if (newCount <= count) {
+        //setMessage('Ya tienes el máximo de este edificio.');
+      }
+    }
+    break;
+
+  default:
+   // setMessage('Recurso desconocido.');
+}
+
+  
+    return countsMax;
+  };
+
