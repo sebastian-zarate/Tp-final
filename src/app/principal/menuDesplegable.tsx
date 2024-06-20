@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getEdificios } from '../../services/edificios';
-
+import Image from 'next/image';
 
 interface Props {
   onBuildClick: (id: string, x: number, y: number, buildingType: string, ancho: number, largo: number, costo:number, cantidad: number) => void;
@@ -21,7 +21,8 @@ const MenuDesplegable: React.FC<Props> = ({ onBuildClick }) => {
     
        
       const edificiosData = await getEdificios();
-      setEdificios(edificiosData);
+      let edificioSinAyunta = edificiosData.filter((edificio) => edificio.name !== 'ayuntamiento');
+      setEdificios(edificioSinAyunta);
     } catch (error) {
       console.error("Error al obtener datos de edificios:", error);
     }
@@ -51,23 +52,30 @@ const MenuDesplegable: React.FC<Props> = ({ onBuildClick }) => {
   };
 
   return (
-    <div style = {{backgroundColor: 'rgb(172, 122, 27, 1)', border: '2mm ridge rgba(0, 0, 0, .7)'}} className=" flex absolute  justify-center items-center text-black font-stoothgart  px-4 rounded">
+    <>
+    <div style = {{backgroundColor: 'rgb(172, 122, 27, 1)', border: '2mm ridge rgba(0, 0, 0, .7)'}} className=" flex absolute  justify-center items-center text-black font-stoothgart rounded">
+    {/* Renderizar los botones para seleccionar el tipo de edificio */}
+    {edificios.map((edificio, index) => (
+      <div style = {{
+        border: '2mm ridge rgba(33, 35, 38, .8)', maxHeight: 200}}
+       
+         className=' py-6 flex flex-col items-center max-h-100' key={index}>
+        
+        <button key={index} onClick={() => handleBuildSelection(edificio.name)}>
+        <Image
+          src= {`/Images/edificios/${edificio.name}.png`}
+          alt= {edificio.name}
+          height={100}
+          width={100}
+          style={{paddingBottom: 40}}
+          />
+        </button>
+        <span key={index} className=' absolute text-lg text-black bottom-2 mt-2' >Precio: {edificio.costo}</span>
+      </div>
 
-      {/* Renderizar los botones para seleccionar el tipo de edificio */}
-      {edificios.map((edificio, index) => (
-        <div style = {{
-          border: '2mm ridge rgba(33, 35, 38, .8)',
-           backgroundImage: `url(/Images/edificios/${edificio.name}.png`, 
-           backgroundSize: 'cover', 
-           backgroundPosition: 'center',
-           position: 'relative'}}
-           className=' py-6 flex flex-col items-center' key={index}>
-          <button key={index} className=' p-20 bottom-2 ' onClick={() => handleBuildSelection(edificio.name)}></button>
-          <span key={index} className=' absolute text-lg text-black bottom-0 mt-2' >Precio: {edificio.costo}</span>
-        </div>
-
-      ))}
-  </div>
+    ))}
+</div></>
+    
 );
 }
 

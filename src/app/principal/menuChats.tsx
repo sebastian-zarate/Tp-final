@@ -174,9 +174,9 @@ const Mensajeria: React.FC<MensajeriaProps> = ({ userId, mostrarMensajeria, user
     <div style = {{backgroundColor: 'rgba(131, 1, 21, 255)', border: '2mm ridge rgba(0, 0, 0, .7)', fontSize:16}} className=' font-stoothgart left-100 p-4 text-yellow-500  py-2 px-4 rounded flex items-center justify-center flex-col'>
         <button onClick={() => handleMensajeria()}>Chat</button>
         <h3 className={notificacion ? '' : 'hidden'}> Hay Mensajes sin leer!</h3>
-      </div>
+    </div>
     <div className={`font-stoothgart fixed inset-0 w-full h-full z-50 bg-black bg-opacity-50 flex items-center justify-center ${mostrarMensajeria ? '' : 'hidden'}`} >
-      <div className="relative w-1/2 h-1/2  rounded-lg">
+      <div className="relative w-1/2 h-1/2  rounded-lg flex flex-col">
       <Image
           src={ChatImage} 
           alt="Background Image"
@@ -187,16 +187,16 @@ const Mensajeria: React.FC<MensajeriaProps> = ({ userId, mostrarMensajeria, user
         />
         <button className="absolute top-2 right-2 text-2xl " onClick={handleMensajeria}>X</button>
         <h1 className="text-1xl  text-center">Mensajeria</h1>
-        <form onSubmit={handleCreateChat} className=" mx-auto pb-4 flex flex-col items-center justify-center">            
+        <form onSubmit={handleCreateChat} className=" mx-auto pb-4 flex flex-row items-center justify-center">            
                     <select name="usuarios" id="us" className="text-center" >
                        {list.map((user, index) => (
                              <option key={index} value={user} >{index +1}. {user}</option>
                         ))} 
                        
                     </select>  
-          <button style={{ backgroundColor: 'rgba(25, 38, 47, 255)',border: '2mm ridge rgba(0, 0, 0, .7)',fontSize:18}} type="submit" className='  px-2 mt-1 w-1/4 rounded-md text-yellow-500' >Create chat</button>
+          <button style={{ backgroundColor: 'rgba(25, 38, 47, 255)',border: '2mm ridge rgba(0, 0, 0, .7)',fontSize:18}} type="submit" className='  px-2 mt-1 w-auto rounded-md text-yellow-500 ml-2' >Crear Chat</button>
         </form>
-        <div>
+        <div className='overflow-y-auto flex-grow mb-4 mr-2'>
           <ul className='flex flex-col items-center'>
             {chats2.map((chat: any, index: number) => (
               <li style={{fontSize:20}} key={chat.id} className='flex flex-row justify-around items-center space-x-4'>

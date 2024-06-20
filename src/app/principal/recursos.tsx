@@ -47,7 +47,7 @@ const Recursos: React.FC<RecursosProps> = ({ usuario, userId,madera, setMadera, 
                 fetchResource(calcularPan, setPanPorSegundo),
             ]);
         }
-    }, [userId]);
+    }, [userId, unidadesDisponibles]);
 
     useEffect(() => {
         cargarUser();
