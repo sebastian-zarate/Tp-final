@@ -24,3 +24,8 @@ export const userSinPied = "El usuario no posee suficiente piedra."
 export const userSinPan = "El usuario no posee suficiente pan."
 export const recurNegat = 'No se admiten recursos negativos.'
 export const recurInsuf = "No tiene suficientes recursos."
+
+//-----------------------Construir Edificios---------------------
+export const maderaInsuf = 'No tienes suficiente madera para construir.'
+export const maxEdif = 'Ya tienes el máximo de este edificio.'
+export const piedraInsuf = 'No tienes suficiente piedra para construir.'

@@ -12,17 +12,17 @@ import { emailExist, emailShort, passwordInvalid, passwordShort, recurInsuf, rec
 const prisma = new PrismaClient()
 let cantMadera = 500
 let cantPan = 800
-let cantPiedra= 600
+let cantPiedra = 600
 let unidadesDeTrabajo = 100
 
-export async function createUser(user: { email: string, password: string, username: string, profileImage: string}) {
-  if (user.email.length < 5 ) {
+export async function createUser(user: { email: string, password: string, username: string, profileImage: string }) {
+  if (user.email.length < 5) {
     throw new Error(emailShort);
   }
-  if (user.username.length < 3){
+  if (user.username.length < 3) {
     throw new Error(usernameShort);
   }
-  if (user.username.length > 30){
+  if (user.username.length > 30) {
     throw new Error(usernamelLong);
   }
   const existing = await prisma.users.findFirst({
@@ -36,7 +36,7 @@ export async function createUser(user: { email: string, password: string, userna
   const existingUsername = await prisma.users.findFirst({
     where: {
       username: user.username
-      }
+    }
   })
   if (existingUsername) {
     throw new Error(usernameExist);
@@ -49,7 +49,7 @@ export async function createUser(user: { email: string, password: string, userna
 
   const salt = getSalt();
 
-  const  userWithHash = {
+  const userWithHash = {
     username: user.username,
     email: user.email,
     hash: hashPassword(salt + user.password),
@@ -57,12 +57,53 @@ export async function createUser(user: { email: string, password: string, userna
     piedra: cantPiedra,
     pan: cantPan,
     madera: cantMadera,
-    nivel:1, 
+    nivel: 1,
     salt,
     unidadesDeTrabajo: unidadesDeTrabajo,
-}
+  }
 
-  await prisma.users.create({ data: userWithHash });
+  const createdUser = await prisma.users.create({ data: userWithHash });
+  //region Edificios iniciales
+
+  // Crear el ayunta para el usuario
+  await prisma.userEdificios.create({
+    data: {
+
+      // Agrega otros campos necesarios para el edificio aquí
+      edificioId: '663ac05f044ccf6167cf703d', // Asegúrate de que este es un string válido
+      posicion_x: 400,
+      posicion_y: 400,
+      userId: createdUser.id,
+      ultimaInteraccion: new Date(),
+      nivel: 1,
+    }
+  });
+  // Crear cantera para el usuario
+  await prisma.userEdificios.create({
+    data: {
+
+      // Agrega otros campos necesarios para el edificio aquí
+      edificioId: '663ac05f044ccf6167cf7040', // Asegúrate de que este es un string válido
+      posicion_x: 200,
+      posicion_y: 400,
+      userId: createdUser.id,
+      ultimaInteraccion: new Date(),
+      nivel: 1,
+    }
+  });
+  // Crear maderera para el usuario
+  await prisma.userEdificios.create({
+    data: {
+
+      // Agrega otros campos necesarios para el edificio aquí
+      edificioId: '663ac05f044ccf6167cf7041', // Asegúrate de que este es un string válido
+      posicion_x: 600,
+      posicion_y: 400,
+      userId: createdUser.id,
+      ultimaInteraccion: new Date(),
+      nivel: 1,
+    }
+  });
 }
 
 export async function authenticateUser(user: { dataUser: string, password: string }) {
@@ -71,23 +112,23 @@ export async function authenticateUser(user: { dataUser: string, password: strin
   let existing = await prisma.users.findFirst({
     where: {
       email: user.dataUser,
-    } 
+    }
   })
 
-  if(existing) userTemp = existing
+  if (existing) userTemp = existing
 
-  if(!existing){
+  if (!existing) {
     let existing2 = await prisma.users.findFirst({
       where: {
         username: user.dataUser
       }
     })
-    if(existing2) userTemp = existing2
-    if (!existing2 ) {
+    if (existing2) userTemp = existing2
+    if (!existing2) {
       throw new Error(userExist);
     }
   }
-  
+
   const hash = hashPassword(userTemp?.salt + user.password);
   console.log(`hash nuevo: ${hash} - signJWT: ${signJWT(hash)}`)
   console.log(`hash existente: ${userTemp?.hash} - signJWT: ${signJWT(userTemp?.hash)}`)
@@ -95,45 +136,45 @@ export async function authenticateUser(user: { dataUser: string, password: strin
   if (hash !== userTemp?.hash) {
     throw new Error(passwordInvalid);
   }
-  
-  cookies().set("user" , signJWT(hash) , { httpOnly: true, sameSite: 'strict' })
 
-  return {userTemp};
+  cookies().set("user", signJWT(hash), { httpOnly: true, sameSite: 'strict' })
+
+  return { userTemp };
 }
 
 
-export const getUserByUserName = async (userName:string) => {
+export const getUserByUserName = async (userName: string) => {
   const users = await prisma.users.findFirst({
     where: {
       username: userName
     }
-  })        
+  })
   return users
 }
 
-export const getUserByemail = async (email:string) => {
+export const getUserByemail = async (email: string) => {
   const users = await prisma.users.findFirst({
     where: {
       email: email
     }
-  })   
-   return users
+  })
+  return users
 }
-export const getUserByHash = async (hash?:string) => {
+export const getUserByHash = async (hash?: string) => {
   const users = await prisma.users.findFirst({
     where: {
       hash: hash
     }
-  }) 
-  if(users)  return users
+  })
+  if (users) return users
   /* else return false   */
 }
-export const getUserById= async (Id:string) => {
+export const getUserById = async (Id: string) => {
   const users = await prisma.users.findFirst({
     where: {
       id: Id
     }
-  }) 
+  })
   return users
   /* else return false   */
 }
@@ -149,8 +190,8 @@ export async function getUser(Id: string) {
 
 //devuelve todos los username 
 export async function getAllUser() {
-  const users = await prisma.users.findMany({})    
-    return users 
+  const users = await prisma.users.findMany({})
+  return users
 }
 
 //actualizo user
@@ -166,17 +207,17 @@ export async function updateUser(Id: string, data: any) {
 }
 //region cambios Nico 
 //MENSAJERIA
-export async function updateUserRecursos(idEmisor: string, usernameReceptor: string, madera: number, piedra: number, pan:number) {
+export async function updateUserRecursos(idEmisor: string, usernameReceptor: string, madera: number, piedra: number, pan: number) {
   //consigo el id del usuario
   let u = await getUserById(idEmisor)
   //si la madera o la piedra o el pan que se quieran regalar son mayores en cantidad a los que posee el usuario, negar la acción
-  if((Number(u?.madera) < madera) ) { 
+  if ((Number(u?.madera) < madera)) {
     throw new Error(userSinMad)
   }
-  if(Number(u?.piedra) < piedra) { 
+  if (Number(u?.piedra) < piedra) {
     throw new Error(userSinPied)
   }
-  if(Number(u?.pan) < pan) { 
+  if (Number(u?.pan) < pan) {
     throw new Error(userSinPan)
   }
 
@@ -185,42 +226,42 @@ export async function updateUserRecursos(idEmisor: string, usernameReceptor: str
   let piedraUpdated = Number(u?.piedra) - piedra
   let panUpdated = Number(u?.pan) - pan
   //si el usuariio quiere donar más recuros de los que puede
-  if(maderaUpdated < 0) { 
+  if (maderaUpdated < 0) {
     throw new Error(userSinMad)
   }
-  if(piedraUpdated < 0) { 
+  if (piedraUpdated < 0) {
     throw new Error(userSinPied)
   }
-  if(panUpdated < 0) { 
+  if (panUpdated < 0) {
     throw new Error(userSinPan)
   }
-    //actualizo al emisor del mensaje
+  //actualizo al emisor del mensaje
   const emisorUpdated = await prisma.users.update({
     where: {
-      id:idEmisor
+      id: idEmisor
     },
     data: {
       madera: maderaUpdated,
-      piedra:piedraUpdated,
-      pan:panUpdated
+      piedra: piedraUpdated,
+      pan: panUpdated
     }
   })
   console.log(`se actualizooooo a ${u?.username} `, emisorUpdated)
-  
-//lógica para sumar recursos al receptor
+
+  //lógica para sumar recursos al receptor
   u = await getUserByUserName(usernameReceptor)
   let maderaReceptorUpdate = Number(u?.madera) + madera
   let piedraReceptorUpdate = Number(u?.piedra) + piedra
   let panReceptorUpdate = Number(u?.pan) + pan
-    //actualizo al receptor del mensaje
-  const receptorUpdated =await prisma.users.update({
+  //actualizo al receptor del mensaje
+  const receptorUpdated = await prisma.users.update({
     where: {
       username: usernameReceptor
     },
     data: {
       madera: maderaReceptorUpdate,
-      piedra:piedraReceptorUpdate,
-      pan:panReceptorUpdate
+      piedra: piedraReceptorUpdate,
+      pan: panReceptorUpdate
     }
   })
   console.log(`se actualizoooooo a ${u?.username} `, receptorUpdated)
@@ -242,22 +283,22 @@ export async function getUserByCooki() {
 export async function getReturnByCooki() {
   let cooki = cookies().get('user')?.value
   //se obtiene el hash de traducir el token
-  if(!cooki) return redirect('login')
+  if (!cooki) return redirect('login')
   let hash = verifyJWT(cooki)
   //se obtiene el user por el hash
   const user = await getUserByHash(String(hash))
   if (!user) return redirect('login')
 }
 
-export const removeCookie = async() => {
-  const cookie =cookies().delete('user'); // ctx es el contexto de la solicitud (por ejemplo, getServerSideProps)
- return cookie
+export const removeCookie = async () => {
+  const cookie = cookies().delete('user'); // ctx es el contexto de la solicitud (por ejemplo, getServerSideProps)
+  return cookie
 };
 
-export async function updateLevelUser(userId:string,madera:number, piedra:number, pan:number) {
-  const U= await getUserById(userId)
-  
-  
+export async function updateLevelUser(userId: string, madera: number, piedra: number, pan: number) {
+  const U = await getUserById(userId)
+
+
 
   const costoNivel1 = 5000
   const costoNivel2 = 8000
@@ -270,72 +311,72 @@ export async function updateLevelUser(userId:string,madera:number, piedra:number
   let panUser = Number(U?.pan);
 
   let userUpdated;
-  if((levelUser == 1)&& (maderaUser >= costoNivel1 && piedraUser >= costoNivel1 && panUser >= costoNivel1) ){
-      //actualizo recuros de user
-      maderaUser -= costoNivel1
-      piedraUser -= costoNivel1
-      panUser -= costoNivel1 
-       console.log("madera actualizada:",maderaUser)
+  if ((levelUser == 1) && (maderaUser >= costoNivel1 && piedraUser >= costoNivel1 && panUser >= costoNivel1)) {
+    //actualizo recuros de user
+    maderaUser -= costoNivel1
+    piedraUser -= costoNivel1
+    panUser -= costoNivel1
+    console.log("madera actualizada:", maderaUser)
 
-      await prisma.users.update({
-        where:{
-            id: userId
-        },
-        data:{
-            nivel: levelUpdated,
-            madera: maderaUser,
-            piedra:piedraUser,
-            pan:panUser
-        }
-      })
-      return costoNivel1
-  } 
-  else if( (levelUser == 2) && ( (maderaUser && piedraUser && panUser) >= costoNivel2) ){
+    await prisma.users.update({
+      where: {
+        id: userId
+      },
+      data: {
+        nivel: levelUpdated,
+        madera: maderaUser,
+        piedra: piedraUser,
+        pan: panUser
+      }
+    })
+    return costoNivel1
+  }
+  else if ((levelUser == 2) && ((maderaUser && piedraUser && panUser) >= costoNivel2)) {
     //actualizo recuros de user
     maderaUser -= costoNivel2
     piedraUser -= costoNivel2
     panUser -= costoNivel2
-    
+
     await prisma.users.update({
-      where:{
-          id: String(userId)
+      where: {
+        id: String(userId)
       },
-      data:{
-          nivel: levelUpdated
+      data: {
+        nivel: levelUpdated
       }
     })
     return costoNivel2
 
-  } else if( (levelUser == 3) && ( (maderaUser && piedraUser && panUser) >= costoNivel3) ){
+  } else if ((levelUser == 3) && ((maderaUser && piedraUser && panUser) >= costoNivel3)) {
     //actualizo recuros de user
     maderaUser -= costoNivel3
     piedraUser -= costoNivel3
     panUser -= costoNivel3
     userUpdated = await prisma.users.update({
-      where:{
-          id: String(userId)
+      where: {
+        id: String(userId)
       },
-      data:{
-          nivel: levelUpdated
+      data: {
+        nivel: levelUpdated
       }
     })
     return costoNivel3
 
-  }else{
+  } else {
     throw new Error(recurInsuf)
   }
- 
+
 }
 //region hasta aca Nico
 
 
 
-export async function updateUserRecursosPropios(Id: string, madera: number, piedra: number, pan:number) {
+export async function updateUserRecursosPropios(Id: string, madera: number, piedra: number, pan: number) {
   const u = await getUserById(Id)
-  if((Number(u?.madera) < madera) || (Number(u?.piedra) < piedra) 
-    || (Number(u?.pan) < pan)) { 
-      throw error("Insuficientes recursos")
-    }
+  if ((Number(u?.madera) < madera) || (Number(u?.piedra) < piedra)
+    || (Number(u?.pan) < pan)) {
+    throw error("Insuficientes recursos")
+  }
   let maderaUpdated = Number(u?.madera) - madera
   let piedraUpdated = Number(u?.piedra) - piedra
   let panUpdated = Number(u?.pan) - pan
@@ -346,8 +387,8 @@ export async function updateUserRecursosPropios(Id: string, madera: number, pied
     },
     data: {
       madera: maderaUpdated,
-      piedra:piedraUpdated,
-      pan:panUpdated
+      piedra: piedraUpdated,
+      pan: panUpdated
     }
   })
 

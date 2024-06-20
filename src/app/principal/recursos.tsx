@@ -31,9 +31,9 @@ const Recursos: React.FC<RecursosProps> = ({ usuario, userId,madera, setMadera, 
     //useffects recursos automaticos
     //useffect para recolectar recursos automaticamente CAMBIAR 50 POR 5
     useEffect(() => {
-        const fetchResource = async (calculateFunc: (id: string) => Promise<number>, setFunc: (value: number) => void) => {
+        const fetchResource = async (calculateFunc: (id: string, nivel: number) => Promise<number>, setFunc: (value: number) => void) => {
             try {
-                const result = await calculateFunc(userId);
+                const result = await calculateFunc(userId, nivelUser);
                 setFunc(result);
             } catch (error) {
                 console.error(`Error fetching resource: ${error}`);
@@ -47,7 +47,7 @@ const Recursos: React.FC<RecursosProps> = ({ usuario, userId,madera, setMadera, 
                 fetchResource(calcularPan, setPanPorSegundo),
             ]);
         }
-    }, [userId, unidadesDisponibles]);
+    }, [userId, unidadesDisponibles, nivelUser]);
 
     useEffect(() => {
         cargarUser();

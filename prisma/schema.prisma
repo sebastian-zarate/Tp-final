@@ -22,7 +22,8 @@ model Edificios {
   nivel Int?
   costo Int?
   descripcion String?
-  cantidad  Int?
+  cantidad Int
+  recurso Int?
   recursoPorMinuto Int?
   tipoRecurso String?
   ultimaInteraccion DateTime?

@@ -91,7 +91,7 @@ export async function recolectarRecursos(userId: string) {
 
 // METODO PARA CALCULAR LA MADERA POR SEGUNDO
 
-export async function calcularMadera(userId: string) {
+export async function calcularMadera(userId: string, userNivel: number) {
     //lista de todas las madereras del usuario
     const madereras = await getUEbyUserIdEdId(userId, "663ac05f044ccf6167cf7041")
    // console.log("madereras: ", madereras)
@@ -101,14 +101,14 @@ export async function calcularMadera(userId: string) {
         //calcular el ratio de madera por segundo 
       //  console.log("maderera por segundo una maderera: ", Number(maderera.trabajadores || 0) * Number(maderera.nivel || 0))
         //sumar el ratio de madera por segundo de todas las madereras
-        maderaPorSegundo += Math.ceil(Number(maderera.trabajadores || 0) / 5) * Number(maderera.nivel || 0)
+        maderaPorSegundo += Math.ceil(Number(maderera.trabajadores || 0) / 5) * Number(userNivel || 0)
         //console.log("madera por segundo una maderera: ", Math.ceil(Number(maderera.trabajadores || 0) / 5) * Number(maderera.nivel || 0), "cant. trabajadores: ", maderera.trabajadores, "nivel: ", maderera.nivel)
     }
    // console.log("madera por segundo TOTAL: ", maderaPorSegundo)
     return maderaPorSegundo
 }
 
-export async function calcularPiedra(userId: string) {
+export async function calcularPiedra(userId: string, userNivel: number) {
     //lista de todas las madereras del usuario
     const canteras = await getUEbyUserIdEdId(userId, "663ac05f044ccf6167cf7040")
     //console.log("----------------->", userId)
@@ -125,7 +125,7 @@ export async function calcularPiedra(userId: string) {
     return piedraPorSegundo
 }
 
-export async function calcularPan(userId: string){
+export async function calcularPan(userId: string, userNivel: number) {
     //lista de todas las madereras del usuario
     const panaderias = await getUEbyUserIdEdId(userId, "663ac518044ccf6167cf7054")
    // console.log("panaderias: ", panaderias)
