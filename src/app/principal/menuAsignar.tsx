@@ -38,14 +38,14 @@ export default function MenuAsignar({idUE, cerrarCompuerta, setError, setBoxErro
         // si existe el id del userEdificio y las unidades seleccionadas
       if(idUE && unidades) {
           console.log("acualizo doc------")
-          try{
-              await updateUEunidadesAdd(idUE, unidades, panXunidad)     //método que actualiza unidades al edificio y al usuario
-              setPan((prev:any)=> prev -  (unidades * panXunidad))
-              setUnidadesDisp((prev:any)=> prev - unidades)
-          }catch(e){
-            setError(String(e))
-            setBoxError(true)
-          }       
+          const updateU =  await updateUEunidadesAdd(idUE, unidades, panXunidad)     //método que actualiza unidades al edificio y al usuario
+          if (typeof updateU === "string") {
+            setError(updateU)
+            return setBoxError(true)
+          }
+          setPan((prev:any)=> prev -  (unidades * panXunidad))
+          setUnidadesDisp((prev:any)=> prev - unidades)
+     
         }
     }
     //método para quitar unidades al edificio
@@ -53,14 +53,14 @@ export default function MenuAsignar({idUE, cerrarCompuerta, setError, setBoxErro
       // si existe el id del userEdificio y las unidades seleccionadas   
       if(idUE && unidades) {
           console.log("acualizo doc------")
-          try{
-              await updateUEunidadesSubstract(idUE, Number(unidades), panXunidad) //método que actualiza unidades al edificio y al usuario
-              setPan((prev:any)=> prev + (unidades * panXunidad))
-              setUnidadesDisp((prev:any)=> prev + unidades)
-          }catch(e){
-            setError(String(e))
-            setBoxError(true)
-          }       
+          const updateU = await updateUEunidadesSubstract(idUE, Number(unidades), panXunidad) //método que actualiza unidades al edificio y al usuario
+          if (typeof updateU === "string") {
+            setError(updateU)
+            return setBoxError(true)
+          }
+          setPan((prev:any)=> prev + (unidades * panXunidad))
+          setUnidadesDisp((prev:any)=> prev + unidades)
+     
         }
     }
 

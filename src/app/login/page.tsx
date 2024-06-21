@@ -27,14 +27,13 @@ function Login(){
           dataUser: data.get('dataUser') as string,
           password: data.get('password') as string
         }
-        
-        try{
-          await authenticateUser(user)  
-          window.location.replace('/principal')
-        } catch(e){
-          setError(String(e))
-          setBoxError(true)
-        }        
+        const authUser = await authenticateUser(user) 
+        if (typeof authUser === "string") {
+          setError(authUser)          
+          return setBoxError(true)
+        }
+        window.location.replace('/principal')
+     
     }
 
     return(

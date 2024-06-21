@@ -1,21 +1,20 @@
 'use client'
-import React, { useState, useEffect, useRef, use } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import MenuDesplegable from './menuDesplegable';
 import MenuAsignar from './menuAsignar';
-import Mensajeria from './menuChats';
 import Recursos from './recursos';
 import { GuardarEdificio, getBuildingsByUserId, builtEdificio, getEdificionameByUE, getBuildingCount, getUEbyUserId, getUEById, updateBuildingCount, getOneBuildingsByUserId } from '../../services/userEdificios'
-import { getUserById, updateUserRecursosPropios, updateLevelUser } from '@/services/users';
-import { getAllUser, getReturnByCooki, getUserByCooki, } from '@/services/users';
+import { updateLevelUser } from '@/services/users';
+import { getReturnByCooki, getUserByCooki, } from '@/services/users';
 import { recolectarRecursos, calcularMadera, calcularPiedra, calcularPan } from '@/services/recursos';
 import { getChats, getChatName } from '@/services/chats';
 import { getMensajes } from '@/services/mensajes';
-import { getEdificioById, getEdificios, getImagenEdificio, getImagenesEdificios } from '@/services/edificios';
+import { getImagenesEdificios } from '@/services/edificios';
 import ButtonUser from './buttonUser';
 import Image from 'next/image';
 import ImageFloor from '../../../public/Images/FloorImage.jpeg';
 import PantallaCarga from './pantallaCarga';
-import Head from 'next/head';
+
 
 
 type Building = {
@@ -167,29 +166,25 @@ const DynamicBuildings: React.FC = () => {
 
 
   //#region METODOS HANDLE
-  const handleBuildClick = async (id_edi: string, x: number, y: number, buildingType: string, ancho: number, largo: number, costos: number, cantidad: number, recurso:number) => {
+  const handleBuildClick = async (id_edi: string, x: number, y: number, buildingType: string, ancho: number, largo: number, costos: number, cantidad: number, recurso: number) => {
     const existingBuilding = false //buildings.find(building => building.x === x && building.y === y && building.id === id);
 
     if (!existingBuilding) {
 
 
       // Actualizar el estado del usuario
-      let construir;
-      try{
-        construir = await updateBuildingCount(userId, cantidad, costos, id_edi, recurso); // devuelve 1 si se puede construir, 0 si no
-        
-      }catch(e){
-          setError(String(e))
-          setBoxError(true)
-        }
-
+      const construir = await updateBuildingCount(userId, cantidad, costos, id_edi, recurso); // devuelve 1 si se puede construir, 0 si no
+      if (typeof construir === "string") {
+        setError(construir)
+        return setBoxError(true)
+      }
+      
       //window.location.reload();
       // Llamar a la función para guardar el edificio en la base de datos
 
       if (construir === 1) {
         buildings.find(building => building.x === x && building.y === y && building.id === id_edi);
 
-        
         /*
         type Building = {
           x: number;
@@ -203,19 +198,22 @@ const DynamicBuildings: React.FC = () => {
           cantidad: number;
           edificioId: string;
         };*/
-       // window.location.reload();
+        // window.location.reload();
         try {
           // Evita recargar la página, en su lugar actualiza el estado
           const edif = await builtEdificio(userId, id_edi, x, y, 1);
           console.log('Edificio guardado exitosamente en la base de datos.');
-          const newEdif = await getOneBuildingsByUserId(userId, edif.edificio.id);
-          console.log('Edificio:', newEdif);
-          if (newEdif != null && newEdif !== undefined) { 
-            setBuildings(prevBuildings => [...prevBuildings, newEdif]);
-          } else {
-            console.error('No se encontró el edificio con el ID de usuario dado');
+          if (edif) {
+            const newEdif = await getOneBuildingsByUserId(userId, (edif.edificio.id));
+            console.log('Edificio:', newEdif);
+            if (newEdif != null && newEdif !== undefined) {
+              setBuildings(prevBuildings => [...prevBuildings, newEdif]);
+              setMenuOpen(false)
+            } else {
+              console.error('No se encontró el edificio con el ID de usuario dado');
+            }
           }
-          
+
         } catch (error) {
           console.error('Error al guardar el edificio en la base de datos:', error);
         }
@@ -317,17 +315,18 @@ const DynamicBuildings: React.FC = () => {
     setMostrarMensajeria(!mostrarMensajeria);
   }
   async function subirNivel() {
-    try {
-      const valorNivel = await updateLevelUser(userId, madera, piedra, pan)
-      setMadera(prev => prev - valorNivel)
-      setPiedra(prev => prev - valorNivel)
-      setPan(prev => prev - valorNivel)
-      setNivelUser(prev => prev + 1)
-      console.log("El usuario subió de nivel")
-    } catch (e) {
-      setError(String(e))
-      setBoxError(true)
+
+    const valorNivel = await updateLevelUser(userId, madera, piedra, pan)
+    if (typeof valorNivel === "string") {
+      setError(valorNivel)
+      return setBoxError(true)
     }
+    setMadera(prev => prev - Number(valorNivel))
+    setPiedra(prev => prev - Number(valorNivel))
+    setPan(prev => prev - Number(valorNivel))
+    setNivelUser(prev => prev + 1)
+    console.log("El usuario subió de nivel")
+
   }
   const mostrarUnidTrab = async (id: string) => {
     const UE = await getUEById(id)
@@ -376,9 +375,9 @@ const DynamicBuildings: React.FC = () => {
 
   //region IMAGENES DE LOS EDIFICIOS
   //metodos para las imagenes de los edificios
-  
 
-  const cargarImagenes = async () => {  
+
+  const cargarImagenes = async () => {
     const img = await getImagenesEdificios();
     setImgs(img);
   }
@@ -400,11 +399,11 @@ const DynamicBuildings: React.FC = () => {
   //region RETURN 
   return (
     <>
-      
-      <div className="hola flex flex-col items-center justify-center w-screen h-screen bg-gray-900">
+
+      <div className="hola flex  items-center justify-center w-screen h-screen bg-gray-900">
         <PantallaCarga cargandoPrincipal={cargandoPrincipal} cargandoChats={cargandoChats} cargandoImagenes={cargandoImagenes}>
         </PantallaCarga>
-        <div style={{ backgroundColor: 'rgba(131, 1, 21, 255)', border: '2mm ridge rgba(0, 0, 0, .7)', fontSize: 18 }} className="absolute top-0 left-0 p-4 bg-red-500 text-yellow-500 font-stoothgart py-2 px-4 rounded">
+        <div style={{ backgroundColor: 'rgba(131, 1, 21, 255)', border: '2mm ridge rgba(0, 0, 0, .7)', fontSize: 18 }} className=" mb-20 absolute top-2 left-2  bg-red-500 text-yellow-500 font-stoothgart py-2 px-4 rounded">
           <Recursos
             usuario={usuario}
             setNivelUser={setNivelUser}
@@ -420,7 +419,9 @@ const DynamicBuildings: React.FC = () => {
             cargarUser={cargarUser}
           />
         </div>
-        
+
+
+
         <div style={{
           width: '1200px',
           height: '700px',
@@ -460,10 +461,6 @@ const DynamicBuildings: React.FC = () => {
               />
 
 
-              {/*    <h3 className='absolute left-10'>Unidades:{unidadesTrabajando}</h3>   */}
-
-
-
               {((idUEClick == building.id) && menuButton) ? <MenuAsignar
                 idUE={building.id}
                 cerrarCompuerta={setMenBut}
@@ -477,22 +474,24 @@ const DynamicBuildings: React.FC = () => {
 
           ))}
           {boxError &&
-          <div className="absolute top-0 left-1/2 transform -translate-x-1/2 p-4 bg-yellow-500 text-black font-bold py-2 px-4 rounded z-50">
-            <h1 className=" flex justify-center items-center font-stoothgart text-black-400 ">{error}</h1>
-          </div>
-        }
+            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 p-4 bg-yellow-500 text-black font-bold py-2 px-4 rounded z-50">
+              <h1 className=" flex justify-center items-center font-stoothgart text-black-400 ">{error}</h1>
+            </div>
+          }
         </div>
         <button
           style={{ backgroundColor: 'rgba(131, 1, 21, 255)', border: '2mm ridge rgba(0, 0, 0, .7)', fontSize: 18 }}
-          className="absolute bottom-4 left-4 bg-green-400 hover:bg-green-700 text-yellow-500 font-stoothgart py-2 px-4 rounded"
+          className="absolute bottom-4 left-2 bg-green-400 hover:bg-green-700 text-yellow-500 font-stoothgart py-2 px-4 rounded"
           onClick={handleMenuClick}
         >
-          Construir Edificios;
+          Construir Edificios
         </button>
         {menuOpen && <MenuDesplegable onBuildClick={handleBuildClick} />}
 
         <div className=" text-black absolute top-4 right-0 " >
-          <button style={{ backgroundColor: 'rgba(131, 1, 21, 255)', border: '2mm ridge rgba(0, 0, 0, .7)', fontSize: 18 }} className='py-2 px-4 absolute top-0 right-10 rounded font-stoothgart text-yellow-400' onClick={() => setUserButton(!userButton)}>Perfil</button>
+          <button style={{ backgroundColor: 'rgba(131, 1, 21, 255)', border: '2mm ridge rgba(0, 0, 0, .7)', fontSize: 18 }}
+            className='py-2 px-4 absolute top-0 right-10 rounded font-stoothgart text-yellow-400'
+            onClick={() => setUserButton(!userButton)}>Perfil</button>
 
           <div className=' text-black px-4'>
             {userButton && <ButtonUser
@@ -505,7 +504,8 @@ const DynamicBuildings: React.FC = () => {
               chats={chats}
               chatnames={chatnames}
               handleMensajeria={handleMensajeria}
-              getMensajes={getMensajes} />
+              getMensajes={getMensajes}
+              nivelUser={nivelUser} />
             }
           </div>
         </div>

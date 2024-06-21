@@ -20,36 +20,36 @@ const Chats: React.FC = () => {
     const [error, setError] = useState("")
 
 
-//region verficar la cookie------------------
-let estado = false;
+    //region verficar la cookie------------------
+    let estado = false;
 
-useEffect(() => { 
-  async function verificarCooki() {
-    //obtengo el valor de la cookie user
-    if(!estado) {
-      await getReturnByCooki() 
-      estado = !estado
-    }
-    
-  } 
-  verificarCooki()      
-    const intervalId = setInterval(() => {
-      estado = !estado
-        
-      }, 5000);
-      return () => clearInterval(intervalId);
-}, [estado]) 
-//------------------------------------------------
+    useEffect(() => {
+        async function verificarCooki() {
+            //obtengo el valor de la cookie user
+            if (!estado) {
+                await getReturnByCooki()
+                estado = !estado
+            }
 
-//region Uso de errores
-useEffect(() => {
-  if(boxError){
-    const intervalId = setInterval(() => {
-      setBoxError(false)
-      }, 3000);
-      return () => clearInterval(intervalId);
-  }
-}, [boxError])
+        }
+        verificarCooki()
+        const intervalId = setInterval(() => {
+            estado = !estado
+
+        }, 5000);
+        return () => clearInterval(intervalId);
+    }, [estado])
+    //------------------------------------------------
+
+    //region Uso de errores
+    useEffect(() => {
+        if (boxError) {
+            const intervalId = setInterval(() => {
+                setBoxError(false)
+            }, 3000);
+            return () => clearInterval(intervalId);
+        }
+    }, [boxError])
 
 
     useEffect(() => {
@@ -82,7 +82,7 @@ useEffect(() => {
         }
 
         //conseguir el username del receptor del mensaje
-        if(chatId !== "" && userId !== ""){
+        if (chatId !== "" && userId !== "") {
             getChatNameById(chatId, userId).then(setUsernameOther)
         }
 
@@ -91,34 +91,35 @@ useEffect(() => {
     //refrescar por si me mandaron mensajes*/
     useEffect(() => {
         if (chatId !== "") {
-          getMensajes(chatId).then(mensajes => {
-            setMensajes(mensajes);
-          });
-        }
-      
-        const intervalId = setInterval(() => {
-          if (chatId !== "" && username !== "") {
-            console.log(`Refrescando mensajes ${username}`)
             getMensajes(chatId).then(mensajes => {
-              setMensajes(mensajes);
-              handleLeerMensajes(mensajes);
+                setMensajes(mensajes);
             });
-          }
+        }
+
+        const intervalId = setInterval(() => {
+            if (chatId !== "" && username !== "") {
+                console.log(`Refrescando mensajes ${username}`)
+                getMensajes(chatId).then(mensajes => {
+                    setMensajes(mensajes);
+                    handleLeerMensajes(mensajes);
+                });
+            }
         }, 5000);
-      
+
         return () => clearInterval(intervalId);
-      }, [chatId, userId]);
+    }, [chatId, userId]);
 
     const handleLeerMensajes = async (mensajes: any) => {
         console.log("Leyendo los Mensajes: ", mensajes)
-        for(let mensaje of mensajes){
+        for (let mensaje of mensajes) {
             //si el mensaje no fue leido y el emisor no soy yo comparando usernames
-            if(mensaje.leido === false && mensaje.emisorUserName !== username){
-                await updateMensaje(mensaje.id, {leido: true})
+            if (mensaje.leido === false && mensaje.emisorUserName !== username) {
+                await updateMensaje(mensaje.id, { leido: true })
                 console.log("--------------------->Mensaje leido: ", mensaje)
             }
         }
     }
+
     const handleSubmit = async (event: any) => {
         event.preventDefault();
 
@@ -127,7 +128,7 @@ useEffect(() => {
 
         // create the message object
         const mensaje = {
-            chatId: chatId,   
+            chatId: chatId,
             emisor: String(userId),   //soy yo
             emisorUserName: String(username),
             madera: Number(data.get("madera")),
@@ -138,28 +139,28 @@ useEffect(() => {
             leido: false // nuevo atributo para saber si el mensaje fue leido
         }
 
-        if(mensaje.madera < 0 || mensaje.piedra < 0 || mensaje.pan < 0){
+        if (mensaje.madera < 0 || mensaje.piedra < 0 || mensaje.pan < 0) {
             setError(recurNegat)
             setBoxError(true)
             return event.target.reset();
-        }        
-
-        try{            
-            //se actualizan los recursos del emisor y receptor   
-            await updateUserRecursos(userId, usernameOther,mensaje.madera, mensaje.piedra, mensaje.pan)      
-            // create the message
-            const m = await createMensaje(mensaje);
-            console.log("El mensaje creado: ", m);
-            setMensajes(prevMensajes => [...prevMensajes, m]);  
-            //console.log("emisorrrrrrr:",emis)         
-        }catch(e){
-            setError(String(e))
-            setBoxError(true)
-            event.target.reset();
         }
+
+        //se actualizan los recursos del emisor y receptor   
+        const updatRec = await updateUserRecursos(userId, usernameOther, mensaje.madera, mensaje.piedra, mensaje.pan)
+        if (typeof updatRec === "string") {
+            console.log(`STRINGGGGGG: ${updatRec}`)
+            setError(updatRec)
+            setBoxError(true)
+            return event.target.reset();
+        }
+        // create the message
+        const m = await createMensaje(mensaje);
+        console.log("El mensaje creado: ", m);
+        setMensajes(prevMensajes => [...prevMensajes, m]);
     }
+    
     return (
-        <main style={{ 
+        <main style={{
             backgroundImage: `url(${BackgroundImage.src})`,
             backgroundSize: 'cover',
             backgroundRepeat: 'no-repeat',
@@ -170,28 +171,33 @@ useEffect(() => {
             justifyContent: 'center',
             alignItems: 'center',
         }}>
+            {boxError &&
+                <div className="absolute top-10 left-1/2 transform -translate-x-1/2 p-4 bg-yellow-500 text-black font-bold py-2 px-4 rounded z-50">
+                    <h1 className=" flex justify-center items-center font-stoothgart text-black-400 ">{error}</h1>
+                </div>
+            }
             <div className="flex flex-col justify-center items-center mt-16 p-8 w-full">
-                <div style={{ 
-                    backgroundColor: 'rgba(25, 38, 47, 255)', 
-                    border: '2mm ridge rgba(82, 47, 1, .9)' 
+                <div style={{
+                    backgroundColor: 'rgba(25, 38, 47, 255)',
+                    border: '2mm ridge rgba(82, 47, 1, .9)'
                 }} className="w-8/12 flex justify-between p-5 border m-5 font-stoothgart text-lg text-yellow-400">
                     <h1>Chateando con {usernameOther}</h1>
                 </div>
-    
-                <div style={{ 
-                    backgroundColor: 'rgba(25, 38, 47, 255)', 
-                    border: '2mm ridge rgba(82, 47, 1, .9)' 
+
+                <div style={{
+                    backgroundColor: 'rgba(25, 38, 47, 255)',
+                    border: '2mm ridge rgba(82, 47, 1, .9)'
                 }} className="bg-white p-10 m-2 w-8/12 flex-col flex justify-between font-stoothgart">
-                    <div style={{ 
-                        backgroundColor: 'rgba(249,235,198)', 
-                        border: '2mm ridge rgba(0, 0, 0, .7)' 
+                    <div style={{
+                        backgroundColor: 'rgba(249,235,198)',
+                        border: '2mm ridge rgba(0, 0, 0, .7)'
                     }} className="p-5 flex flex-col text-sm bg-slate-300 overflow-auto max-h-[500px]">
                         {mensajes.map((mensaje, index) => (
                             <div key={index} className="m-2">
                                 <span className="text-slate-900 text-s">- {mensaje.emisorUserName} - {mensaje.fecha.toLocaleDateString()} -{mensaje.fecha.toLocaleTimeString()}</span>
-                                <div style={{ 
-                                    backgroundColor: 'rgba(86,30,8,255)', 
-                                    border: '2mm ridge rgba(0, 0, 0, .7)' 
+                                <div style={{
+                                    backgroundColor: 'rgba(86,30,8,255)',
+                                    border: '2mm ridge rgba(0, 0, 0, .7)'
                                 }} className="w-2/6 border p-3 rounded-xs text-base text-white">
                                     <span>{mensaje.texto}</span>
                                 </div>
@@ -201,18 +207,18 @@ useEffect(() => {
                             </div>
                         ))}
                     </div>
-    
+
                     <form className="flex pt-5 flex-col font-stoothgart" onSubmit={handleSubmit}>
                         <label style={{ fontSize: 18 }} htmlFor="mensaje" className="text-yellow-400">Mensaje</label>
-                        <textarea style={{ 
-                            backgroundColor: 'rgb(172, 122, 27, 1)', 
-                            border: '2mm ridge rgba(0, 0, 0, .7)' 
+                        <textarea style={{
+                            backgroundColor: 'rgb(172, 122, 27, 1)',
+                            border: '2mm ridge rgba(0, 0, 0, .7)'
                         }} className="h-20 w-full resize-none text-white" name="mensaje" placeholder="Límite de caractéres: 300"></textarea>
-    
+
                         <h3 style={{ fontSize: 18 }} className="flex justify-center items-center text-yellow-400">Desea donar algún recurso?</h3>
-                        <div style={{ 
-                            backgroundColor: 'rgba(172, 122, 27, 1)', 
-                            border: '2mm ridge rgba(0, 0, 0, .7)' 
+                        <div style={{
+                            backgroundColor: 'rgba(172, 122, 27, 1)',
+                            border: '2mm ridge rgba(0, 0, 0, .7)'
                         }} className="border">
                             <div>
                                 <label htmlFor="madera">Madera:</label>
@@ -227,23 +233,23 @@ useEffect(() => {
                                 <input style={{ border: '2mm ridge rgba(0, 0, 0, .7)' }} id="pan" type="number" name="pan" />
                             </div>
                         </div>
-    
-                        <button type="submit" style={{ 
-                            backgroundColor: 'rgba(131, 1, 21, 255)', 
-                            border: '2mm ridge rgba(0, 0, 0, .7)', 
-                            fontSize: 20 
+
+                        <button type="submit" style={{
+                            backgroundColor: 'rgba(131, 1, 21, 255)',
+                            border: '2mm ridge rgba(0, 0, 0, .7)',
+                            fontSize: 20
                         }} className="mt-5 bg-blue-500 hover:bg-blue-700 text-yellow-400">Enviar</button>
                         {/* <button className="mt-5 bg-blue-500 hover:bg-blue-700">Cancelar</button> */}
                     </form>
-                    <a href="/principal" style={{ 
-                        backgroundColor: 'rgba(131, 1, 21, 255)', 
-                        border: '2mm ridge rgba(0, 0, 0, .7)', 
-                        fontSize: 20 
+                    <a href="/principal" style={{
+                        backgroundColor: 'rgba(131, 1, 21, 255)',
+                        border: '2mm ridge rgba(0, 0, 0, .7)',
+                        fontSize: 20
                     }} className="flex justify-center mt-5 hover:bg-blue-700 font-stoothgart text-yellow-400">Principal</a>
                 </div>
             </div>
         </main>
     );
-    
+
 }
 export default Chats;

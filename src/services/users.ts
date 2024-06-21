@@ -17,13 +17,13 @@ let unidadesDeTrabajo = 100
 
 export async function createUser(user: { email: string, password: string, username: string, profileImage: string }) {
   if (user.email.length < 5) {
-    throw new Error(emailShort);
+    return (emailShort);
   }
   if (user.username.length < 3) {
-    throw new Error(usernameShort);
+    return(usernameShort);
   }
   if (user.username.length > 30) {
-    throw new Error(usernamelLong);
+    return (usernamelLong);
   }
   const existing = await prisma.users.findFirst({
     where: {
@@ -31,7 +31,7 @@ export async function createUser(user: { email: string, password: string, userna
     }
   })
   if (existing) {
-    throw new Error(emailExist);
+    return (emailExist);
   }
   const existingUsername = await prisma.users.findFirst({
     where: {
@@ -39,11 +39,11 @@ export async function createUser(user: { email: string, password: string, userna
     }
   })
   if (existingUsername) {
-    throw new Error(usernameExist);
+    return (usernameExist);
   }
 
   if (user.password.length < 8) {
-    throw new Error(passwordShort);
+    return (passwordShort);
   }
 
 
@@ -125,7 +125,7 @@ export async function authenticateUser(user: { dataUser: string, password: strin
     })
     if (existing2) userTemp = existing2
     if (!existing2) {
-      throw new Error(userExist);
+      return (userExist);
     }
   }
 
@@ -134,7 +134,7 @@ export async function authenticateUser(user: { dataUser: string, password: strin
   console.log(`hash existente: ${userTemp?.hash} - signJWT: ${signJWT(userTemp?.hash)}`)
 
   if (hash !== userTemp?.hash) {
-    throw new Error(passwordInvalid);
+    return (passwordInvalid);
   }
 
   cookies().set("user", signJWT(hash), { httpOnly: true, sameSite: 'strict' })
@@ -212,13 +212,13 @@ export async function updateUserRecursos(idEmisor: string, usernameReceptor: str
   let u = await getUserById(idEmisor)
   //si la madera o la piedra o el pan que se quieran regalar son mayores en cantidad a los que posee el usuario, negar la acción
   if ((Number(u?.madera) < madera)) {
-    throw new Error(userSinMad)
+    return (userSinMad)
   }
   if (Number(u?.piedra) < piedra) {
-    throw new Error(userSinPied)
+    return (userSinPied)
   }
   if (Number(u?.pan) < pan) {
-    throw new Error(userSinPan)
+    return (userSinPan)
   }
 
   //lógica para restar recursos al emisor
@@ -227,13 +227,13 @@ export async function updateUserRecursos(idEmisor: string, usernameReceptor: str
   let panUpdated = Number(u?.pan) - pan
   //si el usuariio quiere donar más recuros de los que puede
   if (maderaUpdated < 0) {
-    throw new Error(userSinMad)
+    return (userSinMad)
   }
   if (piedraUpdated < 0) {
-    throw new Error(userSinPied)
+    return (userSinPied)
   }
   if (panUpdated < 0) {
-    throw new Error(userSinPan)
+    return (userSinPan)
   }
   //actualizo al emisor del mensaje
   const emisorUpdated = await prisma.users.update({
@@ -297,13 +297,8 @@ export const removeCookie = async () => {
 
 export async function updateLevelUser(userId: string, madera: number, piedra: number, pan: number) {
   const U = await getUserById(userId)
-
-
-
-  const costoNivel1 = 5000
-  const costoNivel2 = 8000
-  const costoNivel3 = 12000
-
+  
+  const costoNivel = 5000 * Number(U?.nivel)
   const levelUser = Number(U?.nivel);
   let levelUpdated = levelUser + 1
   let maderaUser = Number(U?.madera);
@@ -311,11 +306,11 @@ export async function updateLevelUser(userId: string, madera: number, piedra: nu
   let panUser = Number(U?.pan);
 
   let userUpdated;
-  if ((levelUser == 1) && (maderaUser >= costoNivel1 && piedraUser >= costoNivel1 && panUser >= costoNivel1)) {
+  if ((levelUser == 1) && (maderaUser >= costoNivel && piedraUser >= costoNivel && panUser >= costoNivel)) {
     //actualizo recuros de user
-    maderaUser -= costoNivel1
-    piedraUser -= costoNivel1
-    panUser -= costoNivel1
+    maderaUser -= costoNivel
+    piedraUser -= costoNivel
+    panUser -= costoNivel
     console.log("madera actualizada:", maderaUser)
 
     await prisma.users.update({
@@ -329,41 +324,10 @@ export async function updateLevelUser(userId: string, madera: number, piedra: nu
         pan: panUser
       }
     })
-    return costoNivel1
-  }
-  else if ((levelUser == 2) && ((maderaUser && piedraUser && panUser) >= costoNivel2)) {
-    //actualizo recuros de user
-    maderaUser -= costoNivel2
-    piedraUser -= costoNivel2
-    panUser -= costoNivel2
-
-    await prisma.users.update({
-      where: {
-        id: String(userId)
-      },
-      data: {
-        nivel: levelUpdated
-      }
-    })
-    return costoNivel2
-
-  } else if ((levelUser == 3) && ((maderaUser && piedraUser && panUser) >= costoNivel3)) {
-    //actualizo recuros de user
-    maderaUser -= costoNivel3
-    piedraUser -= costoNivel3
-    panUser -= costoNivel3
-    userUpdated = await prisma.users.update({
-      where: {
-        id: String(userId)
-      },
-      data: {
-        nivel: levelUpdated
-      }
-    })
-    return costoNivel3
+    return costoNivel
 
   } else {
-    throw new Error(recurInsuf)
+    return (recurInsuf)
   }
 
 }
@@ -373,10 +337,7 @@ export async function updateLevelUser(userId: string, madera: number, piedra: nu
 
 export async function updateUserRecursosPropios(Id: string, madera: number, piedra: number, pan: number) {
   const u = await getUserById(Id)
-  if ((Number(u?.madera) < madera) || (Number(u?.piedra) < piedra)
-    || (Number(u?.pan) < pan)) {
-    throw error("Insuficientes recursos")
-  }
+
   let maderaUpdated = Number(u?.madera) - madera
   let piedraUpdated = Number(u?.piedra) - piedra
   let panUpdated = Number(u?.pan) - pan

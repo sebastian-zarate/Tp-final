@@ -94,7 +94,7 @@ export async function GuardarEdificio(usersId: string, id: string, posX: number,
         });
     } catch (error) {
         console.error("Error saving building:", error);
-        throw error;
+        return ;
     }
 
 
@@ -123,7 +123,7 @@ export async function builtEdificio(usuarioId: string, edificioID: string, edifi
         return { usuarioId: usuarioId, edificio: nuevoEdificio };
     } catch (error) {
         console.error("Error al guardar el edificio en la base de datos:", error);
-        throw error; // Relanzar el error para que sea manejado por el código que llama a esta función
+        return ; // Relanzar el error para que sea manejado por el código que llama a esta función
     }
 }
 
@@ -181,7 +181,7 @@ export async function getBuildingsByUserId(usuarioId: string): Promise<any[]> {
         }));
     } catch (error) {
         console.error("Error fetching buildings by user ID:", error);
-        throw error;
+       throw error ;
     }
 }
 
@@ -244,7 +244,7 @@ export async function getOneBuildingsByUserId(usuarioId: string, id:string){
         
     } catch (error) {
         console.error("Error fetching buildings by user ID:", error);
-        throw error;
+        return ;
     }
 }
 
@@ -289,14 +289,14 @@ export const getEdificionameByUE = async (Id: string) => {
 export const updateUEunidadesAdd = async (Id: string, unidades: any, panXunidad: any) => {
 
     if (unidades < 0) {       //comparo que no se puedan asignar unidades negativas
-        throw new Error(unidNegat)
+        return (unidNegat)
     }
     //obtener unidades totales del usuario
     const unid = await getUserByCooki()
 
 
     if (unidades > Number(unid?.unidadesDeTrabajo)) {        //comparo que no se puedan asignar unidades por encima de las que ya tiene el usuario        
-        throw new Error(unidExed)
+        return (unidExed)
     }
     //obtengo el doc userEdificio
     const ue = await prisma.userEdificios.findFirst({
@@ -310,11 +310,11 @@ export const updateUEunidadesAdd = async (Id: string, unidades: any, panXunidad:
     //cantidad de unidades de trabajo que le quedan al user
     let resultadoUnidades = (Number(usuario?.unidadesDeTrabajo)) - unidades
 
-    if (resultadoUnidades < 0) throw Error(unidIns)
+    if (resultadoUnidades < 0) return (unidIns)
 
     let panUser = Number(usuario?.pan) - (panXunidad * unidades)
 
-    if (panUser < 0) throw Error(panIns)
+    if (panUser < 0) return (panIns)
 
     let unidadesEdif = Number(ue?.trabajadores) + unidades
     //actualizo el documento userEdificio
@@ -345,7 +345,7 @@ export const updateUEunidadesAdd = async (Id: string, unidades: any, panXunidad:
 //método para restar unidades de un edificio
 export const updateUEunidadesSubstract = async (Id: string, unidades: any, panXunidad: any) => {
     if (unidades < 0) {       //comparo que no se puedan asignar unidades negativas
-        throw new Error(unidNegat)
+        return (unidNegat)
     }
     //obtengo el doc userEdificio
     const ue = await prisma.userEdificios.findFirst({
@@ -353,7 +353,7 @@ export const updateUEunidadesSubstract = async (Id: string, unidades: any, panXu
             id: Id
         }
     })
-    if (Number(ue?.trabajadores) <= 0) throw new Error(edifSinUnid)
+    if (Number(ue?.trabajadores) <= 0) return (edifSinUnid)
     //obtengo el id del user que se encuentra en el documento userEdificio
     const us_id = ue?.userId
     const usuario = await getUserById(String(us_id))
@@ -363,7 +363,7 @@ export const updateUEunidadesSubstract = async (Id: string, unidades: any, panXu
     let panUser = Number(usuario?.pan) + (panXunidad * unidades)
 
     let unidadesEdif = Number(ue?.trabajadores) - unidades
-    if (unidadesEdif < 0) throw Error(edifSinUnid)
+    if (unidadesEdif < 0) return (edifSinUnid)
 
     //actualizo el documento userEdificio
     const e = await prisma.userEdificios.update({
@@ -432,7 +432,7 @@ export async function updateUserBuildings(
         }
     } catch (error) {
         console.error('Error updating user buildings:', error);
-        throw error;
+        return ;
     }
 };
 
@@ -453,7 +453,7 @@ export async function getBuildingCount(idUser: string, idEdificio: string): Prom
         return buildings;
     } catch (error) {
         console.error("Error fetching buildings by user ID:", error);
-        throw error;
+        throw error ;
     }
 };
 
@@ -491,9 +491,9 @@ export const updateBuildingCount = async (userId: string, cantidad: number, cost
                 await updateUserRecursosPropios(userId, ma, 0, 0);
             } else {
                 if (maderass < costo) {
-                    throw new Error(maderaInsuf);
+                    return (maderaInsuf);
                 } else if (newCount <= count) {
-                    throw new Error(maxEdif);
+                    return (maxEdif);
                 }
             }
             break;
@@ -507,9 +507,9 @@ export const updateBuildingCount = async (userId: string, cantidad: number, cost
                 await updateUserRecursosPropios(userId, 0, pi, 0);
             } else {
                 if (piedrass < costo) {
-                    throw new Error(piedraInsuf);
+                    return (piedraInsuf);
                 } else if (newCount <= count) {
-                    throw new Error(maxEdif);
+                    return (maxEdif);
                 }
             }
             break;
