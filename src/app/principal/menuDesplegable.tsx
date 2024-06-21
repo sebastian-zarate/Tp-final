@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getEdificios } from '../../services/edificios';
+import { getEdificios, getImagenesEdificios } from '../../services/edificios';
 import Image from 'next/image';
 
 interface Props {
@@ -9,6 +9,7 @@ interface Props {
 
 const MenuDesplegable: React.FC<Props> = ({ onBuildClick }) => {
   const [edificios, setEdificios] = useState<any[]>([]);
+  const [images, setImages] = useState<Map<string, string>>(new Map());
 
 
 
@@ -23,11 +24,19 @@ const MenuDesplegable: React.FC<Props> = ({ onBuildClick }) => {
 
       const edificiosData = await getEdificios();
       let edificioSinAyunta = edificiosData.filter((edificio) => edificio.name !== 'ayuntamiento');
+      console.log("edificiosNoAyunta: ",edificioSinAyunta)
       setEdificios(edificioSinAyunta);
+      cargarImagenes();
     } catch (error) {
       console.error("Error al obtener datos de edificios:", error);
     }
   };
+
+  const cargarImagenes = async () => {
+    const imagenes = await getImagenesEdificios();
+    setImages(imagenes);
+    console.log("imagenes: ", imagenes)
+  }
 
 
 
@@ -77,7 +86,7 @@ const MenuDesplegable: React.FC<Props> = ({ onBuildClick }) => {
             <button onClick={() => handleBuildSelection(edificio.name)}
               >
               <Image
-                src={`/Images/edificios/${edificio.name}.png`}
+                src={`/Images/edificios/${images.get(edificio.id)}`}
                 alt={edificio.name}
                 height={100}
                 width={100}
