@@ -129,7 +129,7 @@ const DynamicBuildings: React.FC = () => {
         setChats(chats);
         console.log('Chats:', chats);
         //cargar imagenes
-        //cargarImagenes();
+        cargarImagenes();
         //para la pantalla de carga
         //por si no tiene edificios construidos
         if (fetchedBuildings.length === 0) { setCargandoImagenes(false) }
@@ -452,7 +452,7 @@ const DynamicBuildings: React.FC = () => {
               onDoubleClick={(e) => { handleClick(e); mostrarUnidTrab }}
             >
               <Image
-                src={`/Images/edificios/${building.type}.png`}
+                src={`/Images/edificios/${imgs.get(building.edificioId)}`}
                 alt={building.type}
                 className="absolute inset-0 w-full h-full"
                 width={building.ancho}
