@@ -4,7 +4,7 @@ import MenuDesplegable from './menuDesplegable';
 import MenuAsignar from './menuAsignar';
 import Recursos from './recursos';
 import { GuardarEdificio, getBuildingsByUserId, builtEdificio, getEdificionameByUE, getBuildingCount, getUEbyUserId, getUEById, updateBuildingCount, getOneBuildingsByUserId } from '../../services/userEdificios'
-import { updateLevelUser } from '@/services/users';
+import { getUser, updateLevelUser } from '@/services/users';
 import { getReturnByCooki, getUserByCooki, } from '@/services/users';
 import { recolectarRecursos, calcularMadera, calcularPiedra, calcularPan } from '@/services/recursos';
 import { getChats, getChatName } from '@/services/chats';
@@ -76,6 +76,9 @@ const DynamicBuildings: React.FC = () => {
 
   let estado = false;
   const [message, setMessage] = useState('');
+
+  //para que la generacion de recursos no interfiera con las compras
+  const [construyendo, setConstruyendo] = useState(false);
 
   useEffect(() => {
     if (message) {
@@ -167,6 +170,8 @@ const DynamicBuildings: React.FC = () => {
 
   //#region METODOS HANDLE
   const handleBuildClick = async (id_edi: string, x: number, y: number, buildingType: string, ancho: number, largo: number, costos: number, cantidad: number, recurso: number) => {
+    // para asegurar que no interefiera la generación de recursos con la construcción
+    setConstruyendo(true);
     const existingBuilding = false //buildings.find(building => building.x === x && building.y === y && building.id === id);
 
     if (!existingBuilding) {
@@ -185,20 +190,6 @@ const DynamicBuildings: React.FC = () => {
       if (construir === 1) {
         buildings.find(building => building.x === x && building.y === y && building.id === id_edi);
 
-        /*
-        type Building = {
-          x: number;
-          y: number;
-          type: string;
-          ancho: number;
-          largo: number;
-          id: string;
-          nivel: number;
-          costo: number;
-          cantidad: number;
-          edificioId: string;
-        };*/
-        // window.location.reload();
         try {
           // Evita recargar la página, en su lugar actualiza el estado
           const edif = await builtEdificio(userId, id_edi, x, y, 1);
@@ -209,6 +200,14 @@ const DynamicBuildings: React.FC = () => {
             if (newEdif != null && newEdif !== undefined) {
               setBuildings(prevBuildings => [...prevBuildings, newEdif]);
               setMenuOpen(false)
+
+              //restar recursos de la construcción  
+              const userActualizado = await getUser(userId)
+              if(userActualizado != null){
+                setMadera(userActualizado.madera);
+                setPiedra(userActualizado.piedra);
+                setPan(userActualizado.pan);
+              }
             } else {
               console.error('No se encontró el edificio con el ID de usuario dado');
             }
@@ -221,6 +220,7 @@ const DynamicBuildings: React.FC = () => {
     } else {
       console.log('Ya hay un edificio del mismo tipo en estas coordenadas');
     }
+    setConstruyendo(false);
   };
 
   const handleMenuClick = () => {
@@ -417,6 +417,7 @@ const DynamicBuildings: React.FC = () => {
             setPan={setPan}
             unidadesDisponibles={unidadesDisponibles}
             cargarUser={cargarUser}
+            construyendo={construyendo}
           />
         </div>
 

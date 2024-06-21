@@ -460,7 +460,7 @@ export async function getBuildingCount(idUser: string, idEdificio: string): Prom
 //region update nuevo
 export const updateBuildingCount = async (userId: string, cantidad: number, costos: number, id: string, recurso: number) => {
     let countsMax = 0;
-    console.log('userId', userId, 'cantidad', cantidad, 'costos', costos, 'id', id, 'recurso', recurso)
+    //console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%costos: ", costos, "--------recursos: ", recurso);
     const count = (await getBuildingCount(userId, id)).length;
     //const ayunta = await getAyuntamiento(userId);
     const user = await getUserById(userId);
@@ -473,7 +473,7 @@ export const updateBuildingCount = async (userId: string, cantidad: number, cost
 
     const newCount = cantidad * niveles;
 
-    const costo = costos * niveles;
+    const costo = costos;
 
     //setMessage('ayuna' + newCount);
 
@@ -485,8 +485,7 @@ export const updateBuildingCount = async (userId: string, cantidad: number, cost
         case 1:
             if (costo <= maderass && newCount > count) {
                 countsMax = 1;
-                const ma = costo;  // Corrected the typo here
-
+                const ma = costo;  
                 // Update user resources
                 await updateUserRecursosPropios(userId, ma, 0, 0);
             } else {
@@ -501,7 +500,7 @@ export const updateBuildingCount = async (userId: string, cantidad: number, cost
         case 2:
             if (costo <= piedrass && newCount > count) {
                 countsMax = 1;
-                const pi = costo;  // Corrected the typo here
+                const pi = costo;  
 
                 // Update user resources
                 await updateUserRecursosPropios(userId, 0, pi, 0);

@@ -16,9 +16,10 @@ interface RecursosProps {
     setPan: React.Dispatch<React.SetStateAction<number>>;
     unidadesDisponibles: number;
     cargarUser: () => void;
+    construyendo: boolean;
 }
 
-const Recursos: React.FC<RecursosProps> = ({ usuario, userId,madera, setMadera, piedra, setPiedra, pan, setPan, unidadesDisponibles, cargarUser, nivelUser}) => {
+const Recursos: React.FC<RecursosProps> = ({ usuario, userId,madera, setMadera, piedra, setPiedra, pan, setPan, unidadesDisponibles, cargarUser, nivelUser, construyendo}) => {
 
     const maderaRef = useRef(madera);
     const piedraRef = useRef(piedra);
@@ -81,12 +82,16 @@ const Recursos: React.FC<RecursosProps> = ({ usuario, userId,madera, setMadera, 
 
     useEffect(() => {
         const timer = setInterval(async () => {
+           // si no hay edificios siendo construidos
+            if(!construyendo){
             try {
+                
                 await updateUser(userId, { madera: maderaRef.current, piedra: piedraRef.current, pan: panRef.current });
                 console.log('recursos actualizados');
             } catch (error) {
                 console.error(`Error updating user: ${error}`);
             }
+           }
         }, 5000);
 
         return () => clearInterval(timer);
