@@ -77,6 +77,9 @@ const DynamicBuildings: React.FC = () => {
   let estado = false;
   const [message, setMessage] = useState('');
 
+  //para que la generacion de recursos no interfiera con las compras
+  const [construyendo, setConstruyendo] = useState(false);
+
   useEffect(() => {
     if (message) {
       const timer = setTimeout(() => setMessage(''), 10000);
@@ -167,6 +170,8 @@ const DynamicBuildings: React.FC = () => {
 
   //#region METODOS HANDLE
   const handleBuildClick = async (id_edi: string, x: number, y: number, buildingType: string, ancho: number, largo: number, costos: number, cantidad: number, recurso: number) => {
+    // para asegurar que no interefiera la generación de recursos con la construcción
+    setConstruyendo(true);
     const existingBuilding = false //buildings.find(building => building.x === x && building.y === y && building.id === id);
 
     if (!existingBuilding) {
@@ -215,6 +220,7 @@ const DynamicBuildings: React.FC = () => {
     } else {
       console.log('Ya hay un edificio del mismo tipo en estas coordenadas');
     }
+    setConstruyendo(false);
   };
 
   const handleMenuClick = () => {
@@ -411,6 +417,7 @@ const DynamicBuildings: React.FC = () => {
             setPan={setPan}
             unidadesDisponibles={unidadesDisponibles}
             cargarUser={cargarUser}
+            construyendo={construyendo}
           />
         </div>
 
