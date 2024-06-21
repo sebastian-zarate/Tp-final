@@ -95,7 +95,7 @@ function Login(){
             </button>         
           </form>     
       
-          <a href="/signup" className="mt-5 text-lg font-stoothgart text-yellow-400">¿Tiene una cuenta creada?</a>   
+          <a href="/signup" className="mt-5 text-lg font-stoothgart text-yellow-400">No tengo Cuenta</a>   
         </div>
         <Image 
           src={VikingoShield} 

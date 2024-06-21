@@ -1,5 +1,6 @@
 'use server'
 import { PrismaClient } from "@prisma/client"
+import { getUserByCooki, getUserById } from "./users";
 /* import { NextResponse } from "next/server" */
 
 const prisma = new PrismaClient()
@@ -21,6 +22,12 @@ export const addEdificio = async (edificio: any, ancho: number, largo: number) =
 //----------------------------------------------
 
 export async function getEdificios(): Promise<any[]> {
+    let resultado = await getUserByCooki();
+    let usuarioId = String(resultado?.id);
+    const user = await getUserById(usuarioId);
+
+    let niveles = Number(user?.nivel);
+
     try {
         const edificios = await prisma.edificios.findMany({
             select: {
@@ -30,10 +37,20 @@ export async function getEdificios(): Promise<any[]> {
                 largo: true,
                 costo: true,
                 cantidad: true,
-                descripcion: true,     
+                descripcion: true,
+                recurso: true,
             },
         });
-        return edificios;
+
+        // Multiply the costo by the user's nivel
+        const updatedEdificios = edificios.map(edificio => {
+            return {
+                ...edificio,
+                costo: Number(edificio.costo) * niveles
+            };
+        });
+
+        return updatedEdificios;
     } catch (error) {
         console.error("Error fetching edificios:", error);
         throw error;
@@ -96,6 +113,17 @@ export const getImagenEdificio= async (Id:string) => {
         }
     })  
     return e?.imagen
+}
+
+export const getImagenesEdificios= async () => {
+    let map = new Map<string, string>();
+    const e = await prisma.edificios.findMany({   
+    })  
+    for (let i = 0; i < e.length; i++) {
+        map.set(e[i].id, String(e[i].imagen));
+    }
+    console.log(map);
+    return map
 }
 
 export async function updateUserBuildings(

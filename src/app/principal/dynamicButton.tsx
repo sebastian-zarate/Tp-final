@@ -4,17 +4,18 @@ import MenuDesplegable from './menuDesplegable';
 import MenuAsignar from './menuAsignar';
 import Mensajeria from './menuChats';
 import Recursos from './recursos';
-import { GuardarEdificio, getBuildingsByUserId, builtEdificio, getEdificionameByUE, getBuildingCount, getUEbyUserId, getUEById } from '../../services/userEdificios'
+import { GuardarEdificio, getBuildingsByUserId, builtEdificio, getEdificionameByUE, getBuildingCount, getUEbyUserId, getUEById, updateBuildingCount, getOneBuildingsByUserId } from '../../services/userEdificios'
 import { getUserById, updateUserRecursosPropios, updateLevelUser } from '@/services/users';
 import { getAllUser, getReturnByCooki, getUserByCooki, } from '@/services/users';
 import { recolectarRecursos, calcularMadera, calcularPiedra, calcularPan } from '@/services/recursos';
 import { getChats, getChatName } from '@/services/chats';
 import { getMensajes } from '@/services/mensajes';
-import { getEdificioById, getEdificios, getImagenEdificio } from '@/services/edificios';
+import { getEdificioById, getEdificios, getImagenEdificio, getImagenesEdificios } from '@/services/edificios';
 import ButtonUser from './buttonUser';
 import Image from 'next/image';
 import ImageFloor from '../../../public/Images/FloorImage.jpeg';
 import PantallaCarga from './pantallaCarga';
+import Head from 'next/head';
 
 
 type Building = {
@@ -44,9 +45,9 @@ const DynamicBuildings: React.FC = () => {
   const [userId, setUserId] = useState('')
 
   //NICO
-  const[menuButton, setMenBut] = useState(false);   //cuando se cliclea un botón se habilita la compuerta que habre el formulario de asignar unidades
-  const[idUEClick, setIdUEClick] = useState("");    //id de userEdificios seleccionado ante un click
-  const[userButton, setUserButton] = useState(false); //compuerta para el botón de usuario.
+  const [menuButton, setMenBut] = useState(false);   //cuando se cliclea un botón se habilita la compuerta que habre el formulario de asignar unidades
+  const [idUEClick, setIdUEClick] = useState("");    //id de userEdificios seleccionado ante un click
+  const [userButton, setUserButton] = useState(false); //compuerta para el botón de usuario.
   const [boxError, setBoxError] = useState(false);
   const [error, setError] = useState("");
   const [nivelUser, setNivelUser] = useState(1);
@@ -61,14 +62,14 @@ const DynamicBuildings: React.FC = () => {
   const mouseUpRef = useRef<() => void>(() => { });
 
   //para las imagenes de los edificios
-  const [images, setImages] = useState<{ [key: string]: string }>({});
+  const [imgs, setImgs] = useState<Map<string, string>>(new Map());
   //para la foto de perfil
   const [profileImage, setProfileImage] = useState<string>('');
 
   //para la pantalla de carga (deben ser todas falsas para que se oculte la pantalla de carga)	
   const [cargandoPrincipal, setCargandoPrincipal] = useState(true)
   const [cargandoChats, setCargandoChats] = useState(true)
-  const [cargandoImagenes, setCargandoImagenes] = useState(false) //por ahora lo dejo en false xq no anda
+  const [cargandoImagenes, setCargandoImagenes] = useState(true) //por ahora lo dejo en false xq no anda
   const [cantidadEdificios, setCantidadEdificios] = useState(0)
   const [imagenesCargadas, setImagenesCargadas] = useState(0)
   //----------------------------------------------------------
@@ -126,7 +127,7 @@ const DynamicBuildings: React.FC = () => {
         setChats(chats);
         console.log('Chats:', chats);
         //cargar imagenes
-        mapearImagenes(fetchedBuildings);
+        cargarImagenes();
         //para la pantalla de carga
         //por si no tiene edificios construidos
         if (fetchedBuildings.length === 0) { setCargandoImagenes(false) }
@@ -166,28 +167,55 @@ const DynamicBuildings: React.FC = () => {
 
 
   //#region METODOS HANDLE
-  const handleBuildClick = async (id_edi: string, x: number, y: number, buildingType: string, ancho: number, largo: number, costos: number, cantidad: number) => {
+  const handleBuildClick = async (id_edi: string, x: number, y: number, buildingType: string, ancho: number, largo: number, costos: number, cantidad: number, recurso:number) => {
     const existingBuilding = false //buildings.find(building => building.x === x && building.y === y && building.id === id);
 
     if (!existingBuilding) {
 
 
       // Actualizar el estado del usuario
-      const construir = await updateBuildingCount(cantidad, costos, id_edi); // devuelve 1 si se puede construir, 0 si no
+      let construir;
+      try{
+        construir = await updateBuildingCount(userId, cantidad, costos, id_edi, recurso); // devuelve 1 si se puede construir, 0 si no
+        
+      }catch(e){
+          setError(String(e))
+          setBoxError(true)
+        }
+
       //window.location.reload();
       // Llamar a la función para guardar el edificio en la base de datos
 
       if (construir === 1) {
         buildings.find(building => building.x === x && building.y === y && building.id === id_edi);
 
-        const newBuilding = { id_edi, x, y, type: buildingType, ancho, largo, cantidad: 1 };
-        //setBuildings([...buildings, newBuilding]);
-        window.location.reload();
+        
+        /*
+        type Building = {
+          x: number;
+          y: number;
+          type: string;
+          ancho: number;
+          largo: number;
+          id: string;
+          nivel: number;
+          costo: number;
+          cantidad: number;
+          edificioId: string;
+        };*/
+       // window.location.reload();
         try {
           // Evita recargar la página, en su lugar actualiza el estado
-          await builtEdificio(userId, id_edi, x, y, 1);
+          const edif = await builtEdificio(userId, id_edi, x, y, 1);
           console.log('Edificio guardado exitosamente en la base de datos.');
-
+          const newEdif = await getOneBuildingsByUserId(userId, edif.edificio.id);
+          console.log('Edificio:', newEdif);
+          if (newEdif != null && newEdif !== undefined) { 
+            setBuildings(prevBuildings => [...prevBuildings, newEdif]);
+          } else {
+            console.error('No se encontró el edificio con el ID de usuario dado');
+          }
+          
         } catch (error) {
           console.error('Error al guardar el edificio en la base de datos:', error);
         }
@@ -262,50 +290,50 @@ const DynamicBuildings: React.FC = () => {
     }
   }
 
-//region Nico
+  //region Nico
   //método para obtener el id del userEdificio seleccionado
-  async function handleClick(event: any) {  
+  async function handleClick(event: any) {
     //si la compuerta ya esta abierta no ejecutar este código
-    if(menuButton) return
-    const elementoClicado = event.target as HTMLElement;  
+    if (menuButton) return
+    const elementoClicado = event.target as HTMLElement;
     const idUE = elementoClicado.id;
     console.log('id UE:', idUE);
     const edificioName = await getEdificionameByUE(idUE)
-    console.log("edificiooooooooooooo:",edificioName)
-    if(!menuButton  && (edificioName == "maderera" || edificioName == "cantera" || edificioName == "panaderia"))    setMenBut(true);
-    if(elementoClicado.id){
+    console.log("edificiooooooooooooo:", edificioName)
+    if (!menuButton && (edificioName == "maderera" || edificioName == "cantera" || edificioName == "panaderia")) setMenBut(true);
+    if (elementoClicado.id) {
       setIdUEClick(idUE)
     }
-}
-useEffect(() => {
-  if(boxError){
-    const intervalId = setInterval(() => {
-      setBoxError(false)
+  }
+  useEffect(() => {
+    if (boxError) {
+      const intervalId = setInterval(() => {
+        setBoxError(false)
       }, 3000);
       return () => clearInterval(intervalId);
-  }
-}, [boxError])
+    }
+  }, [boxError])
   function handleMensajeria() {
     setMostrarMensajeria(!mostrarMensajeria);
   }
-async function subirNivel() {
-  try{
-   const valorNivel = await updateLevelUser(userId, madera, piedra, pan)
-   setMadera(prev => prev - valorNivel)
-   setPiedra(prev => prev - valorNivel)
-   setPan(prev => prev - valorNivel)
-   setNivelUser(prev => prev + 1)
-    console.log("El usuario subió de nivel")
-  }catch(e){
-    setError(String(e))
-    setBoxError(true)
+  async function subirNivel() {
+    try {
+      const valorNivel = await updateLevelUser(userId, madera, piedra, pan)
+      setMadera(prev => prev - valorNivel)
+      setPiedra(prev => prev - valorNivel)
+      setPan(prev => prev - valorNivel)
+      setNivelUser(prev => prev + 1)
+      console.log("El usuario subió de nivel")
+    } catch (e) {
+      setError(String(e))
+      setBoxError(true)
+    }
   }
-}
-const mostrarUnidTrab = async(id:string) => {
-  const UE = await getUEById(id)
-  setUnidadesTrabajando(prev => prev + Number(UE?.trabajadores))
-  
-}
+  const mostrarUnidTrab = async (id: string) => {
+    const UE = await getUEById(id)
+    setUnidadesTrabajando(prev => prev + Number(UE?.trabajadores))
+
+  }
 
   //region seba
   let timeoutId: ReturnType<typeof setTimeout> | null = null;
@@ -343,54 +371,16 @@ const mostrarUnidTrab = async(id:string) => {
   };
 
   //region update nuevo
-  const updateBuildingCount = async (cantidad: number, costos: number, id: string) => {
-    let countsMax = 0;
 
-    const count = (await getBuildingCount(userId, id)).length;
-    const user = await getUserById(userId);
-    let madera = Number(user?.madera);
-    let piedra = Number(user?.piedra);
-    let pan = Number(user?.pan);
-
-    if (costos <= madera && costos <= piedra && cantidad >= count) {
-      countsMax = 1;
-      madera -= costos;
-      piedra -= costos;
-      // Update user resources
-      await updateUserRecursosPropios(userId, madera, piedra, pan);
-      setMessage('Edificio construido exitosamente.');
-    } else {
-      if (madera < costos && piedra < costos) {
-        setMessage('No tienes suficiente madera y piedra para construir.');
-      } else if (madera < costos) {
-        setMessage('No tienes suficiente madera para construir.');
-      } else if (piedra < costos) { // Corrected condition to piedra < costos
-        setMessage('No tienes suficiente piedra para construir.');
-      } else if (cantidad <= count) {
-        setMessage('Ya tienes el máximo de este edificio.');
-      }
-
-    }
-
-
-    return countsMax;
-  };
   //endregion
 
   //region IMAGENES DE LOS EDIFICIOS
   //metodos para las imagenes de los edificios
-  const mapearImagenes = async (localbuildings: any) => {
-    const imagenes: { [key: string]: string } = {};
-    for (let edificio of localbuildings) {
-      if (edificio.edificioId) {
-        const imagen = await getImagenEdificio(edificio.edificioId);
-        if (imagen) {
-          imagenes[edificio.edificioId] = String(imagen);
-        }
-      }
-    }
-    setImages(imagenes);
-    console.log('Imagenes:', imagenes);
+  
+
+  const cargarImagenes = async () => {  
+    const img = await getImagenesEdificios();
+    setImgs(img);
   }
 
   const handleCargaImagenes = () => {
@@ -409,120 +399,118 @@ const mostrarUnidTrab = async(id:string) => {
 
   //region RETURN 
   return (
-    <div className="hola flex flex-col items-center justify-center w-screen h-screen bg-gray-900">
-      <PantallaCarga cargandoPrincipal={cargandoPrincipal} cargandoChats={cargandoChats} cargandoImagenes={cargandoImagenes}>
-      </PantallaCarga>
-      <div style = {{backgroundColor: 'rgba(131, 1, 21, 255)', border: '2mm ridge rgba(0, 0, 0, .7)', fontSize:18}} className="absolute top-0 left-0 p-4 bg-red-500 text-yellow-500 font-stoothgart py-2 px-4 rounded">
-        <Recursos
-          usuario={usuario}
-          setNivelUser = {setNivelUser}
-          nivelUser = {nivelUser}
-          userId={userId}
-          madera={madera}
-          setMadera={setMadera}
-          piedra={piedra}
-          setPiedra={setPiedra}
-          pan={pan}
-          setPan={setPan}
-          unidadesDisponibles={unidadesDisponibles}
-          cargarUser={cargarUser}
-        />
-      </div>
-      {boxError && 
-              <div className=" text-white rounded w-80 py-4 px-8 absolute top-0 bg-red-400 bg-opacity-80">
-                    <h1 className=" flex justify-center items-center font-stoothgart text-black-400 ">{error}</h1>                
-              </div>
-      }
-
-      <div style={{
-        width: '1200px',
-        height: '700px',
-        backgroundImage: `url(${ImageFloor.src})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        position: 'relative'
-      }} className="bg-green-500 flex items-center justify-center relative">
-
-        {buildings.map((building, index) => (
-          <div
-            key={index}
-            id={building.id}
-
-            className={` text-white font-bold py-2 px-4 rounded`}
-            style={{
-              left: `${building.x}px`,
-              top: `${building.y}px`,
-              width: `${building.ancho}px`,
-              height: `${building.largo}px`,
-              //transform: 'rotateX(45deg) rotateZ(-45deg)',
-              //transform: 'rotateX(45deg) rotateZ(-45deg)',
-              transformOrigin: 'center center',
-              position: 'absolute',
-              cursor: 'pointer',
-            }}
-            onMouseDown={(e) => handleMouseDown(index, e)}
-            onDoubleClick={(e) => {handleClick(e); mostrarUnidTrab}}
-          >
-            <Image
-              src={`/Images/edificios/${images[building.edificioId]}`}
-              alt={building.type}
-              className="absolute inset-0 w-full h-full"
-              width={building.ancho}
-              height={building.largo}
-              style={{ pointerEvents: 'none' }}
-              onLoad={() => handleCargaImagenes()}
-            />
-
-            
-                     {/*    <h3 className='absolute left-10'>Unidades:{unidadesTrabajando}</h3>   */}
-
-
-
-            {((idUEClick == building.id) && menuButton) ? <MenuAsignar 
-            idUE={building.id}
-            cerrarCompuerta={setMenBut} 
-            setError = {setError} 
-            setBoxError = {setBoxError}
-            setPan= {setPan}
-            setUnidadesDisp = {setUnidadesDisp}
-            unidadesTrabajando = {unidadesTrabajando}/> : null}
-
-          </div>
-
-        ))}
-        <div id="messageDiv" style={messageDivStyle} className="absolute top-0 left-1/2 transform -translate-x-1/2 p-4 bg-yellow-500 text-black font-bold py-2 px-4 rounded z-50">
-          {message}
-        </div>
-      </div>
-      <button
-        style={{backgroundColor: 'rgba(131, 1, 21, 255)', border: '2mm ridge rgba(0, 0, 0, .7)', fontSize:18}}
-        className="absolute bottom-4 left-4 bg-green-400 hover:bg-green-700 text-yellow-500 font-stoothgart py-2 px-4 rounded"
-        onClick={handleMenuClick}
-      >
-        Construir Edificios
-      </button>
-      {menuOpen && <MenuDesplegable onBuildClick={handleBuildClick} />}
-
-      <div className=" text-black absolute top-4 right-0 " >
-        <button style = {{backgroundColor: 'rgba(131, 1, 21, 255)', border: '2mm ridge rgba(0, 0, 0, .7)', fontSize:18}} className='py-2 px-4 absolute top-0 right-10 rounded font-stoothgart text-yellow-400' onClick={() => setUserButton(!userButton)}>Perfil</button>
-
-        <div className=' text-black px-4'>
-          {userButton && <ButtonUser
+    <>
+      
+      <div className="hola flex flex-col items-center justify-center w-screen h-screen bg-gray-900">
+        <PantallaCarga cargandoPrincipal={cargandoPrincipal} cargandoChats={cargandoChats} cargandoImagenes={cargandoImagenes}>
+        </PantallaCarga>
+        <div style={{ backgroundColor: 'rgba(131, 1, 21, 255)', border: '2mm ridge rgba(0, 0, 0, .7)', fontSize: 18 }} className="absolute top-0 left-0 p-4 bg-red-500 text-yellow-500 font-stoothgart py-2 px-4 rounded">
+          <Recursos
+            usuario={usuario}
+            setNivelUser={setNivelUser}
+            nivelUser={nivelUser}
             userId={userId}
-            subirNivel={subirNivel}
-            username={usuario}
-            profileImage={profileImage}
-            mostrarMensajeria={mostrarMensajeria}
-            userLoaded={userLoaded}
-            chats={chats}
-            chatnames={chatnames}
-            handleMensajeria={handleMensajeria}
-            getMensajes={getMensajes} />
-          }
+            madera={madera}
+            setMadera={setMadera}
+            piedra={piedra}
+            setPiedra={setPiedra}
+            pan={pan}
+            setPan={setPan}
+            unidadesDisponibles={unidadesDisponibles}
+            cargarUser={cargarUser}
+          />
+        </div>
+        
+        <div style={{
+          width: '1200px',
+          height: '700px',
+          backgroundImage: `url(${ImageFloor.src})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          position: 'relative'
+        }} className="bg-green-500 flex items-center justify-center relative">
+
+          {buildings.map((building, index) => (
+            <div
+              key={index}
+              id={building.id}
+
+              className={` text-white font-bold py-2 px-4 rounded`}
+              style={{
+                left: `${building.x}px`,
+                top: `${building.y}px`,
+                width: `${building.ancho}px`,
+                height: `${building.largo}px`,
+                transformOrigin: 'center center',
+                position: 'absolute',
+                cursor: 'pointer',
+                userSelect: 'none',
+              }}
+              onMouseDown={(e) => handleMouseDown(index, e)}
+              onDoubleClick={(e) => { handleClick(e); mostrarUnidTrab }}
+            >
+              <Image
+                src={`/Images/edificios/${imgs.get(building.edificioId)}`}
+                alt={building.type}
+                className="absolute inset-0 w-full h-full"
+                width={building.ancho}
+                height={building.largo}
+                style={{ pointerEvents: 'none', userSelect: 'none' }}
+                onLoad={() => handleCargaImagenes()}
+              />
+
+
+              {/*    <h3 className='absolute left-10'>Unidades:{unidadesTrabajando}</h3>   */}
+
+
+
+              {((idUEClick == building.id) && menuButton) ? <MenuAsignar
+                idUE={building.id}
+                cerrarCompuerta={setMenBut}
+                setError={setError}
+                setBoxError={setBoxError}
+                setPan={setPan}
+                setUnidadesDisp={setUnidadesDisp}
+                unidadesTrabajando={unidadesTrabajando} /> : null}
+
+            </div>
+
+          ))}
+          {boxError &&
+          <div className="absolute top-0 left-1/2 transform -translate-x-1/2 p-4 bg-yellow-500 text-black font-bold py-2 px-4 rounded z-50">
+            <h1 className=" flex justify-center items-center font-stoothgart text-black-400 ">{error}</h1>
+          </div>
+        }
+        </div>
+        <button
+          style={{ backgroundColor: 'rgba(131, 1, 21, 255)', border: '2mm ridge rgba(0, 0, 0, .7)', fontSize: 18 }}
+          className="absolute bottom-4 left-4 bg-green-400 hover:bg-green-700 text-yellow-500 font-stoothgart py-2 px-4 rounded"
+          onClick={handleMenuClick}
+        >
+          Construir Edificios;
+        </button>
+        {menuOpen && <MenuDesplegable onBuildClick={handleBuildClick} />}
+
+        <div className=" text-black absolute top-4 right-0 " >
+          <button style={{ backgroundColor: 'rgba(131, 1, 21, 255)', border: '2mm ridge rgba(0, 0, 0, .7)', fontSize: 18 }} className='py-2 px-4 absolute top-0 right-10 rounded font-stoothgart text-yellow-400' onClick={() => setUserButton(!userButton)}>Perfil</button>
+
+          <div className=' text-black px-4'>
+            {userButton && <ButtonUser
+              userId={userId}
+              subirNivel={subirNivel}
+              username={usuario}
+              profileImage={profileImage}
+              mostrarMensajeria={mostrarMensajeria}
+              userLoaded={userLoaded}
+              chats={chats}
+              chatnames={chatnames}
+              handleMensajeria={handleMensajeria}
+              getMensajes={getMensajes} />
+            }
+          </div>
         </div>
       </div>
-    </div>
-
+    </>
   );
 };
 
