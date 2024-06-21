@@ -82,7 +82,7 @@ const Recursos: React.FC<RecursosProps> = ({ usuario, userId,madera, setMadera, 
     useEffect(() => {
         const timer = setInterval(async () => {
             try {
-               // await updateUser(userId, { madera: maderaRef.current, piedra: piedraRef.current, pan: panRef.current });
+                await updateUser(userId, { madera: maderaRef.current, piedra: piedraRef.current, pan: panRef.current });
                 console.log('recursos actualizados');
             } catch (error) {
                 console.error(`Error updating user: ${error}`);

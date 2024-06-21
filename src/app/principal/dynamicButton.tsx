@@ -4,7 +4,7 @@ import MenuDesplegable from './menuDesplegable';
 import MenuAsignar from './menuAsignar';
 import Recursos from './recursos';
 import { GuardarEdificio, getBuildingsByUserId, builtEdificio, getEdificionameByUE, getBuildingCount, getUEbyUserId, getUEById, updateBuildingCount, getOneBuildingsByUserId } from '../../services/userEdificios'
-import { updateLevelUser } from '@/services/users';
+import { getUser, updateLevelUser } from '@/services/users';
 import { getReturnByCooki, getUserByCooki, } from '@/services/users';
 import { recolectarRecursos, calcularMadera, calcularPiedra, calcularPan } from '@/services/recursos';
 import { getChats, getChatName } from '@/services/chats';
@@ -196,6 +196,13 @@ const DynamicBuildings: React.FC = () => {
               setBuildings(prevBuildings => [...prevBuildings, newEdif]);
               setMenuOpen(false)
 
+              //restar recursos de la construcción  
+              const userActualizado = await getUser(userId)
+              if(userActualizado != null){
+                setMadera(userActualizado.madera);
+                setPiedra(userActualizado.piedra);
+                setPan(userActualizado.pan);
+              }
             } else {
               console.error('No se encontró el edificio con el ID de usuario dado');
             }
