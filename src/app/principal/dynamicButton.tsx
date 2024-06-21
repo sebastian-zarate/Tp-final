@@ -185,20 +185,6 @@ const DynamicBuildings: React.FC = () => {
       if (construir === 1) {
         buildings.find(building => building.x === x && building.y === y && building.id === id_edi);
 
-        /*
-        type Building = {
-          x: number;
-          y: number;
-          type: string;
-          ancho: number;
-          largo: number;
-          id: string;
-          nivel: number;
-          costo: number;
-          cantidad: number;
-          edificioId: string;
-        };*/
-        // window.location.reload();
         try {
           // Evita recargar la página, en su lugar actualiza el estado
           const edif = await builtEdificio(userId, id_edi, x, y, 1);
@@ -209,6 +195,7 @@ const DynamicBuildings: React.FC = () => {
             if (newEdif != null && newEdif !== undefined) {
               setBuildings(prevBuildings => [...prevBuildings, newEdif]);
               setMenuOpen(false)
+
             } else {
               console.error('No se encontró el edificio con el ID de usuario dado');
             }

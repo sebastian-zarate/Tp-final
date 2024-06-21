@@ -337,21 +337,17 @@ export async function updateLevelUser(userId: string, madera: number, piedra: nu
 
 export async function updateUserRecursosPropios(Id: string, madera: number, piedra: number, pan: number) {
   const u = await getUserById(Id)
-
+  console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% adentro de updateUserRecursosPropios")
+  //console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% u", u?.madera, " - ", madera, " = " , Number(u?.madera) - madera)
   let maderaUpdated = Number(u?.madera) - madera
+  //console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% maderaUpdated", maderaUpdated)
+  console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% u", u?.piedra, " - ", piedra, " = " , Number(u?.piedra) - piedra)
   let piedraUpdated = Number(u?.piedra) - piedra
+  console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% piedraUpdated", piedraUpdated)
   let panUpdated = Number(u?.pan) - pan
 
-  const userUpdated = await prisma.users.update({
-    where: {
-      id: Id
-    },
-    data: {
-      madera: maderaUpdated,
-      piedra: piedraUpdated,
-      pan: panUpdated
-    }
-  })
+  console.log("eeeeeeeeeeeeeeeeeeeeeee", "maderaUpdated", maderaUpdated, "piedraUpdated", piedraUpdated, "panUpdated", panUpdated)
+  const userUpdated = await updateUser(Id, {madera: maderaUpdated, piedra: piedraUpdated, pan: panUpdated})
 
   console.log(`User ${Id} updated: `, userUpdated)
   return userUpdated
