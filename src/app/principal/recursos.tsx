@@ -56,7 +56,7 @@ const Recursos: React.FC<RecursosProps> = ({ usuario, userId,madera, setMadera, 
             setMadera(madera => madera + maderaPorSegundo);
             setPiedra(piedra => piedra + piedraPorSegundo);
             setPan(pan => pan + panPorSegundo);
-        }, 2000);
+        }, 5000);
 
         return () => clearInterval(timer);
     }, [maderaPorSegundo, piedraPorSegundo, panPorSegundo]);
