@@ -235,7 +235,7 @@ const Chats: React.FC = () => {
                             </div>
                         </div>
              
-                    <div style={{ display: 'flex', width: '1076px' }}>
+                    <div style={{ display: 'flex'}}>
                         <button type="submit" style={{
                             backgroundColor: 'rgba(131, 1, 21, 255)',
                             border: '2mm ridge rgba(0, 0, 0, .7)',
