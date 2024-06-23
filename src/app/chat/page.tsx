@@ -158,7 +158,7 @@ const Chats: React.FC = () => {
         console.log("El mensaje creado: ", m);
         setMensajes(prevMensajes => [...prevMensajes, m]);
     }
-    
+
     return (
         <main style={{
             backgroundImage: `url(${BackgroundImage.src})`,
@@ -203,7 +203,7 @@ const Chats: React.FC = () => {
                                 </div>
                                 {mensaje.madera > 0 && <span className="text-slate-500 text-xs">- Madera: {mensaje.madera}</span>}
                                 {mensaje.piedra > 0 && <span className="text-slate-500 text-xs">- Piedra: {mensaje.piedra}</span>}
-                                {mensaje.pan > 0 && <span className="text-slate-500 text-xs">- Pan: {mensaje.pan}</span>}
+                                {mensaje.pan > 0 && <span className="text-slate-500 text-xs"   >- Pan:    {mensaje.pan}</span>}
                             </div>
                         ))}
                     </div>
@@ -219,33 +219,46 @@ const Chats: React.FC = () => {
                         <div style={{
                             backgroundColor: 'rgba(172, 122, 27, 1)',
                             border: '2mm ridge rgba(0, 0, 0, .7)'
-                        }} className="border">
-                            <div>
+                            
+                        }} className="border ">
+                            <div style={{ display: 'flex', gap: '10px' }}>
                                 <label htmlFor="madera">Madera:</label>
                                 <input style={{ border: '2mm ridge rgba(0, 0, 0, .7)' }} id="madera" type="number" name="madera" />
                             </div>
-                            <div>
-                                <label htmlFor="piedra">Piedra</label>
+                            <div style={{ display: 'flex', gap: '16px' }}>
+                                <label htmlFor="piedra">Piedra:</label>
                                 <input style={{ border: '2mm ridge rgba(0, 0, 0, .7)' }} id="piedra" type="number" name="piedra" />
                             </div>
-                            <div>
-                                <label htmlFor="pan">Pan</label>
+                            <div style={{ display: 'flex', gap: '34px' }}>
+                                <label htmlFor="pan">Pan:</label>
                                 <input style={{ border: '2mm ridge rgba(0, 0, 0, .7)' }} id="pan" type="number" name="pan" />
                             </div>
                         </div>
-
+             
+                    <div style={{ display: 'flex', width: '1076px' }}>
                         <button type="submit" style={{
                             backgroundColor: 'rgba(131, 1, 21, 255)',
                             border: '2mm ridge rgba(0, 0, 0, .7)',
-                            fontSize: 20
-                        }} className="mt-5 bg-blue-500 hover:bg-blue-700 text-yellow-400">Enviar</button>
-                        {/* <button className="mt-5 bg-blue-500 hover:bg-blue-700">Cancelar</button> */}
-                    </form>
-                    <a href="/principal" style={{
-                        backgroundColor: 'rgba(131, 1, 21, 255)',
-                        border: '2mm ridge rgba(0, 0, 0, .7)',
-                        fontSize: 20
-                    }} className="flex justify-center mt-5 hover:bg-blue-700 font-stoothgart text-yellow-400">Principal</a>
+                            fontSize: 20,
+                            flex: 1,
+                            margin: '5px'
+                        }} className="bg-blue-500 hover:bg-blue-700 text-yellow-400">Enviar</button>
+                           
+                           <a href="/principal" style={{
+                            backgroundColor: 'rgba(131, 1, 21, 255)',
+                            border: '2mm ridge rgba(0, 0, 0, .7)',
+                            fontSize: 20,
+                            flex: 1,
+                            margin: '5px',
+                            textAlign: 'center',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                        }} className="hover:bg-blue-700 font-stoothgart text-yellow-400">Principal</a>
+                        </div>
+              </form>
+                        
+                
                 </div>
             </div>
         </main>

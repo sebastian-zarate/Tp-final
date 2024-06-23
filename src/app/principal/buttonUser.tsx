@@ -42,9 +42,10 @@ class ButtonUser extends React.Component<ButtonUserProps> {
           handleMensajeria={handleMensajeria}
           getMensajes={getMensajes}
         />
-
-        <button style = {{backgroundColor: 'rgba(131, 1, 21, 255)', border: '2mm ridge rgba(0, 0, 0, .7)', fontSize:16}} className="absolute top-60 px-5 py-2 font-stoothgart text-yellow-500" onClick={() =>subirNivel()}>Subir de nivel</button>    
-        <div className='p-2 m-2 text-yellow-500 font-stoothgart absolute top-80  ' style={{ backgroundColor: 'rgba(131, 1, 21, 255)', border: '2mm ridge rgba(0, 0, 0, .7)', fontSize: 18 }}>
+        
+        <button style = {{backgroundColor: 'rgba(131, 1, 21, 255)', border: '2mm ridge rgba(0, 0, 0, .7)', fontSize:16}} className=" my-3 top-60 px-5 py-2 font-stoothgart text-yellow-500" onClick={() =>subirNivel()}>Subir de nivel</button>    
+        <div className='p-2 m-2 text-yellow-500 font-stoothgart  top-80   ' style={{ backgroundColor: 'rgba(131, 1, 21, 255)', border: '2mm ridge rgba(0, 0, 0, .7)', fontSize: 18 }}>
+          
           <h3>Recursos para subir de nivel:</h3>
             <span>_Madera: {costoNivel}</span>
             <p/>
