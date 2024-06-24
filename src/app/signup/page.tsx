@@ -74,7 +74,7 @@ const Signup: React.FC = () => {
 
   return (
     <>
-    
+
       <div
         style={{
           backgroundImage: `url(${backgroundImage.src})`,
@@ -88,6 +88,7 @@ const Signup: React.FC = () => {
           padding: 0,
         }}
       >
+        <h1 style={{ position: 'absolute', top: 20 }} className="border-solid mb-4 text-5xl font-stoothgart text-black">Las Aventuras de Juan el vikingo</h1>
         {boxError &&
           <div className=" text-white rounded w-80 py-4 px-8 absolute top-20 bg-red-400 bg-opacity-80">
             {/* <button className="absolute top-0 right-1 " onClick={()=> {setBoxError(false); setError("")}}>X</button> */}

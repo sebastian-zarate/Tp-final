@@ -396,7 +396,11 @@ const DynamicBuildings: React.FC = () => {
   return (
     <>
 
-      <div className="hola flex  items-center justify-center w-screen h-screen bg-gray-900">
+      <div className="hola flex  items-center justify-center w-screen h-screen bg-gray-900" 
+          style={{
+          backgroundImage: `/Images/backgroundMain.jpg`,
+
+        }}>
         <PantallaCarga cargandoPrincipal={cargandoPrincipal} cargandoChats={cargandoChats} cargandoImagenes={cargandoImagenes}>
         </PantallaCarga>
         <div style={{ backgroundColor: 'rgba(131, 1, 21, 255)', border: '2mm ridge rgba(0, 0, 0, .7)', fontSize: 18 }} className=" mb-20 absolute top-2 left-2  bg-red-500 text-yellow-500 font-stoothgart py-2 px-4 rounded">
@@ -417,6 +421,18 @@ const DynamicBuildings: React.FC = () => {
           />
         </div>
 
+          
+        <div className=' text-yellow-500 font-stoothgart absolute left-2 top-100 ' style={{ backgroundColor: 'rgba(131, 1, 21, 255)', border: '2mm ridge rgba(0, 0, 0, .7)', fontSize: 18 }}>
+          <h3>Recursos para subir de nivel:</h3>
+
+          <div className='flex flex-col'>
+            <p />
+            <span>_Madera: {nivelUser * 5000}</span>
+            <span>_Piedra: {nivelUser * 5000}</span>
+            <span>_Pan: {nivelUser * 5000}</span>
+          </div>
+
+        </div>
 
 
         <div style={{
