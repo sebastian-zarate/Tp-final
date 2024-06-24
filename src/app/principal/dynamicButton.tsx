@@ -14,6 +14,7 @@ import ButtonUser from './buttonUser';
 import Image from 'next/image';
 import ImageFloor from '../../../public/Images/FloorImage.jpeg';
 import PantallaCarga from './pantallaCarga';
+import backgroundMain from '../../../public/Images/backgroundMain.jpg'
 
 
 
@@ -398,7 +399,8 @@ const DynamicBuildings: React.FC = () => {
 
       <div className="hola flex  items-center justify-center w-screen h-screen bg-gray-900" 
           style={{
-          backgroundImage: `/Images/backgroundMain.jpg`,
+          backgroundImage: `url(${backgroundMain.src})`,
+          backgroundSize: 'cover'
 
         }}>
         <PantallaCarga cargandoPrincipal={cargandoPrincipal} cargandoChats={cargandoChats} cargandoImagenes={cargandoImagenes}>
